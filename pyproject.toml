@@ -1,0 +1,57 @@
+[project]
+name = "novel-rag"
+version = "0.1.0"
+description = "长篇小说跨章节问答 GraphRAG 系统（ES BM25 + Milvus 向量 + Neo4j 知识图谱，LangGraph 编排）"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "elasticsearch>=8.19,<8.20",
+    "pymilvus>=2.6,<2.7",
+    "neo4j>=5.28",
+    "tenacity>=9.0",
+    "diskcache>=5.6",
+    "openai>=1.60",
+    "torch==2.14.1",
+    "FlagEmbedding>=1.4",
+    "numpy>=1.26",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/novel_rag"]
+
+# torch 必须从 PyTorch 官方 CUDA 索引安装，否则 Windows 上会装成 CPU 版
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+markers = ["integration: 需要 docker 服务、GPU 或有效的 Kimi key"]
+addopts = "-m 'not integration'"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]

@@ -1,0 +1,135 @@
+# novel_rag 基础设施：ES+IK / Neo4j / Milvus standalone（etcd + minio + milvus）
+# 版本号和密码从同目录的 .env 读取（见 .env.example）。数据一律用命名卷，只有 IK 词典目录 bind mount。
+# 建议启动顺序：elasticsearch → neo4j → milvus（standalone 会自动拉起 etcd、minio）。
+name: novel-rag
+
+services:
+  elasticsearch:
+    build:
+      context: ./docker/elasticsearch
+      args:
+        ES_VERSION: ${ES_VERSION:-8.19.23}
+    image: novel-rag/elasticsearch-ik:${ES_VERSION:-8.19.23}
+    container_name: novel-rag-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false   # 仅限本地开发
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+      - ./docker/elasticsearch/ik-dict:/usr/share/elasticsearch/config/analysis-ik/custom
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  neo4j:
+    image: neo4j:${NEO4J_VERSION:-5.26.32-community}
+    container_name: novel-rag-neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J__PASSWORD:?在 .env 中设置 NEO4J__PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_server_memory_heap_initial__size=1g
+      - NEO4J_server_memory_heap_max__size=1g
+      - NEO4J_server_memory_pagecache_size=512m
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+      - neo4j-plugins:/plugins
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # ---- Milvus：以官方 v2.6.25 milvus-standalone-docker-compose.yml 为蓝本，etcd/minio 版本照抄官方，不要自行升级 ----
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.25
+    container_name: novel-rag-milvus-etcd
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - milvus-etcd:/etcd
+    command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio:
+    image: milvusdb/minio:RELEASE.2024-12-18T13-15-44Z
+    container_name: novel-rag-milvus-minio
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    # 只在容器网络内使用，不映射到宿主机端口
+    volumes:
+      - milvus-minio:/minio_data
+    command: minio server /minio_data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  milvus:
+    image: milvusdb/milvus:${MILVUS_VERSION:-v2.6.25}
+    container_name: novel-rag-milvus
+    command: ["milvus", "run", "standalone"]
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+      MQ_TYPE: woodpecker
+    volumes:
+      - milvus-data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      start_period: 90s
+      timeout: 20s
+      retries: 3
+    depends_on:
+      - etcd
+      - minio
+
+  # 可选的 Milvus 管理界面：docker compose --profile ui up -d attu
+  attu:
+    image: zilliz/attu:v2.6
+    container_name: novel-rag-attu
+    profiles: ["ui"]
+    environment:
+      MILVUS_URL: milvus:19530
+    ports:
+      - "8000:3000"
+    depends_on:
+      - milvus
+
+volumes:
+  es-data:
+  neo4j-data:
+  neo4j-logs:
+  neo4j-plugins:
+  milvus-etcd:
+  milvus-minio:
+  milvus-data:

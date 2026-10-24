@@ -1,0 +1,6 @@
+# 容器内使用的文件必须保持 LF，否则 shell 续行和词典解析会出错
+* text=auto
+Dockerfile text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.dic text eol=lf

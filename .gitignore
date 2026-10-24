@@ -1,0 +1,46 @@
+# 版权原文、处理产物、缓存、书籍配置：整个 data/ 不入库
+data/
+
+# 密钥
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# 缓存与模型
+.cache/
+cache/
+models/
+*.safetensors
+*.bin
+*.pt
+*.onnx
+
+# docker 运行期数据（compose 使用命名卷，这里只防误用 bind mount）
+volumes/
+
+# Claude Code 本地设置（项目级 CLAUDE.md 和 settings.json 入库）
+.claude/settings.local.json
+
+# IK 词典由流程生成，不入库
+docker/elasticsearch/ik-dict/*.dic
+
+# uv 包缓存（用户级 uv.toml 指向这里）
+.uv-cache/
+
+# 文档：只有进度交接和设计要点入库，阶段方案与总结仅本地保存
+docs/*
+!docs/progress.md
+!docs/design-notes.md
