@@ -111,6 +111,41 @@ class RetrievalConfig(_Frozen):
     rerank_top_k: int = 8
 
 
+class SectionKeywords(_Frozen):
+    """section_type 判定用的通用关键词（按标题前缀匹配，不区分大小写）。不是书籍专属知识，书籍配置可以覆盖判定结果。"""
+
+    prologue: tuple[str, ...] = ("序幕", "序章", "楔子", "引子", "prologue")
+    epilogue: tuple[str, ...] = ("终章", "尾声", "epilogue")
+    appendix: tuple[str, ...] = ("附录", "appendix")
+    front_matter: tuple[str, ...] = (
+        "出版说明", "作者简介", "作者介绍", "关于作者", "内容简介", "译者序", "译序", "前言", "序言", "目录", "版权",
+        "preface", "foreword", "contents", "copyright",
+    )  # fmt: skip
+    back_matter: tuple[str, ...] = ("后记", "译后记", "致谢", "鸣谢", "afterword", "acknowledg")
+    dedication: tuple[str, ...] = ("献给", "谨以此书", "献辞", "dedicated to", "dedication")
+
+
+class IngestConfig(_Frozen):
+    # 不可信输入的解压限制
+    max_archive_files: int = 5000
+    max_uncompressed_bytes: int = 512 * 1024 * 1024
+    max_member_bytes: int = 64 * 1024 * 1024
+    # 章节标题是人名（POV）的启发式：标题不超过 N 字，且在全系列中作为章节标题出现至少 M 次
+    pov_title_max_len: int = 6
+    pov_min_occurrences: int = 3
+    # 去掉标题后正文少于该字数的章节视为空白页（只有标题或插图）
+    blank_section_max_chars: int = 10
+    # 写入 text.txt 的 section_type；其余（标题页、献词、前后辅文）只出现在质检报告中
+    text_section_types: tuple[str, ...] = ("narrative", "appendix")
+    # 卷启用范围（P1 只索引卷一）；None 表示全部
+    enabled_volumes: tuple[int, ...] | None = (1,)
+    # 分册中不夹在两个汉字之间的半角 '?' 占比达到该值，就认为它用作问号（统一为全角），而不是丢失的间隔号
+    qmark_punct_ratio: float = 0.2
+    keywords: SectionKeywords = SectionKeywords()
+    qc_sample_size: int = 8
+    qc_qmark_sample_size: int = 20
+
+
 class PathsConfig(_Frozen):
     data_dir: Path = PROJECT_ROOT / "data"
     cache_dir: Path = PROJECT_ROOT / "data" / "cache"
@@ -120,6 +155,14 @@ class PathsConfig(_Frozen):
     @property
     def llm_cache_dir(self) -> Path:
         return self.cache_dir / "llm"
+
+    @property
+    def books_dir(self) -> Path:
+        return self.data_dir / "books"
+
+    @property
+    def reports_dir(self) -> Path:
+        return self.data_dir / "reports"
 
     def resolve_model(self, model_name: str) -> str:
         """模型加载位置：model_name 本身是存在的路径 → 直接用；models_dir 下有同名目录
@@ -146,6 +189,7 @@ class Settings(BaseSettings):
     embedding: EmbeddingConfig = EmbeddingConfig()
     reranker: RerankerConfig = RerankerConfig()
     retrieval: RetrievalConfig = RetrievalConfig()
+    ingest: IngestConfig = IngestConfig()
     paths: PathsConfig = PathsConfig()
 
     def snapshot(self) -> dict[str, Any]:

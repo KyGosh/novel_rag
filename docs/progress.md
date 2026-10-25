@@ -4,18 +4,19 @@
 
 ## 当前状态
 
-- 阶段：P0（骨架）基本完成，方案见 `docs/phases/P0.md`
-  - 已完成：uv 项目骨架（src 布局，各模块空包）、`docker-compose.yml` + ES+IK 镜像、`config.py`（含去密钥快照）、`llm/` 抽象层（接口 / Fake / 缓存 / 重试限流 / 用量 / 结构化输出 / bge 本地模型 / Kimi）、单测 26 项全过、`scripts/check_env.py` 7 项全部通过
-  - 剩余：原文放入 `data/raw/`（P1 开始前完成）；P3 前在控制台确认 Kimi 账户限流等级
-  - 下一阶段：P1（多格式解析、分块、Milvus 向量 baseline、评测集 v0）
+- 阶段：P1 进行中。执行顺序：第一步（解析 + 规范化 + `text.txt` 定稿）→ B 线评测集优先、A 线分块与检索并行 → baseline
+  - 第一步已实现：`scripts/ingest.py`（epub 解析、规范化、卷与章节识别、注释剥离、质检报告、定稿保护），全五卷质检通过（349 章，与目录一致；27 条注释全部配对），人工抽查通过
+  - **卷一 `text.txt` 已定稿（2026-10-25）**：sha256 `202f6f3a1f81035d9980812a4276a36ade7b69ac711f825316f9b59337ef4780`，543,372 字，74 章（序幕 0 + 正文 72 + 附录 73）；原文 epub sha256 `48e924072b5fdf2c4b4a763ddda657c3cb641b42bd50b63637cd1b6a5883ac44`，parser `epub-1`，规则 `norm-1`。重新导入时 hash 不同会被 `text.lock` 拒绝
+  - 待做：插图提取与分类（不影响 `text.txt`）；txt / md 解析器与格式无关性测试；B 线评测集
+  - 剩余：P3 前在控制台确认 Kimi 账户的限流等级
 - 最新评测数字：暂无（P1 产出 baseline）
 
 ## 开发阶段
 
 | 阶段 | 内容 | 状态 |
 |---|---|---|
-| P0 | docker-compose（ES+IK / Milvus / Neo4j）、uv 项目骨架、config、`llm/` 抽象层、冒烟测试 | 进行中 |
-| P1 | 多格式解析（txt / md / epub / 文字层 pdf）+ 插图提取与过滤 + 分块（卷一，不含章节摘要）+ Milvus 向量 baseline + 最简生成 + 评测集 v0 + Recall/MRR | 未开始 |
+| P0 | docker-compose（ES+IK / Milvus / Neo4j）、uv 项目骨架、config、`llm/` 抽象层、冒烟测试 | 已完成 |
+| P1 | 多格式解析（txt / md / epub / 文字层 pdf）+ 插图提取与过滤 + 分块（卷一，不含章节摘要）+ Milvus 向量 baseline + 最简生成 + 评测集 v0 + Recall/MRR | 方案已出 |
 | P2 | ES BM25 + RRF + Rerank，消融表 v1 | 未开始 |
 | P3 | 知识图谱构建（抽取、消歧、Neo4j、回灌 IK 词典） | 未开始 |
 | P4 | 实体链接 + 图检索 + LangGraph 编排 + 章节摘要 | 未开始 |
@@ -53,6 +54,16 @@
 - 本地模型权重放在项目 `models/`（gitignore）。`paths.resolve_model()` 优先从 `models/{名称最后一段}` 加载，没有才走 HuggingFace Hub；配置和实验记录里的模型名仍是 `BAAI/bge-m3` 等 Hub 名。bge-m3 的 `onnx/`（2.2GB）不需要。
 - uv 缓存放在 `D:/Project/novel_rag/.uv-cache`，由用户级 `%APPDATA%\uv\uv.toml` 的 `cache-dir` 指定，与 `.venv` 同盘以便硬链接。pyproject 里写相对路径会按当前工作目录解析，不可用。换机器时不需要这一步。
 - 厂商 SDK（openai / FlagEmbedding / torch / transformers）只允许在 `llm/` 中 import，由 `tests/unit/test_import_boundaries.py` 强制。
+
+- P1 第十二节决策（2026-10-24）：人工校验可以投入；出题先试 10 题、看过花费再全量；模糊匹配用 rapidfuzz；pdf 默认 pypdfium2；注释 P1 只提取保存，P2 用消融决定是否入索引。
+- 导入产物布局：系列级可选配置 `data/books/{series_id}/book.toml`（卷名纠正、POV 映射、section_type 覆盖）；每卷产物 `data/books/{series_id}-{卷号}/`（`text.txt`、`chapters.jsonl`、`notes.jsonl`、`manifest.json`，定稿后多一个 `text.lock`）。`text.txt` 一卷一个、只含 narrative + appendix；章节是偏移表，不按章拆文件（章节切分改了不影响金标区间）。已定稿的卷若重新生成的 hash 不同，导入拒绝覆盖，除非 `--force`。
+- 不用 ebooklib（AGPL），OPF / NCX / nav 自行解析；XHTML 先按 XML 严格解析（HTML 命名实体转数字引用，不加载 DTD），失败才退回 lxml 的 HTML 解析器。新增依赖 lxml、Pillow。
+- 导入实测发现（修正了 P1.md 第一节的判断）：
+  - "汉字?汉字"并不普遍是丢失的间隔号。卷二全程用半角 `?` 作问号（三个分册共 2711 处），间隔号正常；卷一只有注释里一处"曼斯?雷德"。规则改为按分册判定：不夹在汉字之间的 `?` 占比 ≥ `qmark_punct_ratio`（0.2）时视为半角问号，统一成全角"？"；否则才把汉字之间的 `?` 修复为 `·`。
+  - 汉字之间的空格不再删除（只计数）：附录表格靠空格分列。
+  - 卷三（上）（下）的目录锚点指向标题页中间的 `h1`。分册起点规则：锚点之前只有不到 50 字且没有标题时，前移到文件开头。
+  - 卷一附录的末尾是一段没有标题的译后记，无法用通用规则拆出，随附录一起记为 appendix。
+- P1 规划要点（2026-10-22）：一个文件里可以包含多卷，卷由目录顶层的分册合并而成（去掉"上/中/下"后缀后同名），可选配置可以纠正卷名；注释（`<sup>[n]</sup>` 加文件末尾的注释段落）从正文中剥离，单独存放；插图分为装饰、附录图示、插画/地图三类；全五卷都要解析，但索引和评测只用卷一；相关性判定按"证据区间与 chunk 的重叠字数 ≥ min(区间的 50%, 50 字)"。
 
 ## 待决事项（P0 内需要确定）
 
