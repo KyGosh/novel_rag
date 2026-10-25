@@ -146,6 +146,32 @@ class IngestConfig(_Frozen):
     qc_qmark_sample_size: int = 20
 
 
+class EvalGenConfig(_Frozen):
+    """评测集构建：出题窗口采样、组合题配对、证据定位、预筛与冻结的参数。"""
+
+    seed: int = 20261025
+    window_min_chars: int = 600
+    window_max_chars: int = 900
+    include_appendix: bool = False  # 附录（谱系表等）默认不参与生成式出题，留给人工题
+    # 第二轮组合题的任务数：人物关系 / 多跳 / 跨章节情节
+    combo_counts: dict[str, int] = Field(default_factory=lambda: {"relation": 60, "multihop": 70, "plot": 60})
+    plot_min_chapter_gap: int = 5  # 跨章节题相邻两个窗口至少相隔几章
+    plot_windows: int = 3  # 跨章节题最多用几个窗口
+    max_window_uses: int = 3  # 同一题型中一个窗口最多参与几个组合任务
+    # 证据定位
+    quote_min_chars: int = 6
+    quote_max_chars: int = 200
+    fuzzy_threshold: float = 90.0  # rapidfuzz 局部对齐分数（0–100）
+    # 预筛
+    copy_lcs_chars: int = 8  # 问题与证据的最长公共子串达到该长度，标记为照抄
+    dup_jaccard: float = 0.8  # 两道题字符 bigram 的 Jaccard 相似度达到该值，标记为近似重复
+    answer_max_chars: int = 40
+    question_max_chars: int = 80
+    # 冻结
+    per_type_target: int = 30
+    copyright_max_substring: int = 20  # 问题和答案中不得出现原文中这么长的连续片段
+
+
 class PathsConfig(_Frozen):
     data_dir: Path = PROJECT_ROOT / "data"
     cache_dir: Path = PROJECT_ROOT / "data" / "cache"
@@ -163,6 +189,15 @@ class PathsConfig(_Frozen):
     @property
     def reports_dir(self) -> Path:
         return self.data_dir / "reports"
+
+    @property
+    def eval_work_dir(self) -> Path:
+        """评测集构建的中间产物（出题任务、候选题含原文片段、校验日志），属于 data/，不入库。"""
+        return self.data_dir / "eval_work"
+
+    @property
+    def datasets_dir(self) -> Path:
+        return self.results_dir.parent / "datasets"
 
     def resolve_model(self, model_name: str) -> str:
         """模型加载位置：model_name 本身是存在的路径 → 直接用；models_dir 下有同名目录
@@ -190,6 +225,7 @@ class Settings(BaseSettings):
     reranker: RerankerConfig = RerankerConfig()
     retrieval: RetrievalConfig = RetrievalConfig()
     ingest: IngestConfig = IngestConfig()
+    evalgen: EvalGenConfig = EvalGenConfig()
     paths: PathsConfig = PathsConfig()
 
     def snapshot(self) -> dict[str, Any]:
