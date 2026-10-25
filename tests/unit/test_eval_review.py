@@ -218,3 +218,11 @@ def test_freeze_rejects_copied_question(book, tmp_path):
     ReviewLog(work / "review.jsonl").append({"cand_id": "r1-1", "action": "accept"})
     with pytest.raises(FreezeError, match="原文连续"):
         freeze(book, CFG, work, out, "x")
+
+
+def test_freeze_draft_includes_pending(book, tmp_path):
+    work, out = tmp_path / "work", tmp_path / "draft"
+    _write_located(work, "located_r1.jsonl", [_cand("r1-1", "fact", [1], book), _cand("r1-2", "fact", [2], book)])
+    ReviewLog(work / "review.jsonl").append({"cand_id": "r1-2", "action": "drop", "reason": "too_easy"})
+    manifest = freeze(book, CFG, work, out, "demo_draft", draft=True)
+    assert manifest.counts["total"] == 1 and manifest.model_dump()["draft"] is True

@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import cache, lru_cache
 
 from novel_rag.config import Settings, get_settings
-from novel_rag.llm.base import ChatModel, Embedder, Reranker, VisionModel
+from novel_rag.llm.base import ChatModel, Embedder, Reranker, TokenCounter, VisionModel
 from novel_rag.llm.usage import get_usage_tracker
 
 
@@ -53,6 +53,15 @@ def get_reranker() -> Reranker:
 
     s = get_settings()
     return BgeReranker(s.reranker, load_from=s.paths.resolve_model(s.reranker.model_name))
+
+
+@lru_cache(maxsize=1)
+def get_token_counter() -> TokenCounter:
+    """按 reranker 的 tokenizer 计数：chunk + 查询必须放得进 reranker 的 max_length。"""
+    from novel_rag.llm.bge import HFTokenCounter
+
+    s = get_settings()
+    return HFTokenCounter(s.reranker.model_name, load_from=s.paths.resolve_model(s.reranker.model_name))
 
 
 def get_vision_model() -> VisionModel:

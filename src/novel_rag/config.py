@@ -102,13 +102,43 @@ class RerankerConfig(_Frozen):
 
 
 class RetrievalConfig(_Frozen):
-    """检索漏斗参数（P2 起使用，先占位）。"""
+    """检索漏斗参数（BM25 / RRF / rerank 在 P2 起使用）。"""
 
     bm25_top_k: int = 50
     vector_top_k: int = 50
     rrf_k: int = 60
     fusion_top_k: int = 40
     rerank_top_k: int = 8
+    # Milvus HNSW 索引与搜索参数
+    hnsw_m: int = 16
+    hnsw_ef_construction: int = 200
+    hnsw_ef: int = 128
+    metric_type: str = "COSINE"
+    # 编码文本：raw = chunk 原文；title_prefix = 前面加"卷名 章节标题"（只影响向量，不影响字符偏移）
+    embed_text_template: Literal["raw", "title_prefix"] = "raw"
+    milvus_upsert_batch: int = 256
+
+
+class ChunkConfig(_Frozen):
+    """切句与分块参数。参数（连同切句规则版本）的 hash 就是 chunk 版本号，任何改动都会产生新版本。"""
+
+    target_chars: int = 500
+    max_chars: int = 800
+    min_chars: int = 150  # 章末短于此的尾块并入前一块
+    overlap_chars: int = 90  # 重叠只取整句，总长不超过此值
+    long_quote_chars: int = 200  # 引号内的对话超过此长度，允许在句末标点处断开
+    sentence_hard_max: int = 300  # 超长单句在逗号 / 分号处硬切
+    query_max_tokens: int = 64  # token 预算检查：P99(chunk token) + 查询长度 ≤ reranker.max_length
+
+
+class EvalConfig(_Frozen):
+    """检索评测参数。"""
+
+    # 证据区间与 chunk 的重叠字数 ≥ min(区间长度 × ratio, chars) 判定命中
+    relevance_min_ratio: float = 0.5
+    relevance_min_chars: int = 50
+    ks: tuple[int, ...] = (5, 10, 20)
+    generate_top_k: int = 6  # 最简生成取前几个 chunk
 
 
 class SectionKeywords(_Frozen):
@@ -191,6 +221,10 @@ class PathsConfig(_Frozen):
         return self.data_dir / "reports"
 
     @property
+    def embedding_cache_dir(self) -> Path:
+        return self.cache_dir / "embeddings"
+
+    @property
     def eval_work_dir(self) -> Path:
         """评测集构建的中间产物（出题任务、候选题含原文片段、校验日志），属于 data/，不入库。"""
         return self.data_dir / "eval_work"
@@ -224,6 +258,8 @@ class Settings(BaseSettings):
     embedding: EmbeddingConfig = EmbeddingConfig()
     reranker: RerankerConfig = RerankerConfig()
     retrieval: RetrievalConfig = RetrievalConfig()
+    chunk: ChunkConfig = ChunkConfig()
+    eval: EvalConfig = EvalConfig()
     ingest: IngestConfig = IngestConfig()
     evalgen: EvalGenConfig = EvalGenConfig()
     paths: PathsConfig = PathsConfig()

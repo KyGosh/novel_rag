@@ -7,10 +7,17 @@ from novel_rag.llm.base import (
     Message,
     Reranker,
     StructuredOutputError,
+    TokenCounter,
     TokenUsage,
     VisionModel,
 )
-from novel_rag.llm.factory import get_chat_model, get_embedder, get_reranker, get_vision_model
+from novel_rag.llm.factory import (
+    get_chat_model,
+    get_embedder,
+    get_reranker,
+    get_token_counter,
+    get_vision_model,
+)
 from novel_rag.llm.usage import UsageRecord, UsageTracker, get_usage_tracker
 
 __all__ = [
@@ -20,6 +27,7 @@ __all__ = [
     "Message",
     "Reranker",
     "StructuredOutputError",
+    "TokenCounter",
     "TokenUsage",
     "UsageRecord",
     "UsageTracker",
@@ -27,6 +35,7 @@ __all__ = [
     "get_chat_model",
     "get_embedder",
     "get_reranker",
+    "get_token_counter",
     "get_usage_tracker",
     "get_vision_model",
 ]

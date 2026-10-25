@@ -15,6 +15,7 @@ from novel_rag.llm.base import (
     Embedder,
     Message,
     Reranker,
+    TokenCounter,
     TokenUsage,
     VisionModel,
     l2_normalize,
@@ -83,3 +84,12 @@ class FakeVisionModel(VisionModel):
 
     def describe(self, image: bytes | Path, prompt: str) -> str:
         return "fake image description"
+
+
+class FakeTokenCounter(TokenCounter):
+    """token 数 = 字符数。"""
+
+    model_name = "fake-tokenizer"
+
+    def count(self, texts: Sequence[str]) -> list[int]:
+        return [len(t) for t in texts]

@@ -72,25 +72,34 @@ def to_item(st: ReviewState, book: BookText) -> EvalItem:
         source="human" if st.cand.get("source") == "human" else "generated",
         split="dev",  # 由 assign_split 覆盖
         max_reading_order=max(book.chapter(e.chapter_idx).reading_order for e in evidence),
-        review=st.status,  # accepted / edited
+        review="edited" if st.status == "edited" else "accepted",  # 草稿中的未校验题记为 accepted
         difficulty=st.difficulty,
         origin=st.cand["cand_id"],
     )
 
 
 def freeze(
-    book: BookText, cfg: EvalGenConfig, work: Path, out_dir: Path, name: str, *, allow_pending: bool = False
+    book: BookText,
+    cfg: EvalGenConfig,
+    work: Path,
+    out_dir: Path,
+    name: str,
+    *,
+    allow_pending: bool = False,
+    draft: bool = False,
 ) -> DatasetManifest:
+    """draft=True：未校验的题也当作通过，用于在人工校验完成前跑通评测链路；草稿不能用于正式数字。"""
     cands = load_candidates(work)
     states = replay(cands, ReviewLog(work / "review.jsonl").read())
     pending = [cid for cid, s in states.items() if s.status == "pending"]
-    if pending and not allow_pending:
+    if pending and not (allow_pending or draft):
         raise FreezeError(f"还有 {len(pending)} 道候选题未校验（例如 {pending[:3]}）；确认要跳过请加 --allow-pending")
 
     chosen_items: list[EvalItem] = []
     reserve_items: list[EvalItem] = []
     for t in QUESTION_TYPES:
-        kept = [s for s in states.values() if s.cand["type"] == t and s.status in ("accepted", "edited")]
+        ok_status = ("accepted", "edited", "pending") if draft else ("accepted", "edited")
+        kept = [s for s in states.values() if s.cand["type"] == t and s.status in ok_status]
         chosen, reserve = select(kept, cfg.per_type_target)
         chosen_items.extend(to_item(s, book) for s in chosen)
         reserve_items.extend(to_item(s, book) for s in reserve)
@@ -112,6 +121,7 @@ def freeze(
         imports[p.stem] = json.loads(p.read_text(encoding="utf-8"))
     manifest = DatasetManifest(
         name=name,
+        draft=draft,
         books={book.book_id: book.text_sha256},
         counts={
             "total": len(chosen_items),

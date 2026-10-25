@@ -40,6 +40,7 @@ class BookText:
     text_sha256: str
     chapters: tuple[Chapter, ...]
     locked: bool
+    title: str = ""  # 卷名（来自导入产物的 manifest.json）
 
     @classmethod
     def load(cls, book_dir: Path, *, require_lock: bool = True) -> BookText:
@@ -56,7 +57,11 @@ class BookText:
             raise CorpusError(f"{book_dir.name} 的 text.txt 尚未定稿（缺少 text.lock）")
         rows = [json.loads(line) for line in chapters_path.read_text(encoding="utf-8").splitlines() if line]
         chapters = tuple(Chapter(**{k: r[k] for k in Chapter.__dataclass_fields__}) for r in rows)
-        return cls(book_dir.name, text, sha, chapters, locked)
+        manifest_path = book_dir / "manifest.json"
+        title = (
+            json.loads(manifest_path.read_text(encoding="utf-8")).get("title", "") if manifest_path.is_file() else ""
+        )
+        return cls(book_dir.name, text, sha, chapters, locked, title)
 
     def chapter(self, chapter_idx: int) -> Chapter:
         for c in self.chapters:

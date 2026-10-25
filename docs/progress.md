@@ -8,7 +8,8 @@
   - 第一步已实现：`scripts/ingest.py`（epub 解析、规范化、卷与章节识别、注释剥离、质检报告、定稿保护），全五卷质检通过（349 章，与目录一致；27 条注释全部配对），人工抽查通过
   - **卷一 `text.txt` 已定稿（2026-10-25）**：sha256 `202f6f3a1f81035d9980812a4276a36ade7b69ac711f825316f9b59337ef4780`，543,372 字，74 章（序幕 0 + 正文 72 + 附录 73）；原文 epub sha256 `48e924072b5fdf2c4b4a763ddda657c3cb641b42bd50b63637cd1b6a5883ac44`，parser `epub-1`，规则 `norm-1`。重新导入时 hash 不同会被 `text.lock` 拒绝
   - B 线评测集：工具链已完成（出题任务导出 / 候选题与人工题导入、证据三级定位、预筛、命令行校验、冻结），候选题已出完：第一轮事实题 73 道 + 第二轮组合题 122 道（关系 38、多跳 40、跨章节 44），349 段证据全部精确定位。**下一步：人工校验（`scripts/review_questions.py`）+ 人工题（`human.jsonl`，建议每类 6 道）→ `scripts/freeze_dataset.py` 冻结为 `eval/datasets/asoiaf_v0/`**
-  - 待做：插图提取与分类（不影响 `text.txt`）；txt / md 解析器与格式无关性测试；A 线（分块 → Milvus → 检索 → 评测运行器）
+  - A 线已完成并跑通全链路：切句 + 分块（`scripts/chunk.py`，卷一 chunk 版本 `0c94b7e4`：1181 个，字数 P50 517 / P99 644，reranker token P99 511 + 查询 64 ≤ 1024）→ Milvus 导入（`scripts/index_milvus.py`，collection `chunks_bgem3_1024_0c94b7e4`，幂等、向量按文本 hash 缓存）→ 向量检索（P50 54 ms）→ 评测运行器（`scripts/run_eval.py`）→ 最简生成（`scripts/ask.py`、`--generate`）。草稿评测集上的数字只用于验证链路，结果放在 `data/eval_work/`，不入库。**正式 baseline 等评测集冻结后在 dev / test 各跑一次**
+  - 待做：插图提取与分类（不影响 `text.txt`）；txt / md 解析器与格式无关性测试；可选消融（分块 300 / 500 / 800、标题前缀）
   - 剩余：P3 前在控制台确认 Kimi 账户的限流等级
 - 最新评测数字：暂无（P1 产出 baseline）
 
@@ -67,6 +68,14 @@
 - 评测集出题方式（2026-10-25）：出题不调用 Kimi（Kimi 只作为被测系统的模型），由 Claude 在会话中按 `prompts/qgen_guidelines.v1.md` 出题；脚本负责采样窗口（每章一个、固定种子）、导出任务、导入并定位证据。可复现性靠候选题文件 hash + 规范版本号 + 冻结后的评测集文件保证，出题过程本身不能一键重跑。出题模型与被测模型不同，避免自我偏好；"人工题"子集用来衡量出题措辞贴近原文带来的偏差。新增依赖 rapidfuzz。
 - 评测集格式：`eval/datasets/{name}/items.jsonl`（id、题型、问题、答案、证据区间、来源、划分、`max_reading_order`=最后一段证据所在章的 reading_order）+ `manifest.json`（定稿 text sha256、规范版本、候选文件 hash、定位与校验统计）+ `reserve.jsonl`（未入选的通过题）。加载时 text hash 不一致直接报错。冻结时检查问题和答案中不得出现原文连续 20 字。dev / test 在"题型 × 来源"分组内按 sha256(id) 交替划分。
 - 第二轮人名共现配对的教训：按名字第一段配对会把同名不同人（如琼恩·雪诺与琼恩·艾林）配到一起，190 个组合任务中有 68 个出不了合格题。P3 实体消歧要处理同名问题。
+- A 线设计（2026-10-26）：
+  - 切句：句末标点 + 后引号吞入；引号内不断句（超过 200 字的对话允许断开）；省略号只在后引号前或段尾算句末；引语后紧跟归属语（"他说"）时与归属语算同一句，避免切出孤立的短句。
+  - 分块：只切章节正文，章节标题作为元数据（是否加入编码文本由 `embed_text_template` 消融决定）；整句贪心到 500 字、上限 800、重叠 ≤ 90 字整句、章末 < 150 字并入前块；不变量（切片一致、不跨章、全覆盖、确定性）在代码中检查。chunk 版本 = 参数 + 切句 / 分块规则版本的 hash。
+  - small-to-big（命中块扩展到 `seq ± 1` 或父块）仍按原设计放在 P2，rerank 之后做，用"固定 token 预算下的证据覆盖率"证明收益；P1 baseline 只用单一粒度，避免大块虚高 Recall。
+  - token 计数经 `llm/` 的 `TokenCounter`（bge-reranker tokenizer），transformers 仍只在 `llm/` 中 import。
+  - 评测：相关性 = 证据区间与 chunk 重叠 ≥ min(区间 50%, 50 字)；Recall@K 按证据统计；默认只跑 dev，test 需显式 `--split test`；baseline 不开防剧透过滤（`--spoiler-filter` 作为单独实验）；结果目录不含原文。
+  - 草稿评测集：`freeze_dataset.py --draft` 收录未校验题，输出到 `data/eval_work/{dataset}/draft/`，只用于跑通链路。
+  - pymilvus 2.6 搜索结果中主键以字段名（`chunk_id`）返回，不是 `id`。
 - P1 规划要点（2026-10-22）：一个文件里可以包含多卷，卷由目录顶层的分册合并而成（去掉"上/中/下"后缀后同名），可选配置可以纠正卷名；注释（`<sup>[n]</sup>` 加文件末尾的注释段落）从正文中剥离，单独存放；插图分为装饰、附录图示、插画/地图三类；全五卷都要解析，但索引和评测只用卷一；相关性判定按"证据区间与 chunk 的重叠字数 ≥ min(区间的 50%, 50 字)"。
 
 ## 待决事项（P0 内需要确定）
