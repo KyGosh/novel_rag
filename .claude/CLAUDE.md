@@ -1,6 +1,6 @@
 # CLAUDE.md — novel_rag
 
-通用的长篇小说跨章节问答 GraphRAG 系统：LangGraph 编排，ES BM25 + Milvus 向量混合检索，Neo4j 知识图谱增强。演示和评测数据集是《冰与火之歌》中文版。
+通用的长篇小说跨章节问答 Agent：把 ES BM25 + Milvus 向量混合检索、Neo4j 知识图谱查询和章节原文读取封装成工具，由 LangGraph 实现"规划 → 检索 → 反思 → 作答"循环，自主决定检索路径；与固定流程 RAG 对比。演示和评测数据集是《冰与火之歌》中文版全五卷（最终语料用全五卷）。
 
 - 进度与决策：`docs/progress.md`；各阶段方案：`docs/phases/Px.md`；各模块的详细设计要点：`docs/design-notes.md`（做对应阶段方案时查阅）。
 - 最高原则：每一项优化都要有可复现的评测数字。简历上的数字只能来自 `eval/results/`。
@@ -13,11 +13,11 @@
 
 ## 技术栈（版本已锁定，改动要记入 progress.md）
 
-Python 3.11 + uv；ES 8.19.23 + IK 8.19.23（两者必须完全一致）；Milvus 2.6.25 standalone；Neo4j 5.26 LTS + APOC；LLM 用 Kimi（模型名放在 config，按任务分别配置）；bge-m3 和 bge-reranker-v2-m3 跑在本地 GPU（RTX 4060 Ti 8GB）。
+Python 3.11 + uv；ES 8.19.23 + IK 8.19.23（两者必须完全一致）；Milvus 2.6.25 standalone；Neo4j 5.26 LTS + APOC；LLM 用 DeepSeek（经本地 WorkBuddy 代理 `127.0.0.1:3425`，OpenAI 兼容；模型名放在 config，按任务分别配置）；bge-m3 和 bge-reranker-v2-m3 跑在本地 GPU（RTX 4060 Ti 8GB）。
 
 ## 硬性约束
 
-1. **通用性**：代码里不写死任何书籍专属知识。书籍相关信息（目录、别名、POV、schema 扩展）都是 `data/books/{book_id}/` 下的可选配置，没有这些配置也必须能跑通。支持 txt、md、epub 和有文字层的 pdf，各格式解析后统一成同一种中间表示，下游步骤不感知格式。
+1. **通用性**：代码里不写死任何书籍专属知识。书籍相关信息（目录、别名、POV、schema 扩展）都是 `data/books/{book_id}/` 下的可选配置，没有这些配置也必须能跑通。解析器可插拔（目前支持 epub 和 txt），各格式解析后统一成同一种中间表示，下游步骤不感知格式。
 2. **抽象层**：LLM、Embedding、Reranker、视觉模型只能经过 `llm/` 调用，业务代码不能直接 import 厂商 SDK。所有参数（top_k、阈值、模型名）都集中放在 `config.py`。
 3. **ID 与坐标**：
    - `chunk_id = {book_id}:{chapter_idx:04d}:{seq:04d}`，确定性生成，ES、Milvus、Neo4j 三处共用。
@@ -30,8 +30,16 @@ Python 3.11 + uv；ES 8.19.23 + IK 8.19.23（两者必须完全一致）；Milvu
    - 分 dev / test 集，调参只看 dev。
    - 按题型报告指标。
    - 每次实验都要记录 commit、配置快照和逐题结果。
-7. **安全**：Cypher 以模板为主。Text2Cypher 只允许参数化的只读查询，并强制 LIMIT。输入文件按不可信数据处理。
-8. **版权**：原文只在本地处理。`data/` 不入库；评测集、README 和截图中不能出现大段原文。
+   - 出题模型不能是被测模型（DeepSeek）；judge 用 DeepSeek 时，要用人工打分验证一致率。
+   - 必须有闭卷基线。
+7. **Agent 与工具**：
+   - 工具层是独立于编排框架的纯函数，Agent 和固定流程 RAG 共用同一套工具。
+   - 工具输出要有长度上限，并带 chunk_id 和章节。
+   - Agent 必须有轮数、调用次数和 token 上限，工具失败要重试，重试仍失败时把错误交还给模型，不能让整题失败。
+   - 答案只能引用证据笔记中的 chunk，并校验引用。
+   - 每一步都要落盘 trace。
+8. **安全**：图谱查询只用参数化的只读 Cypher 模板，强制 LIMIT，不做 Text2Cypher。输入文件按不可信数据处理。
+9. **版权**：原文只在本地处理。`data/` 不入库；评测集、README 和截图中不能出现大段原文。
 
 ## 工作流
 

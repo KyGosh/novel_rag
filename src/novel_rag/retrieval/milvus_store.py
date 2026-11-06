@@ -2,14 +2,15 @@
 
 collection 命名为 chunks_{模型简称}_{维度}_{chunk 版本}[_tp]：
 不同分块版本 / 编码模板各自一个 collection，可以并存做消融。
-导入按主键 upsert 并删除多余的 chunk，因此重复导入同一版本结果不变；权威数据仍是 chunks.jsonl。
+一个 collection 可以装多卷（检索范围用 book_id / reading_order 过滤）；导入按主键 upsert，并删除本次所导入各卷中
+多余的 chunk，因此重复导入同一版本结果不变，也不会误删其他卷；权威数据仍是 chunks.jsonl。
 """
 
 from __future__ import annotations
 
 import re
 import time
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Any
 
 import numpy as np
@@ -70,9 +71,14 @@ class MilvusChunkStore:
         )
         self.client.create_collection(self.name, schema=schema, index_params=index)
 
-    def _all_ids(self) -> set[str]:
+    def _all_ids(self, book_ids: Iterable[str] | None = None) -> set[str]:
         ids: set[str] = set()
-        it = self.client.query_iterator(self.name, batch_size=1000, filter='chunk_id != ""', output_fields=["chunk_id"])
+        expr = (
+            SearchFilter(book_ids=tuple(sorted(book_ids))).to_milvus_expr()
+            if book_ids is not None
+            else 'chunk_id != ""'
+        )
+        it = self.client.query_iterator(self.name, batch_size=1000, filter=expr, output_fields=["chunk_id"])
         try:
             while batch := it.next():
                 ids.update(r["chunk_id"] for r in batch)
@@ -80,8 +86,11 @@ class MilvusChunkStore:
             it.close()
         return ids
 
-    def sync(self, chunks: Sequence[dict[str, Any]], vectors: np.ndarray) -> dict[str, int]:
-        """把 collection 同步成与 chunks 完全一致：upsert 全部、删除多余、flush、load。"""
+    def sync(
+        self, chunks: Sequence[dict[str, Any]], vectors: np.ndarray, scope_books: Iterable[str] | None = None
+    ) -> dict[str, int]:
+        """把 scope_books（默认为 chunks 涉及的卷）在 collection 中的内容同步成与 chunks 完全一致：
+        upsert 全部、删除这些卷中多余的、flush、load。"""
         rows = [
             {
                 "chunk_id": c["chunk_id"],
@@ -94,16 +103,29 @@ class MilvusChunkStore:
         b = self.cfg.milvus_upsert_batch
         for i in range(0, len(rows), b):
             self.client.upsert(self.name, rows[i : i + b])
-        stale = sorted(self._all_ids() - {c["chunk_id"] for c in chunks})
+        scope = set(scope_books) if scope_books is not None else {c["book_id"] for c in chunks}
+        stale = sorted(self._all_ids(scope) - {c["chunk_id"] for c in chunks}) if scope else []
         for i in range(0, len(stale), 500):
             self.client.delete(self.name, ids=stale[i : i + 500])
         self.client.flush(self.name)
         self.client.load_collection(self.name)
         return {"upserted": len(rows), "deleted": len(stale), "count": self.count()}
 
-    def count(self) -> int:
-        res = self.client.query(self.name, filter="", output_fields=["count(*)"])
+    def count(self, flt: SearchFilter | None = None) -> int:
+        res = self.client.query(self.name, filter=(flt or SearchFilter()).to_milvus_expr(), output_fields=["count(*)"])
         return int(res[0]["count(*)"])
+
+    def iter_rows(self, book_ids: Iterable[str]) -> Iterable[dict[str, Any]]:
+        """遍历这些卷的全部标量字段与正文（一致性检查用，不取向量）。"""
+        expr = SearchFilter(book_ids=tuple(sorted(book_ids))).to_milvus_expr()
+        it = self.client.query_iterator(
+            self.name, batch_size=1000, filter=expr, output_fields=["chunk_id", *SCALAR_FIELDS, "text"]
+        )
+        try:
+            while batch := it.next():
+                yield from batch
+        finally:
+            it.close()
 
     def search(self, vector: np.ndarray, top_k: int, expr: str = "") -> list[dict[str, Any]]:
         self.client.load_collection(self.name)

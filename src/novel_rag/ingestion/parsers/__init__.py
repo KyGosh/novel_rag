@@ -8,8 +8,9 @@ from pathlib import Path
 from novel_rag.config import IngestConfig
 from novel_rag.ingestion.ir import Document, IngestError
 from novel_rag.ingestion.parsers.epub import parse_epub
+from novel_rag.ingestion.parsers.txt import parse_txt
 
-PARSERS: dict[str, Callable[[Path, IngestConfig], Document]] = {".epub": parse_epub}
+PARSERS: dict[str, Callable[[Path, IngestConfig], Document]] = {".epub": parse_epub, ".txt": parse_txt}
 
 
 def parse_file(path: Path, cfg: IngestConfig) -> Document:

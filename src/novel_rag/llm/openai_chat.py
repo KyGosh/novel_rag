@@ -1,4 +1,4 @@
-"""OpenAI 兼容接口的对话模型（Kimi / Moonshot 走这里）。整个项目只有本文件 import openai。
+"""OpenAI 兼容接口的对话模型（DeepSeek 代理、Kimi 等都走这里）。整个项目只有本文件 import openai。
 
 横切能力：429 / 5xx / 网络错误指数退避重试；全局并发上限；结构化输出校验失败重试；
 思考类模型只取 content，reasoning_content 丢弃；每次调用记录用量。

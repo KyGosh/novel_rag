@@ -1,4 +1,4 @@
-"""集成测试：需要先 `docker compose up -d`、本地 GPU 和有效的 Kimi key。运行：uv run pytest -m integration"""
+"""集成测试：需要先 `docker compose up -d`、本地 GPU 和可用的 LLM 接口（默认为本地 DeepSeek 代理）。运行：uv run pytest -m integration"""
 
 import pytest
 

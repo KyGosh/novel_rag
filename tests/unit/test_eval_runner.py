@@ -124,3 +124,65 @@ def test_generation_messages_and_answer():
     assert "谁来了？" in msgs[1]["content"] and "[1] 《某书 第一章》 b:0001:0000\n片段内容" in msgs[1]["content"]
     res = answer("谁来了？", hits, FakeChatModel(lambda m: "某人 [1]"), book_titles={"b": "某书"})
     assert res["answer"] == "某人 [1]" and res["prompt_version"] == "answer.v1" and res["chunk_ids"] == ["b:0001:0000"]
+
+
+# ---------------------------------------------------------------- P2：预算覆盖率、置信区间、分阶段延迟
+
+
+def test_coverage_metric():
+    from novel_rag.eval.metrics import coverage
+
+    evs = [ev(10, 30), ev(500, 520)]
+    assert coverage([Span("b", 0, 100)], evs, min_ratio=0.5, min_chars=50) == 0.5
+    assert coverage([Span("b", 0, 100), Span("b", 480, 600)], evs, min_ratio=0.5, min_chars=50) == 1.0
+    assert coverage([], evs, min_ratio=0.5, min_chars=50) == 0.0
+
+
+def test_bootstrap_and_paired_diff():
+    from novel_rag.eval.stats import bootstrap_ci, paired_diff
+
+    lo, hi = bootstrap_ci([1.0] * 10, n_samples=200, seed=1, level=0.95)
+    assert lo == hi == 1.0
+    lo, hi = bootstrap_ci([0.0, 1.0] * 20, n_samples=2000, seed=1, level=0.95)
+    assert lo < 0.5 < hi and hi - lo < 0.5
+    assert bootstrap_ci([0.0, 1.0] * 20, n_samples=500, seed=7, level=0.9) == bootstrap_ci(
+        [0.0, 1.0] * 20, n_samples=500, seed=7, level=0.9
+    )  # 固定种子可复现
+    d = paired_diff([0.0] * 20, [1.0] * 10 + [0.0] * 10, n_samples=1000, seed=1, level=0.95)
+    assert d["diff"] == 0.5 and 0 < d["lo"] <= 0.5 <= d["hi"] and d["p_le0"] == 0.0
+    import pytest
+
+    with pytest.raises(ValueError):
+        paired_diff([0.0], [0.0, 1.0], n_samples=10, seed=1, level=0.95)
+
+
+def test_runner_budget_coverage_ci_and_stage_latency():
+    from novel_rag.retrieval.expand import ChunkIndex, expand_hits
+
+    corpus = [
+        {"chunk_id": f"b:0001:{i:04d}", "book_id": "b", "chapter_idx": 1, "seq": i, "reading_order": 1,
+         "chunk_type": "text", "char_start": i * 100, "char_end": i * 100 + 100, "text": "x" * 100}
+        for i in range(3)
+    ]  # fmt: skip
+    spans = {c["chunk_id"]: Span("b", c["char_start"], c["char_end"]) for c in corpus}
+    # 证据在第 2 块（seq 1），检索只命中第 1 块：不扩展时预算内覆盖不到，扩展 ±1 后能覆盖
+    items = [_item(1, "multihop", 120, 160, 1)]
+
+    class StagedRetriever(FakeRetriever):
+        def search(self, query, top_k, flt=None):
+            self.last_latency_ms = {"bm25.total": 3.0, "rerank": 10.0, "total": 15.0}
+            return super().search(query, top_k, flt)[:1]
+
+    settings = Settings(_env_file=None)
+    idx = ChunkIndex(corpus)
+    for window, expected in ((0, 0.0), (1, 1.0)):
+        rows, metrics = run_retrieval_eval(
+            items, StagedRetriever(corpus), spans, settings,
+            expander=lambda hits, flt, w=window: expand_hits(hits, idx, w, flt),
+            count_tokens=lambda c: len(c.text),
+        )  # fmt: skip
+        assert rows[0]["metrics"]["cov@4000"] == expected
+        assert rows[0]["contexts"][0]["budget"] == 2000
+    assert metrics["latency_ms"] == {"p50": 15.0, "p95": 15.0}
+    assert metrics["latency_stages_ms"]["rerank"] == {"p50": 10.0, "p95": 10.0}
+    assert metrics["ci"]["overall"]["cov@4000"] == [1.0, 1.0] and "type:multihop" in metrics["ci"]

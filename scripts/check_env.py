@@ -1,4 +1,4 @@
-"""P0 环境检查：逐项报告 ES / Milvus / Neo4j / GPU / Embedding / Reranker / Kimi 是否可用。
+"""P0 环境检查：逐项报告 ES / Milvus / Neo4j / GPU / Embedding / Reranker / LLM 是否可用。
 
 用法：
     uv run python scripts/check_env.py                 # 全部检查
@@ -175,7 +175,7 @@ class _Capital(BaseModel):
     capital: str
 
 
-def check_kimi() -> tuple[str, dict[str, Any]]:
+def check_llm() -> tuple[str, dict[str, Any]]:
     from novel_rag.llm.cache import CachedChatModel, open_disk_cache
     from novel_rag.llm.openai_chat import ConcurrencyLimiter, OpenAICompatChatModel
     from novel_rag.llm.usage import UsageTracker
@@ -216,7 +216,7 @@ CHECKS: dict[str, Callable[[], tuple[str, dict[str, Any]]]] = {
     "gpu": check_gpu,
     "embedding": check_embedding,
     "reranker": check_reranker,
-    "kimi": check_kimi,
+    "llm": check_llm,
 }
 
 
