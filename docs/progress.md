@@ -7,11 +7,14 @@
 - 阶段：P1 进行中。执行顺序：第一步（解析 + 规范化 + `text.txt` 定稿）→ B 线评测集优先、A 线分块与检索并行 → baseline
   - 第一步已实现：`scripts/ingest.py`（epub 解析、规范化、卷与章节识别、注释剥离、质检报告、定稿保护），全五卷质检通过（349 章，与目录一致；27 条注释全部配对），人工抽查通过
   - **卷一 `text.txt` 已定稿（2026-10-25）**：sha256 `202f6f3a1f81035d9980812a4276a36ade7b69ac711f825316f9b59337ef4780`，543,372 字，74 章（序幕 0 + 正文 72 + 附录 73）；原文 epub sha256 `48e924072b5fdf2c4b4a763ddda657c3cb641b42bd50b63637cd1b6a5883ac44`，parser `epub-1`，规则 `norm-1`。重新导入时 hash 不同会被 `text.lock` 拒绝
-  - B 线评测集：工具链已完成（出题任务导出 / 候选题与人工题导入、证据三级定位、预筛、命令行校验、冻结），候选题已出完：第一轮事实题 73 道 + 第二轮组合题 122 道（关系 38、多跳 40、跨章节 44），349 段证据全部精确定位。**下一步：人工校验（`scripts/review_questions.py`）+ 人工题（`human.jsonl`，建议每类 6 道）→ `scripts/freeze_dataset.py` 冻结为 `eval/datasets/asoiaf_v0/`**
-  - A 线已完成并跑通全链路：切句 + 分块（`scripts/chunk.py`，卷一 chunk 版本 `0c94b7e4`：1181 个，字数 P50 517 / P99 644，reranker token P99 511 + 查询 64 ≤ 1024）→ Milvus 导入（`scripts/index_milvus.py`，collection `chunks_bgem3_1024_0c94b7e4`，幂等、向量按文本 hash 缓存）→ 向量检索（P50 54 ms）→ 评测运行器（`scripts/run_eval.py`）→ 最简生成（`scripts/ask.py`、`--generate`）。草稿评测集上的数字只用于验证链路，结果放在 `data/eval_work/`，不入库。**正式 baseline 等评测集冻结后在 dev / test 各跑一次**
+  - **评测集 asoiaf_v0 已冻结（2026-11-06，commit e3f9bde）**：四类各 30 题，dev / test 各 60 题，证据覆盖卷一 71 章（225 段，204 段互不相同）。195 道候选题全部校验：通过 184（其中修改 13）、丢弃 11，通过率 94.4%；跨章节题通过率最低（77.3%）。校验方式：Claude 出题并逐题预审给建议，用户对照原文证据逐批确认（已写入 manifest，非完全独立的人工校验）。暂无人工题子集，留到 v1。未入选的 64 道通过题在 `reserve.jsonl`
+  - A 线已完成并跑通全链路：切句 + 分块（`scripts/chunk.py`，卷一 chunk 版本 `0c94b7e4`：1181 个，字数 P50 517 / P99 644，reranker token P99 511 + 查询 64 ≤ 1024）→ Milvus 导入（`scripts/index_milvus.py`，collection `chunks_bgem3_1024_0c94b7e4`，幂等、向量按文本 hash 缓存）→ 向量检索 → 评测运行器（`scripts/run_eval.py`）→ 最简生成（`scripts/ask.py`、`--generate`）
   - 待做：插图提取与分类（不影响 `text.txt`）；txt / md 解析器与格式无关性测试；可选消融（分块 300 / 500 / 800、标题前缀）
-  - 剩余：P3 前在控制台确认 Kimi 账户的限流等级
-- 最新评测数字：暂无（P1 产出 baseline）
+  - 待做：可选消融（分块 300 / 500 / 800、标题前缀，只看 dev）；人工题子集（v1）
+- 最新评测数字（P1 纯向量 baseline，bge-m3 + Milvus HNSW，chunk `0c94b7e4`，不开防剧透过滤）：
+  - dev（`eval/results/20261106-105947_baseline_vector_dev`）：总体 Recall@5 0.406 / @20 0.644，Hit@20 0.817，MRR 0.403；事实 R@5 0.800、关系 0.367、多跳 0.333、跨章节 0.122
+  - test（`eval/results/20261106-110025_baseline_vector_test`）：总体 Recall@5 0.422 / @20 0.671，Hit@20 0.833，MRR 0.384；事实 0.667、关系 0.567、多跳 0.233、跨章节 0.222
+  - 检索延迟 P50 约 62–66 ms。结论：纯向量对事实题够用，多跳与跨章节题明显不足（P2 的 BM25 / rerank / small-to-big、P4 的章节摘要要解决的问题）
 
 ## 开发阶段
 
@@ -82,4 +85,4 @@
 
 - [x] 创建 `.wslconfig`（见决策记录）
 - [x] Kimi 支持的结构化输出方式：`response_format={"type":"json_schema"}` 可用，kimi-k2.6 首次请求即通过 pydantic 校验；`json_object` 作为备选保留在 config
-- [ ] Kimi 账户的限流额度：API 响应头里没有限流信息，需要在开放平台控制台查看账户等级（当前只有 15 元代金券、现金余额 0，大概率是最低等级）。P3 全量抽取前按等级设置 `LLM__MAX_CONCURRENCY`（当前默认 4）
+- [x] Kimi 账户的限流额度：实测 429 报错显示组织级上限为 **RPM 3**（最低等级）。`llm/` 新增按 RPM 节流的滑动窗口限流（`LLM__MAX_RPM`，默认不限）；使用 Kimi 时在 `.env` 中设 `LLM__MAX_RPM=3`。P3 全量抽取前需要充值升级等级，否则数千次调用不可行

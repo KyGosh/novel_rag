@@ -1,0 +1,251 @@
+{
+  "name": "baseline_vector_dev",
+  "created": "2026-11-06T10:59:47",
+  "git": {
+    "commit": "e3f9bde4397a75c48bf00255a4b4c7ad9557d73a",
+    "branch": "p1-baseline",
+    "dirty": false
+  },
+  "dataset": {
+    "name": "asoiaf_v0",
+    "split": "dev",
+    "n_items": 60,
+    "fingerprint": "53266d360cd29da740b049cf4a9f04dffb1bc41b1e9c387a5d2b58ebf64062fa",
+    "books": {
+      "asoiaf-1": "202f6f3a1f81035d9980812a4276a36ade7b69ac711f825316f9b59337ef4780"
+    }
+  },
+  "chunk_version": "0c94b7e4",
+  "embed_text_template": "raw",
+  "retriever": {
+    "name": "vector",
+    "collection": "chunks_bgem3_1024_0c94b7e4",
+    "embedding_model": "BAAI/bge-m3",
+    "metric": "COSINE",
+    "hnsw_ef": 128
+  },
+  "spoiler_filter": false,
+  "relevance": {
+    "min_ratio": 0.5,
+    "min_chars": 50
+  },
+  "ks": [
+    5,
+    10,
+    20
+  ],
+  "generate": false,
+  "config": {
+    "es": {
+      "url": "http://localhost:9200",
+      "request_timeout": 30.0
+    },
+    "milvus": {
+      "uri": "http://localhost:19530",
+      "token": "",
+      "db_name": "default"
+    },
+    "neo4j": {
+      "uri": "bolt://localhost:7687",
+      "user": "neo4j",
+      "password": "**********",
+      "database": "neo4j"
+    },
+    "llm": {
+      "base_url": "https://api.moonshot.cn/v1",
+      "api_key": "**********",
+      "max_concurrency": 4,
+      "timeout": 120.0,
+      "max_retries": 5,
+      "structured_mode": "json_schema",
+      "structured_max_attempts": 3,
+      "cache_enabled": true,
+      "tasks": {
+        "extraction": {
+          "model": "kimi-k2.6",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "thinking": {
+              "type": "disabled"
+            }
+          }
+        },
+        "generation": {
+          "model": "kimi-k2.6",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "thinking": {
+              "type": "disabled"
+            }
+          }
+        },
+        "judge": {
+          "model": "kimi-k2.6",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "thinking": {
+              "type": "disabled"
+            }
+          }
+        },
+        "smoke": {
+          "model": "kimi-k2.6",
+          "temperature": null,
+          "max_tokens": 256,
+          "extra_body": {
+            "thinking": {
+              "type": "disabled"
+            }
+          }
+        }
+      }
+    },
+    "embedding": {
+      "model_name": "BAAI/bge-m3",
+      "dim": 1024,
+      "batch_size": 16,
+      "max_length": 1024,
+      "device": "cuda",
+      "fp16": true
+    },
+    "reranker": {
+      "model_name": "BAAI/bge-reranker-v2-m3",
+      "max_length": 1024,
+      "batch_size": 16,
+      "device": "cuda",
+      "fp16": true
+    },
+    "retrieval": {
+      "bm25_top_k": 50,
+      "vector_top_k": 50,
+      "rrf_k": 60,
+      "fusion_top_k": 40,
+      "rerank_top_k": 8,
+      "hnsw_m": 16,
+      "hnsw_ef_construction": 200,
+      "hnsw_ef": 128,
+      "metric_type": "COSINE",
+      "embed_text_template": "raw",
+      "milvus_upsert_batch": 256
+    },
+    "chunk": {
+      "target_chars": 500,
+      "max_chars": 800,
+      "min_chars": 150,
+      "overlap_chars": 90,
+      "long_quote_chars": 200,
+      "sentence_hard_max": 300,
+      "query_max_tokens": 64
+    },
+    "eval": {
+      "relevance_min_ratio": 0.5,
+      "relevance_min_chars": 50,
+      "ks": [
+        5,
+        10,
+        20
+      ],
+      "generate_top_k": 6
+    },
+    "ingest": {
+      "max_archive_files": 5000,
+      "max_uncompressed_bytes": 536870912,
+      "max_member_bytes": 67108864,
+      "pov_title_max_len": 6,
+      "pov_min_occurrences": 3,
+      "blank_section_max_chars": 10,
+      "text_section_types": [
+        "narrative",
+        "appendix"
+      ],
+      "enabled_volumes": [
+        1
+      ],
+      "qmark_punct_ratio": 0.2,
+      "keywords": {
+        "prologue": [
+          "序幕",
+          "序章",
+          "楔子",
+          "引子",
+          "prologue"
+        ],
+        "epilogue": [
+          "终章",
+          "尾声",
+          "epilogue"
+        ],
+        "appendix": [
+          "附录",
+          "appendix"
+        ],
+        "front_matter": [
+          "出版说明",
+          "作者简介",
+          "作者介绍",
+          "关于作者",
+          "内容简介",
+          "译者序",
+          "译序",
+          "前言",
+          "序言",
+          "目录",
+          "版权",
+          "preface",
+          "foreword",
+          "contents",
+          "copyright"
+        ],
+        "back_matter": [
+          "后记",
+          "译后记",
+          "致谢",
+          "鸣谢",
+          "afterword",
+          "acknowledg"
+        ],
+        "dedication": [
+          "献给",
+          "谨以此书",
+          "献辞",
+          "dedicated to",
+          "dedication"
+        ]
+      },
+      "qc_sample_size": 8,
+      "qc_qmark_sample_size": 20
+    },
+    "evalgen": {
+      "seed": 20261025,
+      "window_min_chars": 600,
+      "window_max_chars": 900,
+      "include_appendix": false,
+      "combo_counts": {
+        "relation": 60,
+        "multihop": 70,
+        "plot": 60
+      },
+      "plot_min_chapter_gap": 5,
+      "plot_windows": 3,
+      "max_window_uses": 3,
+      "quote_min_chars": 6,
+      "quote_max_chars": 200,
+      "fuzzy_threshold": 90.0,
+      "copy_lcs_chars": 8,
+      "dup_jaccard": 0.8,
+      "answer_max_chars": 40,
+      "question_max_chars": 80,
+      "per_type_target": 30,
+      "copyright_max_substring": 20
+    },
+    "paths": {
+      "data_dir": "D:\\Project\\novel_rag\\data",
+      "cache_dir": "D:\\Project\\novel_rag\\data\\cache",
+      "results_dir": "D:\\Project\\novel_rag\\eval\\results",
+      "models_dir": "D:\\Project\\novel_rag\\models"
+    }
+  }
+}

@@ -62,6 +62,7 @@ class LLMConfig(_Frozen):
     base_url: str = "https://api.moonshot.cn/v1"
     api_key: SecretStr = SecretStr("")
     max_concurrency: int = 4
+    max_rpm: int | None = None  # 账户每分钟请求数上限（Kimi 最低等级为 3）；None 表示不节流，429 交给重试
     timeout: float = 120.0
     max_retries: int = 5  # 429 / 5xx / 网络错误的指数退避重试次数
     # 结构化输出：json_schema 由服务端按 schema 约束；json_object 只保证合法 JSON，schema 写进 prompt

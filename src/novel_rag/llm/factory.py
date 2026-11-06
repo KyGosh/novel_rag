@@ -13,7 +13,8 @@ from novel_rag.llm.usage import get_usage_tracker
 def _limiter():
     from novel_rag.llm.openai_chat import ConcurrencyLimiter
 
-    return ConcurrencyLimiter(get_settings().llm.max_concurrency)
+    s = get_settings().llm
+    return ConcurrencyLimiter(s.max_concurrency, s.max_rpm)
 
 
 @lru_cache(maxsize=1)
