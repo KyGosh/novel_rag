@@ -186,6 +186,8 @@ class IngestConfig(_Frozen):
     # 章节标题是人名（POV）的启发式：标题不超过 N 字，且在全系列中作为章节标题出现至少 M 次
     pov_title_max_len: int = 6
     pov_min_occurrences: int = 3
+    # txt 解析：标题行最长字数（不含句读）；更长的短行按正文段落处理
+    txt_title_max_len: int = 15
     # 去掉标题后正文少于该字数的章节视为空白页（只有标题或插图）
     blank_section_max_chars: int = 10
     # 写入 text.txt 的 section_type；其余（标题页、献词、前后辅文）只出现在质检报告中
