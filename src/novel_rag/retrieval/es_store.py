@@ -147,6 +147,10 @@ class ESChunkStore:
             if errors:
                 raise RuntimeError(f"ES 删除多余文档有 {len(errors)} 条失败，例：{errors[:2]}")
         self.client.indices.refresh(index=self.name)
+        # 覆盖写入会留下已删除文档，它们仍计入 BM25 的文档频率；合并成一个段后打分只取决于当前内容，
+        # 同一份 chunk 无论重建多少次分数都一样（评测可复现）
+        self.client.indices.forcemerge(index=self.name, max_num_segments=1)
+        self.client.indices.refresh(index=self.name)
         return {"indexed": int(ok), "deleted": len(stale), "count": self.count()}
 
     def count(self, flt: SearchFilter | None = None) -> int:
@@ -161,7 +165,9 @@ class ESChunkStore:
     def search(self, query: str, fields: Sequence[str], top_k: int, flt: SearchFilter) -> list[dict[str, Any]]:
         should = [{"match": {f: {"query": query, "boost": self.cfg.bm25_field_boosts.get(f, 1.0)}}} for f in fields]
         body = {"bool": {"should": should, "minimum_should_match": 1, "filter": flt.to_es_filter()}}
-        res = self.client.search(index=self.name, query=body, size=top_k)
+        # 同分时按 chunk_id 排，结果顺序确定；按 _score 排序时 ES 照常返回分数
+        sort = [{"_score": "desc"}, {"chunk_id": "asc"}]
+        res = self.client.search(index=self.name, query=body, size=top_k, sort=sort)
         return list(res["hits"]["hits"])
 
 

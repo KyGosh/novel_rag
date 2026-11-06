@@ -107,10 +107,16 @@ class FakeES:
 
             def refresh(self, index): ...
 
+            def forcemerge(self, index, max_num_segments):
+                outer.merged = max_num_segments
+
         self.indices = Indices()
+        self.merged = None
+        self.last_sort = None
 
     def search(self, index, query, size, sort=None, source=True, search_after=None):
         self.last_query = query
+        self.last_sort = sort
         if "terms" in query:  # _scan
             ids = sorted(i for i, d in self.docs.items() if d["book_id"] in query["terms"]["book_id"])
             if search_after is not None:
@@ -176,6 +182,9 @@ def test_bm25_retriever_applies_spoiler_filter_and_fields():
     assert [h.fields["reading_order"] for h in hits] == [0, 1] and [h.rank for h in hits] == [1, 2]
     assert {"range": {"reading_order": {"lte": 1}}} in es.last_query["bool"]["filter"]
     assert [list(s["match"])[0] for s in es.last_query["bool"]["should"]] == ["text", "text.bigram"]
+    # 可复现：同分按 chunk_id 排；同步后合并成单段，已删除文档不再影响 BM25 统计
+    assert es.last_sort == [{"_score": "desc"}, {"chunk_id": "asc"}]
+    assert es.merged == 1
     assert r.describe()["fields"] == ["text", "text.bigram"] and "total" in r.last_latency_ms
     with pytest.raises(ValueError):
         BM25Retriever(store, "jieba")
