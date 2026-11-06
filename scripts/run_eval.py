@@ -37,7 +37,8 @@ from novel_rag.retrieval.filters import SearchFilter
 
 
 def _books_with_chunks(books_dir: Path, version: str) -> list[str]:
-    return sorted(p.parent.parent.name for p in books_dir.glob(f"*/chunks/{version}/chunks.jsonl"))
+    # {books_dir}/{book_id}/chunks/{version}/chunks.jsonl
+    return sorted(p.parents[2].name for p in books_dir.glob(f"*/chunks/{version}/chunks.jsonl"))
 
 
 def main() -> int:
