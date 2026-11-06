@@ -87,6 +87,7 @@ def freeze(
     *,
     allow_pending: bool = False,
     draft: bool = False,
+    review_method: str | None = None,
 ) -> DatasetManifest:
     """draft=True：未校验的题也当作通过，用于在人工校验完成前跑通评测链路；草稿不能用于正式数字。"""
     cands = load_candidates(work)
@@ -122,6 +123,7 @@ def freeze(
     manifest = DatasetManifest(
         name=name,
         draft=draft,
+        review_method=review_method,
         books={book.book_id: book.text_sha256},
         counts={
             "total": len(chosen_items),

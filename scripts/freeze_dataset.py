@@ -26,6 +26,7 @@ def main() -> int:
     parser.add_argument("--dataset", required=True, help="评测集名称，同时是工作目录和输出目录的名字")
     parser.add_argument("--allow-pending", action="store_true")
     parser.add_argument("--draft", action="store_true", help="未校验的题也收录，输出到工作目录下的 draft/")
+    parser.add_argument("--review-method", help="校验方式说明，写入 manifest（例如谁预审、谁确认）")
     args = parser.parse_args()
 
     s = get_settings()
@@ -34,7 +35,16 @@ def main() -> int:
     out = work / "draft" if args.draft else s.paths.datasets_dir / args.dataset
     name = f"{args.dataset}_draft" if args.draft else args.dataset
     try:
-        manifest = freeze(book, s.evalgen, work, out, name, allow_pending=args.allow_pending, draft=args.draft)
+        manifest = freeze(
+            book,
+            s.evalgen,
+            work,
+            out,
+            name,
+            allow_pending=args.allow_pending,
+            draft=args.draft,
+            review_method=args.review_method,
+        )
     except FreezeError as e:
         print(f"冻结失败：{e}", file=sys.stderr)
         return 1
