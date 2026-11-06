@@ -99,6 +99,15 @@ class Reranker(ABC):
         """返回与 candidates 一一对应的相关性分数，越大越相关。"""
 
 
+class TokenCounter(ABC):
+    """按某个模型的 tokenizer 统计 token 数（用于分块的 token 预算检查）。"""
+
+    model_name: str
+
+    @abstractmethod
+    def count(self, texts: Sequence[str]) -> list[int]: ...
+
+
 class VisionModel(ABC):
     """插图理解（P5 再实现，届时选 Kimi 视觉模型或本地小模型）。"""
 

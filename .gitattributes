@@ -4,3 +4,5 @@ Dockerfile text eol=lf
 *.sh text eol=lf
 *.yml text eol=lf
 *.dic text eol=lf
+# 评测集的字节内容参与 manifest 指纹，保持 LF
+eval/datasets/** text eol=lf

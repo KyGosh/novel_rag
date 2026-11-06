@@ -41,12 +41,36 @@ def is_retryable(exc: BaseException) -> bool:
 
 
 class ConcurrencyLimiter:
-    """同一账户下所有任务共享的并发上限，同步和异步调用各自计数。"""
+    """同一账户下所有任务共享的并发上限，同步和异步调用各自计数；可选的每分钟请求数上限（滑动 60 秒窗口）。"""
 
-    def __init__(self, limit: int):
+    def __init__(self, limit: int, max_rpm: int | None = None):
         self.limit = limit
+        self.max_rpm = max_rpm
         self._sync = threading.BoundedSemaphore(limit)
         self._async: dict[int, asyncio.Semaphore] = {}
+        self._sent: list[float] = []  # 最近 60 秒内发出请求的时间戳
+        self._rate_lock = threading.Lock()
+
+    def _reserve(self, now: float) -> float:
+        """登记一次请求，返回需要先等待的秒数（0 表示可以立即发出）。"""
+        with self._rate_lock:
+            self._sent = [t for t in self._sent if now - t < 60]
+            if self.max_rpm is None or len(self._sent) < self.max_rpm:
+                self._sent.append(now)
+                return 0.0
+            start = self._sent[-self.max_rpm] + 60  # 窗口内第 max_rpm 早的请求满 60 秒后才能再发
+            self._sent.append(start)
+            return start - now
+
+    def wait_rate(self) -> None:
+        delay = self._reserve(time.monotonic())
+        if delay > 0:
+            time.sleep(delay)
+
+    async def await_rate(self) -> None:
+        delay = self._reserve(time.monotonic())
+        if delay > 0:
+            await asyncio.sleep(delay)
 
     @property
     def sync(self) -> threading.BoundedSemaphore:
@@ -161,6 +185,7 @@ class OpenAICompatChatModel(ChatModel):
     def _call(self, kwargs: dict[str, Any]) -> Any:
         for attempt in Retrying(**self._retrying()):
             with attempt, self.limiter.sync:
+                self.limiter.wait_rate()
                 return self._client.chat.completions.create(**kwargs)
 
     def chat(self, messages, *, schema=None, prompt_version=None) -> ChatResult:
@@ -189,6 +214,7 @@ class OpenAICompatChatModel(ChatModel):
         async for attempt in AsyncRetrying(**self._retrying()):
             with attempt:
                 async with self.limiter.async_sem():
+                    await self.limiter.await_rate()
                     return await self._async_client.chat.completions.create(**kwargs)
 
     async def achat(self, messages, *, schema=None, prompt_version=None) -> ChatResult:

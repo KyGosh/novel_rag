@@ -1,4 +1,6 @@
-"""本地 GPU 上的 bge-m3（Embedding）和 bge-reranker-v2-m3（Reranker）。整个项目只有本文件 import FlagEmbedding。
+"""本地 GPU 上的 bge-m3（Embedding）、bge-reranker-v2-m3（Reranker）与 tokenizer 计数。
+
+整个项目只有本文件 import FlagEmbedding / transformers。
 
 模型在进程内只加载一次（由 factory 保证单例），常驻显存。编码按 batch_size 分批，长文本批量编码时
 要按 8GB 显存调小 batch_size / max_length。
@@ -11,7 +13,7 @@ from collections.abc import Sequence
 import numpy as np
 
 from novel_rag.config import EmbeddingConfig, RerankerConfig
-from novel_rag.llm.base import Embedder, Reranker, l2_normalize
+from novel_rag.llm.base import Embedder, Reranker, TokenCounter, l2_normalize
 
 
 def _module_device(obj: object) -> str:
@@ -89,6 +91,22 @@ class BgeReranker(Reranker):
         if isinstance(scores, float | int):
             scores = [scores]
         return [float(s) for s in scores]
+
+
+class HFTokenCounter(TokenCounter):
+    """HuggingFace tokenizer（只加载 tokenizer，不占显存）。统计不含特殊符号的 token 数。"""
+
+    def __init__(self, model_name: str, load_from: str | None = None):
+        from transformers import AutoTokenizer
+
+        self.model_name = model_name
+        self._tok = AutoTokenizer.from_pretrained(load_from or model_name)
+
+    def count(self, texts: Sequence[str]) -> list[int]:
+        if not texts:
+            return []
+        enc = self._tok(list(texts), add_special_tokens=False)
+        return [len(ids) for ids in enc["input_ids"]]
 
 
 def gpu_info() -> dict[str, object]:

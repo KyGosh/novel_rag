@@ -1,0 +1,176 @@
+{
+  "name": "asoiaf_v0",
+  "books": {
+    "asoiaf-1": "202f6f3a1f81035d9980812a4276a36ade7b69ac711f825316f9b59337ef4780"
+  },
+  "counts": {
+    "total": 120,
+    "by_type": {
+      "fact": 30,
+      "relation": 30,
+      "multihop": 30,
+      "plot": 30
+    },
+    "by_source": {
+      "generated": 120
+    },
+    "by_split": {
+      "dev": 60,
+      "test": 60
+    },
+    "by_type_split": {
+      "fact/dev": 15,
+      "fact/test": 15,
+      "multihop/dev": 15,
+      "multihop/test": 15,
+      "plot/dev": 15,
+      "plot/test": 15,
+      "relation/dev": 15,
+      "relation/test": 15
+    },
+    "reserve": 64
+  },
+  "draft": false,
+  "review_method": "候选题由 Claude 在会话中出题；校验时 Claude 先逐题预审并给出建议（通过/修改/丢弃及理由），用户对照导出的原文证据文件逐批确认后写入校验日志。并非完全独立的人工校验。",
+  "created": "2026-11-06",
+  "generator": "claude-opus-5-5（会话内按出题规范生成）",
+  "guideline_version": "qgen_guidelines.v1",
+  "per_type_target": 30,
+  "candidates_files": {
+    "import_r1": "f4dcc9ec062aa35da2b79d61f9e95f94b187eda3f21d1def9b7cfe7cca31cbcb",
+    "import_r2": "586ccb7ea725bade3b513bfa877ae9f707796752d2fcbc945b59cc30b59885b0"
+  },
+  "import_stats": {
+    "import_r1": {
+      "questions": 73,
+      "ok": 73,
+      "by_type": {
+        "fact": {
+          "ok": 73
+        }
+      },
+      "locate": {
+        "exact": 87
+      },
+      "drop_reasons": {},
+      "flags": {}
+    },
+    "import_r2": {
+      "questions": 122,
+      "ok": 122,
+      "by_type": {
+        "multihop": {
+          "ok": 40
+        },
+        "plot": {
+          "ok": 44
+        },
+        "relation": {
+          "ok": 38
+        }
+      },
+      "locate": {
+        "exact": 262
+      },
+      "drop_reasons": {},
+      "flags": {
+        "copy": 1
+      }
+    }
+  },
+  "review_stats": {
+    "overall": {
+      "total": 195,
+      "reviewed": 195,
+      "accepted": 171,
+      "edited": 13,
+      "dropped": 11,
+      "pending": 0,
+      "pass_rate": 0.944,
+      "edit_rate": 0.071,
+      "drop_reasons": {
+        "duplicate": 3,
+        "weak_evidence": 1,
+        "wrong_type": 5,
+        "ambiguous": 2
+      }
+    },
+    "by_type": {
+      "fact": {
+        "total": 73,
+        "reviewed": 73,
+        "accepted": 71,
+        "edited": 2,
+        "dropped": 0,
+        "pending": 0,
+        "pass_rate": 1.0,
+        "edit_rate": 0.027,
+        "drop_reasons": {}
+      },
+      "multihop": {
+        "total": 40,
+        "reviewed": 40,
+        "accepted": 37,
+        "edited": 2,
+        "dropped": 1,
+        "pending": 0,
+        "pass_rate": 0.975,
+        "edit_rate": 0.051,
+        "drop_reasons": {
+          "duplicate": 1
+        }
+      },
+      "plot": {
+        "total": 44,
+        "reviewed": 44,
+        "accepted": 30,
+        "edited": 4,
+        "dropped": 10,
+        "pending": 0,
+        "pass_rate": 0.773,
+        "edit_rate": 0.118,
+        "drop_reasons": {
+          "weak_evidence": 1,
+          "wrong_type": 5,
+          "ambiguous": 2,
+          "duplicate": 2
+        }
+      },
+      "relation": {
+        "total": 38,
+        "reviewed": 38,
+        "accepted": 33,
+        "edited": 5,
+        "dropped": 0,
+        "pending": 0,
+        "pass_rate": 1.0,
+        "edit_rate": 0.132,
+        "drop_reasons": {}
+      }
+    },
+    "by_source": {
+      "generated": {
+        "total": 195,
+        "reviewed": 195,
+        "accepted": 171,
+        "edited": 13,
+        "dropped": 11,
+        "pending": 0,
+        "pass_rate": 0.944,
+        "edit_rate": 0.071,
+        "drop_reasons": {
+          "duplicate": 3,
+          "weak_evidence": 1,
+          "wrong_type": 5,
+          "ambiguous": 2
+        }
+      }
+    }
+  },
+  "evidence_spans": {
+    "total": 225,
+    "distinct": 204,
+    "shared_by_multiple_items": 19
+  },
+  "chapter_coverage": 71
+}

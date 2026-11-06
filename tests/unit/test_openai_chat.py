@@ -151,3 +151,11 @@ async def test_async_chat_with_retry_and_schema():
     m, comps, _ = _model([_conn_error(), _resp('{"city": "a", "count": 1}')], is_async=True)
     r = await m.achat([{"role": "user", "content": "q"}], schema=Answer)
     assert r.parsed.city == "a" and len(comps.requests) == 2
+
+
+def test_rpm_limiter_spaces_requests_in_sliding_window():
+    lim = ConcurrencyLimiter(4, max_rpm=3)
+    assert [lim._reserve(t) for t in (0.0, 1.0, 2.0)] == [0.0, 0.0, 0.0]
+    assert lim._reserve(3.0) == pytest.approx(57.0)  # 第 4 次要等第 1 次满 60 秒
+    assert lim._reserve(3.5) == pytest.approx(57.5)  # 第 5 次排在第 2 次之后
+    assert ConcurrencyLimiter(4)._reserve(0.0) == 0.0  # 不设上限时不节流
