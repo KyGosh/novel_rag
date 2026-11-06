@@ -1,4 +1,5 @@
-"""检索过滤条件的统一定义。防剧透（max_reading_order）等条件在这里拼装，ES（P2）、Neo4j（P3）沿用同一个定义。"""
+"""检索过滤条件的统一定义。防剧透（max_reading_order）等条件在这里拼装，Milvus、ES、内存复核共用，
+Neo4j（P3）沿用同一个定义。"""
 
 from __future__ import annotations
 
@@ -28,6 +29,19 @@ class SearchFilter:
         if self.chunk_types is not None:
             parts.append(f"chunk_type in {json.dumps(list(self.chunk_types), ensure_ascii=False)}")
         return " and ".join(parts)
+
+    def to_es_filter(self) -> list[dict]:
+        """ES bool 查询的 filter 子句列表（不参与打分）；没有任何条件时返回空列表。"""
+        clauses: list[dict] = []
+        if self.book_ids is not None:
+            clauses.append({"terms": {"book_id": list(self.book_ids)}})
+        if self.max_reading_order is not None:
+            clauses.append({"range": {"reading_order": {"lte": int(self.max_reading_order)}}})
+        if self.section_types is not None:
+            clauses.append({"terms": {"section_type": list(self.section_types)}})
+        if self.chunk_types is not None:
+            clauses.append({"terms": {"chunk_type": list(self.chunk_types)}})
+        return clauses
 
     def accepts(self, fields: dict) -> bool:
         """在内存中判断一条记录是否满足条件（用于 mock 检索器和结果复核）。"""

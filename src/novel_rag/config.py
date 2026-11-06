@@ -106,13 +106,25 @@ class RerankerConfig(_Frozen):
 
 
 class RetrievalConfig(_Frozen):
-    """检索漏斗参数（BM25 / RRF / rerank 在 P2 起使用）。"""
+    """检索漏斗参数：各路召回 → RRF 融合 → rerank → small-to-big 扩展 → 按 token 预算装箱。
 
+    默认值即"固定流程 RAG"的基线配置，由 P2 消融表 v1 选定（见 progress.md）。
+    """
+
+    routes: tuple[str, ...] = ("bm25", "vector")  # 参与融合的检索路
     bm25_top_k: int = 50
     vector_top_k: int = 50
     rrf_k: int = 60
     fusion_top_k: int = 40
-    rerank_top_k: int = 8
+    rerank: bool = True
+    rerank_candidates: int = 40  # 融合结果的前多少个送 reranker；其余按融合顺序接在后面
+    rerank_top_k: int = 8  # 进入 LLM 上下文的块数上限
+    expand_window: int = 1  # small-to-big：命中块扩展到同章 seq ± window；0 表示不扩展
+    context_token_budget: int = 4000  # 送进 LLM 的上下文 token 预算
+    # BM25：ik = 只用 IK 分词字段；ik_bigram = 再加 CJK 二元切分子字段（人名被 IK 切碎时的通用补救）
+    bm25_scheme: Literal["ik", "ik_bigram"] = "ik"
+    bm25_field_boosts: dict[str, float] = Field(default_factory=lambda: {"text": 1.0, "text.bigram": 1.0})
+    es_bulk_batch: int = 500
     # Milvus HNSW 索引与搜索参数
     hnsw_m: int = 16
     hnsw_ef_construction: int = 200
@@ -143,6 +155,13 @@ class EvalConfig(_Frozen):
     relevance_min_chars: int = 50
     ks: tuple[int, ...] = (5, 10, 20)
     generate_top_k: int = 6  # 最简生成取前几个 chunk
+    # 固定 token 预算下的证据覆盖率：上下文（扩展、装箱后）在这些预算内覆盖了多少金标证据
+    token_budgets: tuple[int, ...] = (2000, 4000, 8000)
+    context_pool: int = 40  # 装箱时可用的检索结果数（排名指标只看前 max(ks) 个）
+    # 置信区间：按题目做 bootstrap 重采样（配置之间做配对比较）
+    bootstrap_samples: int = 2000
+    bootstrap_seed: int = 20261106
+    ci_level: float = 0.95
 
 
 class SectionKeywords(_Frozen):
