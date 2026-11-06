@@ -119,7 +119,10 @@ class RetrievalConfig(_Frozen):
     rerank: bool = True
     rerank_candidates: int = 40  # 融合结果的前多少个送 reranker；其余按融合顺序接在后面
     rerank_top_k: int = 8  # 进入 LLM 上下文的块数上限
-    expand_window: int = 1  # small-to-big：命中块扩展到同章 seq ± window；0 表示不扩展
+    # small-to-big：命中块扩展到同章 seq ± window；0 表示不扩展。
+    # 消融表 v1：固定 token 预算下扩展 ±1 让 cov@4000 显著下降（邻块挤占预算），固定流程默认不扩展；
+    # 按需读上下文留给 P4 Agent 的工具
+    expand_window: int = 0
     context_token_budget: int = 4000  # 送进 LLM 的上下文 token 预算
     # BM25：ik = 只用 IK 分词字段；ik_bigram = 再加 CJK 二元切分子字段（人名被 IK 切碎时的通用补救）
     bm25_scheme: Literal["ik", "ik_bigram"] = "ik"
