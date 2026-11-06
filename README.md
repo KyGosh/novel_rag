@@ -16,5 +16,5 @@ docker compose up -d elasticsearch neo4j milvus
 uv sync                           # torch 从 PyTorch cu130 索引安装
 uv run pytest                     # 单测（Fake 实现，不依赖外部服务）
 uv run python scripts/check_env.py   # 环境冒烟检查
-uv run pytest -m integration      # 集成测试（需要 docker、GPU、Kimi key）
+uv run pytest -m integration      # 集成测试（需要 docker、GPU、可用的 LLM 接口）
 ```

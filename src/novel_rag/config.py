@@ -44,29 +44,32 @@ class LLMTaskConfig(_Frozen):
     model: str
     temperature: float | None = None
     max_tokens: int | None = None
-    # 厂商专属参数原样透传，例如 Kimi 的 {"thinking": {"type": "disabled"}}
+    # 厂商专属参数原样透传，例如 DeepSeek（WorkBuddy 代理）关闭思考的 {"reasoning_effort": "none"}
     extra_body: dict[str, Any] = Field(default_factory=dict)
 
 
 def _default_tasks() -> dict[str, LLMTaskConfig]:
-    no_thinking = {"thinking": {"type": "disabled"}}
+    model = "workbuddy/deepseek-v4.1-flash"
+    # 代理只认顶层 reasoning_effort；reasoning.effort、thinking.type 都会被忽略（2026-11-06 实测）
+    no_thinking = {"reasoning_effort": "none"}
     return {
-        "extraction": LLMTaskConfig(model="kimi-k2.6", extra_body=no_thinking),
-        "generation": LLMTaskConfig(model="kimi-k2.6", extra_body=no_thinking),
-        "judge": LLMTaskConfig(model="kimi-k2.6", extra_body=no_thinking),
-        "smoke": LLMTaskConfig(model="kimi-k2.6", max_tokens=256, extra_body=no_thinking),
+        "extraction": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "generation": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "judge": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "smoke": LLMTaskConfig(model=model, max_tokens=256, extra_body=no_thinking),
     }
 
 
 class LLMConfig(_Frozen):
-    base_url: str = "https://api.moonshot.cn/v1"
+    base_url: str = "http://127.0.0.1:3425/v1"  # 本地 WorkBuddy 代理（OpenAI 兼容），转发到 DeepSeek
     api_key: SecretStr = SecretStr("")
     max_concurrency: int = 4
-    max_rpm: int | None = None  # 账户每分钟请求数上限（Kimi 最低等级为 3）；None 表示不节流，429 交给重试
+    max_rpm: int | None = None  # 账户每分钟请求数上限（例如 Kimi 最低等级为 3）；None 表示不节流，429 交给重试
     timeout: float = 120.0
     max_retries: int = 5  # 429 / 5xx / 网络错误的指数退避重试次数
-    # 结构化输出：json_schema 由服务端按 schema 约束；json_object 只保证合法 JSON，schema 写进 prompt
-    structured_mode: Literal["json_schema", "json_object"] = "json_schema"
+    # 结构化输出：json_schema 由服务端按 schema 约束；json_object 只保证合法 JSON，schema 写进 prompt。
+    # DeepSeek 代理会静默忽略 json_schema（照常返回纯文本），所以默认用 json_object
+    structured_mode: Literal["json_schema", "json_object"] = "json_object"
     structured_max_attempts: int = 3  # pydantic 校验失败后的重新请求次数（含首次）
     cache_enabled: bool = True
     tasks: dict[str, LLMTaskConfig] = Field(default_factory=_default_tasks)
