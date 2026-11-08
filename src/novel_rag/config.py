@@ -54,6 +54,8 @@ def _default_tasks() -> dict[str, LLMTaskConfig]:
     no_thinking = {"reasoning_effort": "none"}
     return {
         "extraction": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "summary": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "disambiguation": LLMTaskConfig(model=model, extra_body=no_thinking),
         "generation": LLMTaskConfig(model=model, extra_body=no_thinking),
         "judge": LLMTaskConfig(model=model, extra_body=no_thinking),
         "smoke": LLMTaskConfig(model=model, max_tokens=256, extra_body=no_thinking),
@@ -127,6 +129,12 @@ class RetrievalConfig(_Frozen):
     # BM25：ik = 只用 IK 分词字段；ik_bigram = 再加 CJK 二元切分子字段（人名被 IK 切碎时的通用补救）
     bm25_scheme: Literal["ik", "ik_bigram"] = "ik"
     bm25_field_boosts: dict[str, float] = Field(default_factory=lambda: {"text": 1.0, "text.bigram": 1.0})
+    # ES 分析方案版本：es1 = IK 默认词典；es2 = 回灌人名词典后重建（P3，消融表 v2 判定"不变差"后设为默认）。
+    # IK 词典是全局的，回灌后 es1 的查询端分词也会变，es1 的对比数字以回灌前的运行为准
+    es_analysis_version: str = "es2"
+    # P3 新增的两路（只在 routes 里列出时启用）：摘要定位一路、图谱第三路
+    summary_locate_top_k: int = 50
+    graph_top_k: int = 50
     es_bulk_batch: int = 500
     # Milvus HNSW 索引与搜索参数
     hnsw_m: int = 16
@@ -228,6 +236,59 @@ class EvalGenConfig(_Frozen):
     # 冻结
     per_type_target: int = 30
     copyright_max_substring: int = 20  # 问题和答案中不得出现原文中这么长的连续片段
+    # ---- 评测集 v1（多卷，P3 B 线；规范见 prompts/qgen_guidelines.v2.md）----
+    v1_fact_windows: int = 80  # 第一轮出事实题的窗口数（按卷分层抽取）
+    v1_combo_counts: dict[str, int] = Field(
+        default_factory=lambda: {"relation": 130, "multihop": 130, "plot": 120}
+    )  # 第二轮任务数（按 v0 的丢弃率估算，冻结目标为各 100 题）
+    v1_targets: dict[str, int] = Field(
+        default_factory=lambda: {"fact": 60, "relation": 100, "multihop": 100, "plot": 100}
+    )
+    cross_volume_ratio: float = 0.3  # 组合题中来自不同卷窗口的任务比例下限
+
+
+class SummaryConfig(_Frozen):
+    """章节摘要（P3 C 线）：生成、校验与摘要索引。"""
+
+    jobs_in_flight: int = 16  # 同时在途的章节数；实际 LLM 并发仍受 llm.max_concurrency 限制
+    target_min_chars: int = 300  # 摘要长度目标（只统计，不拒收）
+    target_max_chars: int = 500
+    # 摘要索引：ES 与 Milvus 各一份，带 book_id / chapter_idx / reading_order / pov，防剧透按 reading_order 过滤
+    bm25_top_k: int = 30
+    vector_top_k: int = 30
+    rrf_k: int = 60
+    # "摘要定位"实验：先检索摘要取前 N 章，再在这些章内检索 chunk
+    locate_top_chapters: int = 5
+    summary_version: str | None = None  # None = 取最近生成的摘要版本
+
+
+class KGConfig(_Frozen):
+    """知识图谱（P3 A 线）：抽取、消歧、导出与查询的参数。"""
+
+    # 抽取
+    jobs_in_flight: int = 32
+    context_chars: int = 200  # 本 chunk 之前提供多少字的上文（仅供判断指代）
+    evidence_fuzzy_threshold: float = 90.0  # 关系 / 别名证据引文的模糊定位阈值（rapidfuzz 0–100）
+    # 消歧
+    split_min_mentions: int = 6  # 同名簇至少有这么多提及才做"是否同名不同人"的拆分检查
+    split_max_descriptions: int = 40  # 拆分检查时交给 LLM 的去重描述上限
+    candidate_top_k: int = 5  # 每个簇按向量相似度取前 K 个候选
+    candidate_min_sim: float = 0.80  # 名称 + 描述向量的余弦相似度下限
+    auto_merge_sim: float = 0.97  # 规则直接合并的相似度（还要求同类型、名字有共同片段、群体不冲突）
+    alias_merge_min_support: float = 0.1  # 别名陈述合并：陈述数至少是目标簇提及数的这个比例
+    short_link_min_ratio: float = 0.05  # 简称"全书主导"链接：候选的全名提及数至少是简称簇大小的这个比例
+    judge_max_pairs: int = 3000  # LLM 判定的候选对上限
+    judge_evidence_quotes: int = 3  # 判定时每个实体附几条证据引文
+    min_entity_mentions: int = 1  # 少于这么多提及的实体不入图（1 = 全部入图）
+    # Neo4j 写入与查询
+    neo4j_batch: int = 1000
+    query_timeout_s: float = 5.0
+    query_max_limit: int = 50  # 所有模板的 LIMIT 上限
+    default_limit: int = 20
+    path_max_hops: int = 3
+    # 图谱第三路取证据的层级：0 关系 / 1 +路径 / 2 +主要关系 / 3 +高频提及。消融表 v2：tier 1 从不变差、tier 3 略降
+    route_max_tier: int = 1
+    output_max_chars: int = 4000  # 模板输出转文本的长度上限
 
 
 class PathsConfig(_Frozen):
@@ -290,6 +351,8 @@ class Settings(BaseSettings):
     eval: EvalConfig = EvalConfig()
     ingest: IngestConfig = IngestConfig()
     evalgen: EvalGenConfig = EvalGenConfig()
+    summary: SummaryConfig = SummaryConfig()
+    kg: KGConfig = KGConfig()
     paths: PathsConfig = PathsConfig()
 
     def snapshot(self) -> dict[str, Any]:

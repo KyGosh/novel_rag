@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -164,6 +165,28 @@ def write_chunks(out_dir: Path, chunks: list[dict[str, Any]], manifest: dict[str
     (out_dir / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline=""
     )
+
+
+def series_book_ids(books_dir: Path, version: str) -> list[str]:
+    """该分块版本下已切分的全部卷，按 book_id 排序（{books_dir}/{book_id}/chunks/{version}/chunks.jsonl）。"""
+    return sorted(p.parents[2].name for p in books_dir.glob(f"*/chunks/{version}/chunks.jsonl"))
+
+
+def load_books(
+    books_dir: Path, book_ids: Sequence[str], version: str
+) -> tuple[dict[str, BookText], list[dict[str, Any]]]:
+    """加载若干卷的定稿正文与 chunk，并检查 chunk 是在当前 text.txt 上切出来的。chunk 按卷序、章序、seq 排列。"""
+    books: dict[str, BookText] = {}
+    chunks: list[dict[str, Any]] = []
+    for b in book_ids:
+        book = BookText.load(books_dir / b)
+        cs, manifest = load_chunks(chunks_dir(books_dir, b, version))
+        if manifest["text_sha256"] != book.text_sha256:
+            raise ChunkingError(f"{b} 的 chunks 与当前 text.txt 不一致，请重新运行 scripts/chunk.py")
+        books[b] = book
+        chunks.extend(cs)
+    chunks.sort(key=lambda c: (c["reading_order"], c["seq"]))
+    return books, chunks
 
 
 def load_chunks(out_dir: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:

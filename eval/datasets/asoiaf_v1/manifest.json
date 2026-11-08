@@ -1,0 +1,216 @@
+{
+  "name": "asoiaf_v1",
+  "books": {
+    "asoiaf-1": "202f6f3a1f81035d9980812a4276a36ade7b69ac711f825316f9b59337ef4780",
+    "asoiaf-2": "6f9c2a0fa3d39b3cbcfbc9bd0aecf78c3d6533f9992e616bfab816564cfb4b36",
+    "asoiaf-3": "5e1f976f8f953ed17f24bd79e0eaa518e4169dfc92b12b66019e08a5e25caef3",
+    "asoiaf-4": "6930005452dacf122323133788b16eea6b072b50234595983f09c341ad1747b9",
+    "asoiaf-5": "8205202c5e56e7cbf45483b2da74e3c1eee9a3ca9a759e8a9d104fcdcd720509"
+  },
+  "counts": {
+    "total": 282,
+    "by_type": {
+      "fact": 60,
+      "relation": 66,
+      "multihop": 88,
+      "plot": 68
+    },
+    "by_split": {
+      "dev": 141,
+      "test": 141
+    },
+    "by_type_split": {
+      "fact/dev": 30,
+      "fact/test": 30,
+      "multihop/dev": 44,
+      "multihop/test": 44,
+      "plot/dev": 34,
+      "plot/test": 34,
+      "relation/dev": 33,
+      "relation/test": 33
+    },
+    "reserve": 18,
+    "cross_volume_evidence": {
+      "combo_items": 222,
+      "cross_volume": 93
+    },
+    "by_last_volume": {
+      "asoiaf-1": 51,
+      "asoiaf-5": 69,
+      "asoiaf-3": 74,
+      "asoiaf-2": 60,
+      "asoiaf-4": 28
+    }
+  },
+  "created": "2026-11-08",
+  "generator": "claude-opus-5-5（会话内按出题规范 v2 生成）",
+  "guideline_version": "qgen_guidelines.v2",
+  "review_method": "自动校验（证据定位、预筛、重复检测、版权片段检查）+ Claude 独立复核（只看问题、答案和证据原文），未经人工复核",
+  "human_reviewed": false,
+  "review_note": "自动校验 + 模型复核（Claude 独立复核），未经人工复核；使用 v1 数字的报告都要注明这一点",
+  "targets": {
+    "fact": 60,
+    "relation": 100,
+    "multihop": 100,
+    "plot": 100
+  },
+  "candidates_files": {
+    "import_r1": "42b2b3b6c6eaabed51505444cd1b6137777efc88a7181ac75fc995e2ec362236",
+    "import_r2": "de4796019b217a4bf7b628b8cc751d28ccd78cda6c850ac96d4da102d6a7c7d2"
+  },
+  "import_stats": {
+    "import_r1": {
+      "round": 1,
+      "candidates_file_sha256": "42b2b3b6c6eaabed51505444cd1b6137777efc88a7181ac75fc995e2ec362236",
+      "tasks_total": 344,
+      "tasks_answered": 344,
+      "questions": 80,
+      "ok": 80,
+      "by_type": {
+        "fact": {
+          "ok": 80
+        }
+      },
+      "cross_volume_ok": 0,
+      "locate": {
+        "exact": 96
+      },
+      "drop_reasons": {},
+      "flags": {},
+      "issues": []
+    },
+    "import_r2": {
+      "round": 2,
+      "candidates_file_sha256": "de4796019b217a4bf7b628b8cc751d28ccd78cda6c850ac96d4da102d6a7c7d2",
+      "tasks_total": 380,
+      "tasks_answered": 380,
+      "questions": 343,
+      "ok": 343,
+      "by_type": {
+        "multihop": {
+          "ok": 100
+        },
+        "plot": {
+          "ok": 107
+        },
+        "relation": {
+          "ok": 136
+        }
+      },
+      "cross_volume_ok": 216,
+      "locate": {
+        "exact": 621
+      },
+      "drop_reasons": {},
+      "flags": {},
+      "issues": []
+    }
+  },
+  "review_stats": {
+    "overall": {
+      "total": 423,
+      "reviewed": 423,
+      "accepted": 280,
+      "edited": 20,
+      "dropped": 123,
+      "pending": 0,
+      "pass_rate": 0.709,
+      "edit_rate": 0.067,
+      "drop_reasons": {
+        "wrong_type": 76,
+        "weak_evidence": 36,
+        "duplicate": 2,
+        "ambiguous": 8,
+        "too_easy": 1
+      }
+    },
+    "by_type": {
+      "fact": {
+        "total": 80,
+        "reviewed": 80,
+        "accepted": 75,
+        "edited": 3,
+        "dropped": 2,
+        "pending": 0,
+        "pass_rate": 0.975,
+        "edit_rate": 0.038,
+        "drop_reasons": {
+          "wrong_type": 1,
+          "weak_evidence": 1
+        }
+      },
+      "multihop": {
+        "total": 100,
+        "reviewed": 100,
+        "accepted": 82,
+        "edited": 6,
+        "dropped": 12,
+        "pending": 0,
+        "pass_rate": 0.88,
+        "edit_rate": 0.068,
+        "drop_reasons": {
+          "weak_evidence": 7,
+          "ambiguous": 2,
+          "too_easy": 1,
+          "wrong_type": 1,
+          "duplicate": 1
+        }
+      },
+      "plot": {
+        "total": 107,
+        "reviewed": 107,
+        "accepted": 62,
+        "edited": 6,
+        "dropped": 39,
+        "pending": 0,
+        "pass_rate": 0.636,
+        "edit_rate": 0.088,
+        "drop_reasons": {
+          "wrong_type": 17,
+          "weak_evidence": 17,
+          "ambiguous": 5
+        }
+      },
+      "relation": {
+        "total": 136,
+        "reviewed": 136,
+        "accepted": 61,
+        "edited": 5,
+        "dropped": 70,
+        "pending": 0,
+        "pass_rate": 0.485,
+        "edit_rate": 0.076,
+        "drop_reasons": {
+          "duplicate": 1,
+          "weak_evidence": 11,
+          "wrong_type": 57,
+          "ambiguous": 1
+        }
+      }
+    },
+    "by_source": {
+      "generated": {
+        "total": 423,
+        "reviewed": 423,
+        "accepted": 280,
+        "edited": 20,
+        "dropped": 123,
+        "pending": 0,
+        "pass_rate": 0.709,
+        "edit_rate": 0.067,
+        "drop_reasons": {
+          "wrong_type": 76,
+          "weak_evidence": 36,
+          "duplicate": 2,
+          "ambiguous": 8,
+          "too_easy": 1
+        }
+      }
+    }
+  },
+  "evidence_spans": {
+    "total": 488,
+    "distinct": 383
+  },
+  "chapter_coverage": 232
+}

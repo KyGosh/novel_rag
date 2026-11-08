@@ -151,6 +151,17 @@ def test_prefilter_helpers():
         "evidence": [{"window_id": "w1", "chapter_idx": 1}, {"window_id": "w1", "chapter_idx": 1}],
     }
     assert hard_reasons(multi) == ["single_window"]
+    same_ch = {**multi, "evidence": [{"window_id": "w1", "chapter_idx": 1}, {"window_id": "w2", "chapter_idx": 1}]}
+    assert hard_reasons(same_ch) == ["single_chapter"]
+    # 跨卷：两卷的章号相同也算两个章节
+    cross = {
+        **multi,
+        "evidence": [
+            {"window_id": "v1w1", "book_id": "b1", "chapter_idx": 3},
+            {"window_id": "v2w1", "book_id": "b2", "chapter_idx": 3},
+        ],
+    }
+    assert hard_reasons(cross) == []
 
 
 # ---------------------------------------------------------------- 导出与导入
