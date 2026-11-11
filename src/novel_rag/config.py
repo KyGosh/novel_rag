@@ -280,6 +280,10 @@ class KGConfig(_Frozen):
     judge_max_pairs: int = 3000  # LLM 判定的候选对上限
     judge_evidence_quotes: int = 3  # 判定时每个实体附几条证据引文
     min_entity_mentions: int = 1  # 少于这么多提及的实体不入图（1 = 全部入图）
+    # 人物类别判定（P3.1）与常用词名字
+    category_batch_size: int = 40  # 每次 LLM 调用判定的实体数
+    category_max_descriptions: int = 6  # 每个实体交给判定的描述条数（按出现次数取最多的）
+    weak_name_min_linked_ratio: float = 0.5  # 常用词写法被抽取为提及的次数 / 原文出现次数低于此值 → 弱名字
     # Neo4j 写入与查询
     neo4j_batch: int = 1000
     query_timeout_s: float = 5.0
@@ -308,6 +312,11 @@ class PathsConfig(_Frozen):
     @property
     def reports_dir(self) -> Path:
         return self.data_dir / "reports"
+
+    @property
+    def common_words_file(self) -> Path:
+        """常用词表（IK 自带主词典的副本，从 ES 容器导出，见 scripts/build_kg.py）；不存在时不做常用词判定。"""
+        return self.data_dir / "lexicon" / "ik_main.dic"
 
     @property
     def embedding_cache_dir(self) -> Path:

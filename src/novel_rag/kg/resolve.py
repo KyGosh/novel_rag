@@ -35,7 +35,7 @@ from novel_rag.kg.schema import ENTITY_LABELS, ORG, PERSON, TITLE
 from novel_rag.llm.base import ChatModel, Embedder
 from novel_rag.prompts import Prompt
 
-RESOLVE_VERSION = "kg-resolve-9"
+RESOLVE_VERSION = "kg-resolve-10"  # 10：消歧之后增加人物类别判定与关系清洗（P3.1）
 
 
 def squash(s: str) -> str:
@@ -100,10 +100,12 @@ class JudgeOut(BaseModel):
 
 @dataclass
 class Overrides:
-    """aliases.toml：[[merge]] names = ["甲", "乙"]（同类型、按规范名找簇）；[[alias]] name = "甲" aliases = [...]。"""
+    """aliases.toml：[[merge]] names = ["甲", "乙"]（同类型、按规范名找簇）；[[alias]] name = "甲" aliases = [...]；
+    [[category]] name = "甲"（规范名或实体 ID）category = "人" / "动物" / "非角色"（纠正人物类别判定）。"""
 
     merges: list[list[str]] = field(default_factory=list)
     aliases: dict[str, list[str]] = field(default_factory=dict)
+    categories: dict[str, str] = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: Path) -> Overrides:
@@ -112,7 +114,8 @@ class Overrides:
         raw = tomllib.loads(path.read_text(encoding="utf-8"))
         merges = [list(x["names"]) for x in raw.get("merge", [])]
         aliases = {x["name"]: list(x["aliases"]) for x in raw.get("alias", [])}
-        return cls(merges, aliases)
+        categories = {x["name"]: str(x["category"]) for x in raw.get("category", [])}
+        return cls(merges, aliases, categories)
 
 
 class Resolver:

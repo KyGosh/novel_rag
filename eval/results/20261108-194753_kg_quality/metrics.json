@@ -1,0 +1,149 @@
+{
+  "created": "2026-11-08T19:47:53",
+  "git": {
+    "commit": "839097cf8d945d5734f1d9c94112dd99ec97f7e5",
+    "branch": "p3-kg",
+    "dirty": false
+  },
+  "kg_version": "d9c84c78",
+  "extract_version": "19870d24",
+  "seed": 20261107,
+  "extraction": {
+    "chunks": 22,
+    "entity": {
+      "tp": 243,
+      "fp": 47,
+      "fn": 21,
+      "precision": 0.838,
+      "recall": 0.92
+    },
+    "relation": {
+      "tp": 63,
+      "fp": 26,
+      "fn": 15,
+      "precision": 0.708,
+      "recall": 0.808
+    }
+  },
+  "disambiguation": {
+    "mentions_labeled": 285,
+    "mentions_scored": 279,
+    "mentions_unmapped_by_system": 6,
+    "gold_entities": 46,
+    "pairwise": {
+      "precision": 0.913,
+      "recall": 0.853,
+      "f1": 0.882
+    },
+    "b_cubed": {
+      "precision": 0.936,
+      "recall": 0.875,
+      "f1": 0.905
+    },
+    "errors": [
+      {
+        "mid": "asoiaf-1:0009:0005#3",
+        "gold": "布兰·史塔克",
+        "system": "asoiaf:person:布兰登"
+      },
+      {
+        "mid": "asoiaf-3:0016:0007#6",
+        "gold": "布兰登（珊莎设想的儿子）",
+        "system": "asoiaf:person:布兰登"
+      },
+      {
+        "mid": "asoiaf-5:0027:0022#10",
+        "gold": "伊耿（小格里芬）",
+        "system": "asoiaf:person:伊耿"
+      },
+      {
+        "mid": "asoiaf-5:0005:0012#0",
+        "gold": "伊耿四世",
+        "system": "asoiaf:person:伊耿"
+      },
+      {
+        "mid": "asoiaf-4:0035:0001#9",
+        "gold": "伊耿（雷加之子）",
+        "system": "asoiaf:person:伊耿"
+      },
+      {
+        "mid": "asoiaf-5:0027:0008#10",
+        "gold": "伊耿（小格里芬）",
+        "system": "asoiaf:person:伊耿"
+      },
+      {
+        "mid": "asoiaf-2:0048:0007#0",
+        "gold": "伊耿（雷加之子）",
+        "system": "asoiaf:person:伊耿"
+      },
+      {
+        "mid": "asoiaf-5:0032:0017#1",
+        "gold": "臭佬（拉姆斯的仆人）",
+        "system": "asoiaf:person:席恩·葛雷乔伊"
+      },
+      {
+        "mid": "asoiaf-5:0046:0006#8",
+        "gold": "拉姆斯·波顿",
+        "system": "asoiaf:person:席恩·葛雷乔伊"
+      },
+      {
+        "mid": "asoiaf-2:0050:0009#8",
+        "gold": "拉姆斯·波顿",
+        "system": "asoiaf:person:席恩·葛雷乔伊"
+      },
+      {
+        "mid": "asoiaf-2:0035:0006#7",
+        "gold": "拉姆斯·波顿",
+        "system": "asoiaf:person:席恩·葛雷乔伊"
+      },
+      {
+        "mid": "asoiaf-2:0066:0016#8",
+        "gold": "拉姆斯·波顿",
+        "system": "asoiaf:person:席恩·葛雷乔伊"
+      },
+      {
+        "mid": "asoiaf-4:0046:0040#13",
+        "gold": "艾莉亚·史塔克",
+        "system": "asoiaf:person:艾莉亚·史塔克|嫁拉姆斯"
+      },
+      {
+        "mid": "asoiaf-5:0028:0009#16",
+        "gold": "珍妮·普尔（假艾莉亚）",
+        "system": "asoiaf:person:艾利亚·史塔克"
+      }
+    ]
+  },
+  "relation_evidence": {
+    "n": 100,
+    "verdicts": {
+      "partial": 35,
+      "unsupported": 28,
+      "supported": 37
+    },
+    "support_rate": 0.37,
+    "support_rate_incl_partial": 0.72,
+    "by_evidence_count": {
+      "n_evidence=1": {
+        "n": 76,
+        "verdicts": {
+          "partial": 29,
+          "unsupported": 24,
+          "supported": 23
+        },
+        "support_rate": 0.303,
+        "support_rate_incl_partial": 0.684
+      },
+      "n_evidence>=2": {
+        "n": 24,
+        "verdicts": {
+          "supported": 14,
+          "partial": 6,
+          "unsupported": 4
+        },
+        "support_rate": 0.583,
+        "support_rate_incl_partial": 0.833
+      }
+    }
+  },
+  "review": "Claude 预标 + 用户核对（2026-11-08，四张核对表逐条看过，未改动任何预标；按现行 schema，有名字的动物伙伴计为 Person）"
+}

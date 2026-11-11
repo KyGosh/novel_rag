@@ -124,13 +124,18 @@ class GraphRoute(Retriever):
         self.max_tier = max_tier  # 0 = 实体间直接关系；1 = + 路径；2 = + 各实体主要关系；3 = + 高频提及
         self.last_latency_ms: dict[str, float] = {}
         self.last_debug: dict[str, Any] = {}
+        self._weak_spans: list[str] = []
 
     def _entities(self, query: str, max_ro: int | None) -> list[str]:
         spans = self.linker.link(query, max_ro, self.entity_types)
         out: list[str] = []
+        self._weak_spans = [sp.text for sp in spans if sp.weak]
         for sp in spans:
-            # 同名多个候选时取提及最多的一个（固定流程不反问）
-            eid = sp.candidates[0].entity_id
+            # 弱匹配（名字本身是常用词）不自动采用；同名多个候选时取提及最多的一个（固定流程不反问）
+            strong = sp.strong_candidates
+            if not strong:
+                continue
+            eid = strong[0].entity_id
             if eid not in out:
                 out.append(eid)
         return out[: self.max_entities]
@@ -177,7 +182,7 @@ class GraphRoute(Retriever):
             if len(hits) >= top_k:
                 break
         check_filter(hits, flt, self.name)
-        self.last_debug = {"entities": ents}
+        self.last_debug = {"entities": ents, "weak_spans": self._weak_spans}
         self.last_latency_ms = {"total": (time.perf_counter() - t0) * 1000}
         return hits
 

@@ -1,17 +1,22 @@
-"""构建知识图谱导出文件：抽取记录 → 实体消歧 → 关系聚合 → 事件（来自章节摘要）→ data/kg/{图谱版本}/。
+"""构建知识图谱导出文件：抽取记录 → 实体消歧 → 人物类别判定 → 关系聚合与清洗 → 事件（来自章节摘要）→
+data/kg/{图谱版本}/。
 
 用法：
     uv run python scripts/build_kg.py --extract-tag all                       # 全部卷
     uv run python scripts/build_kg.py --extract-tag all --books asoiaf-1       # 只用某几卷的抽取记录
     uv run python scripts/build_kg.py --extract-tag all --no-overrides        # 不用人工覆盖文件（消融）
+    uv run python scripts/build_kg.py --extract-tag all --no-category         # 不做人物类别判定（全部按"人"）
+常用词表（判定"弱名字"用）是 IK 自带主词典的副本，从 ES 容器导出一次即可（不存在时不做常用词判定）：
+    docker cp novel-rag-es:/usr/share/elasticsearch/config/analysis-ik/main.dic data/lexicon/ik_main.dic
 写入 Neo4j 用 scripts/load_kg.py（Neo4j 是可以随时重建的查询副本）。
-LLM 调用（拆分检查、候选对判定、因果判断）都按内容 hash 缓存，重跑只花新增的部分。
+LLM 调用（拆分检查、候选对判定、类别判定、因果判断）都按内容 hash 缓存，重跑只花新增的部分。
 """
 
 from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import sys
 import time
@@ -29,6 +34,20 @@ from novel_rag.kg.build import (
     chunk_rows,
     kg_version,
     write_export,
+)
+from novel_rag.kg.category import (
+    CATEGORY_VERSION,
+    CorpusCounter,
+    apply_category_overrides,
+    assign_categories,
+    clean_relations,
+    drop_entities,
+    entity_cards,
+    judge_categories,
+    linked_form_counts,
+    load_word_list,
+    person_category_of,
+    weak_names,
 )
 from novel_rag.kg.common import extract_dir, kg_root, load_series_kg
 from novel_rag.kg.events import extract_causes
@@ -48,6 +67,7 @@ def main() -> int:
     parser.add_argument("--summary-version", help="默认取最近生成的")
     parser.add_argument("--no-overrides", action="store_true", help="不使用 aliases.toml（消融）")
     parser.add_argument("--no-causes", action="store_true", help="跳过事件因果判断")
+    parser.add_argument("--no-category", action="store_true", help="不做人物类别判定（全部按「人」，不清洗关系）")
     args = parser.parse_args()
 
     s = get_settings()
@@ -81,6 +101,7 @@ def main() -> int:
     disamb = get_chat_model("disambiguation")
     split_prompt, judge_prompt = load_prompt("kg_split"), load_prompt("kg_judge")
     causes_prompt = load_prompt("kg_causes")
+    category_prompt = None if args.no_category else load_prompt("kg_category")
     embedder = EmbeddingCache(get_embedder(), open_embedding_store(s.paths.embedding_cache_dir))
     overrides_path = s.paths.books_dir / series.series_id / "aliases.toml"
     use_overrides = not args.no_overrides and overrides_path.is_file()
@@ -104,11 +125,49 @@ def main() -> int:
         return await extract_causes(summaries, books, chunks, extraction_chat, causes_prompt, k, stats)
 
     cause_rels = asyncio.run(run())
-    entities, m2e = resolver.finalize()
-    relations = aggregate_relations(records, m2e, stats)
+    entities, m2e_full = resolver.finalize()
+
+    # 人物类别判定（人 / 动物 / 非角色）→ 去掉非角色 → 关系按类别规则清洗
+    cat_stats: Counter = Counter()
+    judgments = {}
+    cards = entity_cards(
+        entities, m2e_full, {mid: m.description for mid, m in resolver.mentions.items()},
+        max_descriptions=k.category_max_descriptions,
+    )  # fmt: skip
+    if category_prompt is not None:
+        judgments = asyncio.run(
+            judge_categories(
+                cards,
+                disamb,
+                category_prompt,
+                batch_size=k.category_batch_size,
+                concurrency=k.jobs_in_flight,
+                stats=cat_stats,
+            )  # fmt: skip
+        )
+        if use_overrides:
+            apply_category_overrides(judgments, entities, Overrides.load(overrides_path).categories, cat_stats)
+    dropped = assign_categories(entities, judgments)
+    relations = aggregate_relations(records, m2e_full, stats)
+    entities, m2e = drop_entities(entities, m2e_full, dropped, cat_stats)
     index = ChapterNameIndex(records, m2e, series.rules)
     events, event_rels = build_events(summaries, index, stats)
     mentions = chunk_mentions(records, m2e)
+    all_relations = clean_relations(
+        relations + event_rels + cause_rels, person_category_of(entities), dropped, cat_stats
+    )
+
+    # 常用词名字（弱匹配）
+    used_ids = {c["chunk_id"] for c in chunks if c["book_id"] in use_books}
+    common_words = load_word_list(s.paths.common_words_file)
+    weak_details: list[dict] = []
+    if common_words is not None:
+        weak, weak_details = weak_names(
+            entities, linked_form_counts(records), CorpusCounter(chunk_text[c] for c in sorted(used_ids)),
+            common_words, min_linked_ratio=k.weak_name_min_linked_ratio, stats=cat_stats,
+        )  # fmt: skip
+        for e in entities:
+            e["weak_names"] = weak.get(e["entity_id"], [])
     book_titles = {b: books[b].title for b in all_books}
     used_chunks = [c for c in chunks if c["book_id"] in use_books]
 
@@ -138,6 +197,19 @@ def main() -> int:
         "books": sorted(use_books),
         "overrides": overrides_path.read_text(encoding="utf-8") if use_overrides else None,
         "causes": not args.no_causes,
+        "category": None
+        if category_prompt is None
+        else {
+            "version": CATEGORY_VERSION,
+            "prompt": category_prompt.version_id,
+            "params": k.model_dump(include={"category_batch_size", "category_max_descriptions"}),
+        },
+        "common_words": None
+        if common_words is None
+        else {
+            "sha256": hashlib.sha256(s.paths.common_words_file.read_bytes()).hexdigest()[:16],
+            "min_linked_ratio": k.weak_name_min_linked_ratio,
+        },
     }
     ver = kg_version(parts)
     out = kg_root(s.paths.data_dir) / ver
@@ -154,7 +226,7 @@ def main() -> int:
         out,
         {
             "entities": entities,
-            "relations": relations + event_rels + cause_rels,
+            "relations": all_relations,
             "events": events,
             "mentions": mentions,
             "chunks": chunk_rows(used_chunks, book_titles),
@@ -168,8 +240,34 @@ def main() -> int:
     (internal / "decisions.jsonl").write_text(
         "".join(json.dumps(d, ensure_ascii=False) + "\n" for d in resolver.decisions), encoding="utf-8"
     )
+    by_cat = {e["entity_id"]: (e.get("category"), e["type"]) for e in entities}
+    (internal / "categories.jsonl").write_text(
+        "".join(
+            json.dumps(
+                {
+                    "entity_id": c.entity_id, "name": c.name, "aliases": list(c.aliases), "groups": list(c.groups),
+                    "n_mentions": c.n_mentions, "descriptions": list(c.descriptions),
+                    "category": judgments[c.entity_id].category if c.entity_id in judgments else "人",
+                    "source": judgments[c.entity_id].source if c.entity_id in judgments else "default",
+                    "reason": judgments[c.entity_id].reason if c.entity_id in judgments else "",
+                },
+                ensure_ascii=False,
+            ) + "\n"
+            for c in cards
+        ),
+        encoding="utf-8",
+    )  # fmt: skip
+    (internal / "weak_names.json").write_text(json.dumps(weak_details, ensure_ascii=False, indent=1), encoding="utf-8")
     by_type = Counter(e["type"] for e in entities)
-    rel_types = Counter(r["type"] for r in relations + event_rels + cause_rels)
+    rel_types = Counter(r["type"] for r in all_relations)
+    # 类别清洗后的自检：人与动物之间不应再有亲属、配偶、婚约、头衔、成员关系
+    cross = Counter(
+        r["type"]
+        for r in all_relations
+        if r["type"] in ("KIN", "SPOUSE", "BETROTHED", "HOLDS_TITLE", "MEMBER_OF", "SERVES", "MENTOR")
+        and "动物" in {by_cat.get(r["subject"], (None,))[0], by_cat.get(r["object"], (None,))[0]}
+        and not (r["type"] == "KIN" and by_cat[r["subject"]][0] == by_cat[r["object"]][0])
+    )
     report = {
         "kg_version": ver,
         "seconds": round(time.perf_counter() - t0, 1),
@@ -178,6 +276,9 @@ def main() -> int:
         "relations_by_type": dict(rel_types.most_common()),
         "resolver": dict(sorted(resolver.stats.items())),
         "build": dict(sorted(stats.items())),
+        "persons_by_category": dict(Counter(c for c, t in by_cat.values() if t == "Person")),
+        "category": dict(sorted(cat_stats.items())),
+        "animal_human_forbidden_relations": dict(cross),
         "aliases_ungrounded": sum(1 for e in entities for a in e["aliases"] if a["link"] == "ungrounded"),
         "llm_usage": get_usage_tracker().summary(),
     }

@@ -75,7 +75,7 @@ def extract_version(schema: Schema, prompt: Prompt, model_identity: dict[str, An
     """决定 LLM 原始输出的因素（校验规则不在内：改校验只需 --revalidate，不必重新调用 LLM）。"""
     schema_text = schema.prompt_entity_types() + schema.prompt_relation_types()  # schema 说明是 prompt 的一部分
     payload = {
-        "schema": schema.version,
+        "schema": schema.extract_version,
         "schema_prompt": hashlib.sha256(schema_text.encode("utf-8")).hexdigest()[:12],
         "prompt": prompt.version_id,
         "model": model_identity,

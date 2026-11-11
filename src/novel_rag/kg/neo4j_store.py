@@ -62,6 +62,7 @@ def entity_rows(entities: Sequence[dict[str, Any]], series_id: str) -> list[dict
                 "aliases": [a["alias"] for a in aliases],
                 "alias_visible": [int(a["visible_from"]) for a in aliases],
                 "alias_link": [a["link"] for a in aliases],
+                "weak_names": list(e.get("weak_names", [])),  # 本身是常用词的写法：查询期链接只给弱匹配
             }
         )
     return rows

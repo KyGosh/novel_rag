@@ -6,19 +6,28 @@
   不允许关系类型无限增长。
 - 对称关系（配偶、婚约、敌对、盟友、兄弟姐妹等）按实体 ID 排序存成一个方向；"儿子/女儿"这类子辈称谓翻转成
   "客体是主体的父母"，所以亲属关系只存长辈 → 晚辈或对称两种方向。
+- 人物类别（kg-schema-2）：抽取口径里"人物"包括有名字的动物伙伴；消歧之后再判一次类别（人 / 动物 / 非角色），
+  每种关系类型声明人物端允许的类别（亲属只在同类之间，配偶、效忠、成员等只限人）。动物与人之间的亲属、成员、
+  效忠改写为"伙伴/坐骑"（COMPANION，动物 → 人），其余不允许的组合丢弃。这些都是通用规则，不含书籍知识。
+- 抽取用的 schema 说明没有变：抽取版本只看 EXTRACT_SCHEMA_VERSION，图谱 schema 升级不必重新抽取。
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-SCHEMA_VERSION = "kg-schema-1"
+SCHEMA_VERSION = "kg-schema-2"  # 图谱 schema（导出 / Neo4j）
+EXTRACT_SCHEMA_VERSION = "kg-schema-1"  # 逐块抽取看到的 schema（决定抽取版本）
 
 PERSON, ORG, LOC, EVENT, TITLE = "Person", "Organization", "Location", "Event", "Title"
 ENTITY_LABELS = {PERSON: "人物", ORG: "组织", LOC: "地点", EVENT: "事件", TITLE: "头衔"}
 LABEL_TO_TYPE = {v: k for k, v in ENTITY_LABELS.items()}
 ORG_CATEGORIES = ("家族", "军团", "宗教", "行会", "政权", "其他")
 EXTENSIONS = {"title": (TITLE,)}  # 扩展名 → 新增的实体类型
+# 人物类别：消歧之后判定。非角色（器物、钱币、道具、比喻）的簇连同其关系一起从图谱中去掉
+HUMAN, ANIMAL, NON_CHARACTER = "人", "动物", "非角色"
+PERSON_CATEGORIES = (HUMAN, ANIMAL)
+CATEGORY_JUDGMENTS = (HUMAN, ANIMAL, NON_CHARACTER)
 
 
 @dataclass(frozen=True)
@@ -29,32 +38,47 @@ class RelationType:
     object_types: tuple[str, ...]
     symmetric: bool = False
     extension: str | None = None  # 属于哪个领域扩展；None 为通用核心
-    source: str = "chunk"  # chunk = 逐块抽取；summary = 来自章节摘要
+    source: str = "chunk"  # chunk = 逐块抽取；summary = 来自章节摘要；derived = 构图时由其他关系改写而来
     hint: str = ""  # prompt 中的说明
+    # 人物端允许的类别（只约束类型为 Person 的一端）：any 不限；human 只限人；same_kind 两端同类；
+    # animal_to_human 主体是动物、客体是人
+    person_rule: str = "any"
 
 
 RELATION_TYPES: tuple[RelationType, ...] = (
-    RelationType("KIN", "亲属", (PERSON,), (PERSON,), hint="主体是客体的<role>，role 必填"),
-    RelationType("SPOUSE", "配偶", (PERSON,), (PERSON,), symmetric=True, hint="主体与客体是夫妻"),
-    RelationType("BETROTHED", "婚约", (PERSON,), (PERSON,), symmetric=True, hint="主体与客体订有婚约"),
+    RelationType("KIN", "亲属", (PERSON,), (PERSON,), hint="主体是客体的<role>，role 必填", person_rule="same_kind"),
+    RelationType(
+        "SPOUSE", "配偶", (PERSON,), (PERSON,), symmetric=True, hint="主体与客体是夫妻", person_rule="human"
+    ),
+    RelationType(
+        "BETROTHED", "婚约", (PERSON,), (PERSON,), symmetric=True, hint="主体与客体订有婚约", person_rule="human"
+    ),
     RelationType(
         "SERVES", "效忠", (PERSON, ORG), (PERSON, ORG),
         hint="主体效忠、侍奉或受雇于客体（封臣、骑士、侍从、护卫、仆人、学士等），客体可以是人物或组织",
+        person_rule="human",
     ),
-    RelationType("MENTOR", "师徒", (PERSON,), (PERSON,), hint="主体是客体的老师或师傅"),
-    RelationType("MEMBER_OF", "成员", (PERSON, ORG), (ORG,), hint="主体（人物或组织）属于客体（组织），包括出身的家族"),
+    RelationType("MENTOR", "师徒", (PERSON,), (PERSON,), hint="主体是客体的老师或师傅", person_rule="human"),
+    RelationType(
+        "MEMBER_OF", "成员", (PERSON, ORG), (ORG,), hint="主体（人物或组织）属于客体（组织），包括出身的家族",
+        person_rule="human",
+    ),
     RelationType("ENEMY", "敌对", (PERSON, ORG), (PERSON, ORG), symmetric=True, hint="主体与客体敌对、交战或有仇"),
     RelationType("ALLY", "盟友", (PERSON, ORG), (PERSON, ORG), symmetric=True, hint="主体与客体结盟或并肩作战"),
     RelationType("KILLED", "杀害", (PERSON, ORG), (PERSON,), hint="原文明确写出主体杀死了客体"),
     RelationType("LOCATED_IN", "位于", (LOC, ORG), (LOC,), hint="主体（地点或组织）位于客体（地点）"),
     RelationType(
         "RULES", "统治", (PERSON, ORG), (LOC, ORG),
-        hint="主体（人物或组织）统治、领有或镇守客体（地点），或统领客体（组织）",
+        hint="主体（人物或组织）统治、领有或镇守客体（地点），或统领客体（组织）", person_rule="human",
     ),
     RelationType("RESIDES", "居住", (PERSON,), (LOC,), hint="主体（人物）居住或驻留在客体（地点）"),
     RelationType(
         "HOLDS_TITLE", "持有头衔", (PERSON,), (TITLE,), extension="title",
-        hint="主体（人物）持有客体（头衔），如某人担任某职位",
+        hint="主体（人物）持有客体（头衔），如某人担任某职位", person_rule="human",
+    ),
+    RelationType(
+        "COMPANION", "伙伴/坐骑", (PERSON,), (PERSON,), source="derived",
+        hint="主体（动物）是客体（人）的伙伴、坐骑或宠物", person_rule="animal_to_human",
     ),
     RelationType("PARTICIPATES", "参与", (PERSON,), (EVENT,), source="summary"),
     RelationType("OCCURS_AT", "发生于", (EVENT,), (LOC,), source="summary"),
@@ -163,6 +187,24 @@ def entity_type_of(label: str) -> tuple[str | None, str | None]:
     return None, None
 
 
+# 动物与人之间被套上这些人际关系时，改写为 伙伴/坐骑（动物 → 人），证据保留
+COMPANION_REWRITE_FROM = ("KIN", "MEMBER_OF", "SERVES")
+
+
+def category_allows(rel_type: str, s_cat: str | None, o_cat: str | None) -> bool:
+    """关系两端的人物类别是否允许。s_cat / o_cat 为 None 表示该端不是人物（组织、地点等），不受约束。"""
+    rule = REL_BY_NAME[rel_type].person_rule
+    if rule == "any":
+        return True
+    if rule == "human":
+        return all(c in (None, HUMAN) for c in (s_cat, o_cat))
+    if rule == "same_kind":
+        return s_cat == o_cat
+    if rule == "animal_to_human":
+        return s_cat == ANIMAL and o_cat == HUMAN
+    raise ValueError(f"未知的类别规则：{rule}")
+
+
 def is_symmetric(rel_type: str, role: str | None) -> bool:
     if rel_type == "KIN":
         return role in SYMMETRIC_KIN_ROLES
@@ -192,7 +234,15 @@ class Schema:
 
     @property
     def version(self) -> str:
-        return SCHEMA_VERSION + ("+" + "+".join(sorted(self.extensions)) if self.extensions else "")
+        return SCHEMA_VERSION + self._ext_suffix()
+
+    @property
+    def extract_version(self) -> str:
+        """逐块抽取看到的 schema 版本（图谱 schema 升级但抽取说明不变时，抽取版本保持不变）。"""
+        return EXTRACT_SCHEMA_VERSION + self._ext_suffix()
+
+    def _ext_suffix(self) -> str:
+        return "+" + "+".join(sorted(self.extensions)) if self.extensions else ""
 
     def prompt_entity_types(self) -> str:
         lines = [

@@ -1,4 +1,5 @@
-"""把图谱查询结果转成给模型 / 人看的文本：每条事实带证据 chunk_id 和"卷名 · 章节标题"，总长度有上限。"""
+"""把图谱查询结果转成给模型 / 人看的文本：每条事实带证据 chunk_id 和"卷名 · 章节标题"，总长度有上限。
+人物类别为动物的实体在名字后标"（动物）"；名字写法本身是常用词时标出，由模型判断问题里指的是不是它。"""
 
 from __future__ import annotations
 
@@ -6,7 +7,7 @@ from collections.abc import Callable
 from typing import Any
 
 from novel_rag.graph_retrieval.templates import QueryResult
-from novel_rag.kg.schema import KIN_ROLES, REL_BY_NAME
+from novel_rag.kg.schema import ANIMAL, KIN_ROLES, PERSON, REL_BY_NAME
 
 TRUNC_NOTE = "……（结果过长，已截断）"
 
@@ -16,9 +17,22 @@ def relation_label(rel_type: str, role: str | None) -> str:
     return f"{label}（{KIN_ROLES[role]}）" if role and role in KIN_ROLES else label
 
 
+def tag(name: str, type_: str | None, category: str | None) -> str:
+    """动物实体加标注：白灵（动物）。人是默认，不标。"""
+    return f"{name}（{ANIMAL}）" if type_ == PERSON and category == ANIMAL else name
+
+
+def type_text(type_: str, category: str | None) -> str:
+    return f"{type_}/{category}" if type_ == PERSON and category else type_
+
+
 def fact_text(subject: str, rel_type: str, role: str | None, obj: str, outgoing: bool) -> str:
     s, o = (subject, obj) if outgoing else (obj, subject)
     return f"{s} —{relation_label(rel_type, role)}→ {o}"
+
+
+def _other(x: dict[str, Any]) -> str:
+    return tag(x["other"], x.get("other_type"), x.get("other_category"))
 
 
 def _ev(evidence: list[dict[str, Any]], where: Callable[[str], str]) -> str:
@@ -33,27 +47,35 @@ def render(result: QueryResult, where: Callable[[str], str], max_chars: int) -> 
     if op == "resolve":
         for r in rows:
             q = f"（{r['qualifier']}）" if r.get("qualifier") else ""
-            facts = "；".join(fact_text(r["name"], f["type"], f["role"], f["other"], f["outgoing"]) for f in r["facts"])
+            facts = "；".join(
+                fact_text(
+                    r["name"], f["type"], f["role"], tag(f["other"], f.get("other_type"), f.get("other_category")),
+                    f["outgoing"],
+                )
+                for f in r["facts"]
+            )  # fmt: skip
             alias = "、".join(a for a in r["aliases"][:6] if a != r["name"])
+            common = "；注意：这个写法也是常用词，确认问题里指的是这个实体" if r.get("common_word") else ""
             lines.append(
-                f"- {r['name']}{q} [{r['entity_id']}] {r['type']}；别名：{alias or '无'}；{facts or '暂无已知关系'}"
+                f"- {r['name']}{q} [{r['entity_id']}] {type_text(r['type'], r.get('category'))}；"
+                f"别名：{alias or '无'}；{facts or '暂无已知关系'}{common}"
             )
     elif op == "profile":
         r = rows[0]
         lines.append(
-            f"{r['name']} [{r['entity_id']}] {r['type']}，"
+            f"{r['name']} [{r['entity_id']}] {type_text(r['type'], r.get('category'))}，"
             f"首次 / 末次出现 reading_order {r['first_seen']}–{r['last_seen']}"
         )
         lines.append(f"别名：{'、'.join(r['aliases']) or '无'}；所属：{'、'.join(r['groups']) or '不详'}")
         for x in r["relations"]:
             lines.append(
-                f"- {fact_text(r['name'], x['type'], x['role'], x['other'], x['outgoing'])}"
+                f"- {fact_text(r['name'], x['type'], x['role'], _other(x), x['outgoing'])}"
                 f"（证据 {x['n_evidence']} 条，ro {x['first_ro']}–{x['last_ro']}）证据：{_ev(x['evidence'], where)}"
             )
     elif op in ("neighbors",):
         for x in rows:
             lines.append(
-                f"- {fact_text('该实体', x['type'], x['role'], x['other'], x['outgoing'])} [{x['other_id']}]"
+                f"- {fact_text('该实体', x['type'], x['role'], _other(x), x['outgoing'])} [{x['other_id']}]"
                 f"（证据 {x['n_evidence']} 条）证据：{_ev(x['evidence'], where)}"
             )
     elif op == "between":
@@ -64,7 +86,7 @@ def render(result: QueryResult, where: Callable[[str], str], max_chars: int) -> 
             )
     elif op == "paths":
         for k, p in enumerate(rows, 1):
-            names = {n["id"]: n["name"] for n in p["nodes"]}
+            names = {n["id"]: tag(n["name"], n.get("type"), n.get("category")) for n in p["nodes"]}
             hops = [
                 f"{names.get(r['from'], r['from'])} —{relation_label(r['type'], r['role'])}→ "
                 f"{names.get(r['to'], r['to'])}"
@@ -82,7 +104,7 @@ def render(result: QueryResult, where: Callable[[str], str], max_chars: int) -> 
             else:
                 lines.append(
                     f"- ro {x['ro']}：首次出现关系 "
-                    f"{fact_text('该实体', x['type'], x['role'], x['other'], x['outgoing'])}"
+                    f"{fact_text('该实体', x['type'], x['role'], _other(x), x['outgoing'])}"
                     f"（{_ev(x['evidence'], where)}）"
                 )
     elif op == "mentions":

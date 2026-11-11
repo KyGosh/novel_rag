@@ -86,7 +86,8 @@ WHERE n.series_id = $sid AND n.first_ro <= $max_ro AND NOT n:Event
   AND (($name = n.name AND n.name_visible <= $max_ro)
        OR any(i IN range(0, size(n.aliases) - 1) WHERE n.aliases[i] = $name AND n.alias_visible[i] <= $max_ro))
 RETURN n.entity_id AS entity_id, n.type AS type, {display("n")} AS name, n.qualifier AS qualifier,
-       {aliases("n")} AS aliases, n.first_ro AS first_ro, n.n_mentions AS n_mentions
+       n.category AS category, {aliases("n")} AS aliases, n.first_ro AS first_ro, n.n_mentions AS n_mentions,
+       $name IN coalesce(n.weak_names, []) AS common_word
 ORDER BY n.n_mentions DESC, n.entity_id
 LIMIT $limit
 """
@@ -95,7 +96,7 @@ Q_RESOLVE_FULLTEXT = f"""
 CALL db.index.fulltext.queryNodes('kg_entity_names', $q) YIELD node AS n, score
 WHERE n.series_id = $sid AND n.first_ro <= $max_ro AND NOT n:Event
 RETURN n.entity_id AS entity_id, n.type AS type, {display("n")} AS name, n.qualifier AS qualifier,
-       {aliases("n")} AS aliases, n.first_ro AS first_ro, n.n_mentions AS n_mentions, score
+       n.category AS category, {aliases("n")} AS aliases, n.first_ro AS first_ro, n.n_mentions AS n_mentions, score
 ORDER BY score DESC, n.n_mentions DESC
 LIMIT $limit
 """
@@ -107,7 +108,8 @@ WHERE r.first_ro <= $max_ro AND m.first_ro <= $max_ro AND NOT m:Event AND NOT r.
 WITH n, r, m, size([x IN r.ev_ros WHERE x <= $max_ro]) AS k
 ORDER BY k DESC, m.entity_id
 WITH n, collect({{type: r.type, role: r.role, outgoing: startNode(r) = n, other: {display("m")},
-                  other_id: m.entity_id, k: k, ros: [x IN r.ev_ros WHERE x <= $max_ro]}})[..$per] AS facts
+                  other_id: m.entity_id, other_type: m.type, other_category: m.category, k: k,
+                  ros: [x IN r.ev_ros WHERE x <= $max_ro]}})[..$per] AS facts
 RETURN n.entity_id AS entity_id, facts
 """
 
@@ -129,7 +131,7 @@ WHERE n.first_ro <= $max_ro AND r.first_ro <= $max_ro AND m.first_ro <= $max_ro
 WITH n, r, m, {evs("r")} AS ev
 WHERE size(ev) > 0
 RETURN r.type AS type, r.role AS role, startNode(r) = n AS outgoing, m.entity_id AS other_id,
-       {display("m")} AS other, m.type AS other_type, size(ev) AS n_evidence,
+       {display("m")} AS other, m.type AS other_type, m.category AS other_category, size(ev) AS n_evidence,
        ev[0].ro AS first_ro, ev[-1].ro AS last_ro, ev[..$ev_per] AS evidence
 ORDER BY n_evidence DESC, first_ro, other_id
 LIMIT $limit
@@ -153,7 +155,7 @@ MATCH p = allShortestPaths((a)-[:REL*..{hops}]-(b))
 WHERE all(r IN relationships(p) WHERE r.first_ro <= $max_ro AND ($types IS NULL OR r.type IN $types))
   AND all(x IN nodes(p) WHERE x.first_ro <= $max_ro)
 WITH p LIMIT $limit
-RETURN [x IN nodes(p) | {{id: x.entity_id, name: {disp}, type: x.type}}] AS nodes,
+RETURN [x IN nodes(p) | {{id: x.entity_id, name: {disp}, type: x.type, category: x.category}}] AS nodes,
        [r IN relationships(p) | {{type: r.type, role: r.role, from: startNode(r).entity_id,
           to: endNode(r).entity_id, evidence: {ev}[..$ev_per], n_evidence: size({ev})}}] AS rels
 """
@@ -356,7 +358,8 @@ class GraphQueries:
         items = [{"kind": "event", **e} for e in events]
         items += [
             {"kind": "relation", "ro": r["first_ro"], "type": r["type"], "role": r["role"], "outgoing": r["outgoing"],
-             "other": r["other"], "other_id": r["other_id"], "evidence": r["evidence"]}
+             "other": r["other"], "other_id": r["other_id"], "other_type": r["other_type"],
+             "other_category": r["other_category"], "evidence": r["evidence"]}
             for r in rels
         ]  # fmt: skip
         items.sort(key=lambda x: (x["ro"], 0 if x["kind"] == "event" else 1))

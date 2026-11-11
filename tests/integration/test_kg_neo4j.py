@@ -15,13 +15,14 @@ pytestmark = pytest.mark.integration
 SID = "kgtest"
 
 
-def ent(name, type_="Person", first=1, aliases=(), name_visible=None, n=10):
+def ent(name, type_="Person", first=1, aliases=(), name_visible=None, n=10, category=None, weak=()):
     return {
         "entity_id": f"{SID}:{type_.lower()}:{name}", "type": type_, "name": name,
         "name_visible_from": name_visible if name_visible is not None else first,
         "first_reading_order": first, "last_reading_order": 9, "n_mentions": n, "n_chunks": 3,
         "aliases": [{"alias": a, "visible_from": v, "first_chunk": "", "link": "x"} for a, v in aliases],
-        "groups": [], "category": None, "qualifier": None,
+        "groups": [], "category": category if category else ("人" if type_ == "Person" else None), "qualifier": None,
+        "weak_names": list(weak),
     }  # fmt: skip
 
 
@@ -48,6 +49,7 @@ TABLES = {
         ent("乙·铁杉"),
         ent("丙·白桦", first=5),  # 第 5 章才出场
         ent("灰岩城主", "Title"),
+        ent("灰影", first=2, category="动物", weak=["灰影"]),  # 有名字的动物；名字本身当作常用词
     ],
     "events": [
         {
@@ -79,6 +81,7 @@ TABLES = {
         rel("甲·铁杉", "KIN", "丙·白桦", [6, 7], role="father"),
         rel(f"{SID}:person:甲·铁杉", "HOLDS_TITLE", TITLE, [2]),
         rel(f"{SID}:person:乙·铁杉", "HOLDS_TITLE", TITLE, [9]),
+        rel("灰影", "COMPANION", "甲·铁杉", [6]),
         rel(f"{SID}:person:甲·铁杉", "PARTICIPATES", "kt-1:0002:e01", [2]),
         rel(f"{SID}:person:甲·铁杉", "PARTICIPATES", "kt-1:0007:e01", [7]),
     ],
@@ -93,7 +96,7 @@ def graph():
     s = get_settings()
     store = Neo4jKGStore.connect(s.neo4j)
     counts = store.replace(SID, TABLES, {"kg_version": "test"}, batch=100)
-    assert counts["entities"] == 4 and counts["events"] == 2 and counts["relations"] == 7 and counts["next"] == 0
+    assert counts["entities"] == 5 and counts["events"] == 2 and counts["relations"] == 8 and counts["next"] == 0
     g = GraphQueries(store.driver, s.neo4j.database, s.kg, SID)
     yield g, store
     store.delete_series(SID)
@@ -146,3 +149,19 @@ def test_linker_from_neo4j(graph):
     lk = EntityLinker.from_neo4j(store.driver, get_settings().neo4j.database, SID)
     assert [s.text for s in lk.link("灰狼和丙·白桦", 4)] == []
     assert [s.text for s in lk.link("灰狼和丙·白桦", 9)] == ["灰狼", "丙·白桦"]
+
+
+def test_categories_companion_and_weak_names(graph):
+    g, store = graph
+    wolf = f"{SID}:person:灰影"
+    r = g.resolve("灰影", 9).rows[0]
+    assert r["entity_id"] == wolf and r["category"] == "动物" and r["common_word"] is True
+    assert g.resolve("甲·铁杉", 9).rows[0]["common_word"] is False
+    assert g.profile(wolf, 9).rows[0]["category"] == "动物"
+    # 伙伴关系同样按阅读进度过滤（证据在 ro 6）
+    assert not [x for x in g.neighbors(A, 5).rows if x["type"] == "COMPANION"]
+    [comp] = [x for x in g.neighbors(A, 9).rows if x["type"] == "COMPANION"]
+    assert comp["other_id"] == wolf and comp["other_category"] == "动物" and comp["outgoing"] is False
+    lk = EntityLinker.from_neo4j(store.driver, get_settings().neo4j.database, SID)
+    [sp] = lk.link("灰影在哪", 9)
+    assert sp.weak and sp.candidates[0].entity_id == wolf

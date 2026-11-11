@@ -100,7 +100,7 @@ def main() -> int:
         "extract_version": xver,
         "tag": args.tag,
         "chunk_version": version,
-        "schema_version": series.schema.version,
+        "schema_version": series.schema.extract_version,
         "prompt_version": prompt.version_id,
         "validation_version": VALIDATION_VERSION,
         "model_identity": chat.cache_identity(),
