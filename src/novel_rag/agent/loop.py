@@ -72,6 +72,8 @@ class AgentState(TypedDict, total=False):
     prompt_tokens: int
     completion_tokens: int
     error_rounds: int
+    round_start_tokens: int  # 本轮开始时的累计 token
+    last_round_tokens: int  # 上一轮（行动 + 反思）的花费，用于预估 token 上限
     termination: str | None
     shown: list[str]  # 所有展示过原文的 chunk（过程覆盖率）
     seen_refs: list[str]  # 只给出编号的 chunk
@@ -185,7 +187,8 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             reason = "limit_rounds"
         elif calls_used >= cfg.max_tool_calls:
             reason = "limit_tool_calls"
-        elif _tok(state) >= cfg.max_tokens:
+        elif _tok(state) + state.get("last_round_tokens", 0) > cfg.max_tokens:
+            # 预估：再进行一轮（按上一轮的花费估计）就会超过上限时不再开始新的一轮，避免超出一整轮的量
             reason = "limit_tokens"
         elif state.get("error_rounds", 0) >= cfg.max_error_rounds:
             reason = "error_streak"
@@ -214,7 +217,8 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         if finish and not others:
             reason = (finish[0].args or {}).get("reason", "") if finish[0].args else ""
             return {**upd, "termination": "finish", "pending_calls": [], "finish_reason": str(reason)[:200]}
-        upd.update({"pending_calls": others, "finish_requested": bool(finish), "rounds": rounds + 1})
+        upd.update({"pending_calls": others, "finish_requested": bool(finish), "rounds": rounds + 1,
+                    "round_start_tokens": _tok(state)})  # fmt: skip
         if finish:
             upd["finish_reason"] = str((finish[0].args or {}).get("reason", ""))[:200]
         return upd
@@ -255,7 +259,8 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         notes = list(state.get("notes", []))
         if not obs:  # 本轮只有错误：不调用反思，直接把错误告诉下一轮
             errs = "；".join(f"{o['tool']}：{o['result'].error}" for o in state.get("observations", []))
-            return {"status": f"上一轮工具调用都出错了：{errs[:200]}", "observations": []}
+            spent = _tok(state) - state.get("round_start_tokens", 0)
+            return {"status": f"上一轮工具调用都出错了：{errs[:200]}", "observations": [], "last_round_tokens": spent}
         allowed: dict[str, bool] = {}  # chunk_id → 是否展示了原文
         for o in obs:
             for c in o["result"].shown_chunk_ids:
@@ -312,6 +317,7 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             **_usage_update(state, res), "notes": notes + added, "status": out.status.strip()[:300] or "（无）",
             "observations": [], "invalid_notes": invalid, "trace": [*state.get("trace", []), step],
         }  # fmt: skip
+        upd["last_round_tokens"] = upd["prompt_tokens"] + upd["completion_tokens"] - state.get("round_start_tokens", 0)
         if state.get("finish_requested"):
             upd["termination"] = "finish"
         return upd

@@ -184,3 +184,13 @@ def test_agent_observations_respect_reading_progress(max_ro):
     chunks = sysm.tb.backends.chunks
     for cid in out.record["evidence_sets"]["shown"]:
         assert chunks.by_id(cid)["reading_order"] <= max_ro
+
+
+def test_token_limit_is_predictive_from_last_round_cost():
+    # 每次调用 1000 token：规划 1000；每轮行动 + 反思 2000。上限 6000：第 2 轮后累计 5000，再一轮会到 7000 → 停止
+    acts = [Call.one("search_text", {"query": f"白狐 {i}"}) for i in range(5)]
+    sysm, _ = system({PLAN: [Say("p")], ACT: acts, REFLECT: [reflect([]) for _ in range(5)],
+                      ANSWER: [answer("原文未提及", [])]}, tokens=(900, 100), max_tokens=6000)  # fmt: skip
+    rec = sysm.run(item()).record
+    assert rec["termination"] == "limit_tokens" and rec["agent"]["rounds"] == 2
+    assert rec["cost"]["loop_tokens"] <= 6000

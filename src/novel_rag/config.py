@@ -340,7 +340,8 @@ class AgentConfig(_Frozen):
 
     max_rounds: int = 6  # 行动轮数上限（每轮 = 行动 + 执行 + 反思）
     max_tool_calls: int = 12
-    max_tokens: int = 40_000  # 每题 token 上限（规划 + 行动 + 反思；作答另计）
+    # 每题 token 上限（规划 + 行动 + 反思；作答另计）。按上一轮的花费预估：再进行一轮就会超出时不再开始新的一轮
+    max_tokens: int = 40_000
     max_calls_per_round: int = 4  # 单轮内并行调用的工具数上限，多出的不执行并告知模型
     max_error_rounds: int = 3  # 连续这么多轮都只产生错误 → 强制作答（终止原因"异常"）
     thinking: bool = False  # True：规划与行动用 agent_thinking 任务（开启思考）
