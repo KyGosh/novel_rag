@@ -10,6 +10,7 @@
    - LLM 自检 same_person 为假（选的是与称呼所指之人相关的人，而不是他本人）的段作废；
    - "某人的某某"：称呼里含"目标的名字或别名 + 的"时放弃（称呼指的是某人的随从、亲属等，不是某人）；
    - 真名保护：称呼本身含间隔号（是全名），或是任何全名人物的名或姓，不合并；
+   - 称呼簇自己的别名里已有真名写法（含间隔号，或是全名人物的名或姓）时，目标的名字必须包含这个写法，否则该段作废；
    - 各段指向不同的人时放弃；指向同一人的段数 / 判定段数 < min_support 时放弃。
 4. 专属称呼与泛称分开（generic_mode="link"，默认）：
    - LLM 同时判断称呼本身是"专属"（只指一个特定的人）还是"泛称"（身份、职务、亲属称谓、描述语）。
@@ -40,7 +41,7 @@ from novel_rag.kg.schema import EPITHET, NON_CHARACTER, PERSON
 from novel_rag.llm.base import ChatModel
 from novel_rag.prompts import Prompt
 
-EPITHET_VERSION = "kg-epithet-5"  # 段落选取、候选构造、复核与合并规则的版本
+EPITHET_VERSION = "kg-epithet-6"  # 段落选取、候选构造、复核与合并规则的版本
 
 
 class MentionLike(Protocol):
@@ -271,6 +272,8 @@ def decide(
         for i, p in enumerate(job.passages, 1)
         if (v := got.get(i)) is not None and v.other_person and not v.target
     }
+    # 称呼簇自己已经带着真名写法（例如别名里有某个全名人物的姓）时，目标必须与这个真名相符
+    own_real = {f for f in forms.get(job.entity_id, ()) if f != name and ("·" in f or f in real_name_segments)}
     votes: Counter = Counter()
     first: dict[str, Passage] = {}
     attributed: dict[str, list[Passage]] = defaultdict(list)
@@ -282,6 +285,8 @@ def decide(
         tid = job.candidates[v.target - 1].entity_id
         if tid not in mentions_by_chapter.get((p.book_id, p.chapter_idx), set()):
             continue  # 目标不在该段所在的章：作废
+        if own_real and not own_real & forms.get(tid, set()):
+            continue  # 目标与称呼簇已有的真名写法不符：作废
         votes[tid] += 1
         first.setdefault(tid, p)
         attributed[tid].append(p)

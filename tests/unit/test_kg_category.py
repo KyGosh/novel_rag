@@ -284,3 +284,15 @@ def test_render_marks_animals_and_common_words():
            "other_type": "Person", "other_category": ANIMAL, "n_evidence": 1,
            "evidence": [{"chunk_id": "demo-1:0001:0000", "ro": 1}]}]  # fmt: skip
     assert "夏日（动物） —伙伴/坐骑→ 该实体" in render(QueryResult("neighbors", {}, nb), lambda c: c, 1000)
+
+
+def test_linked_counts_credit_title_stripped_form():
+    from novel_rag.kg.names import NameRules
+
+    ms = [("阿岚爵士", 3, "Person"), ("阿岚", 1, "Person"), ("国王大道", 2, "Location")]
+    records = [{"mentions": [{"name": n, "count": k, "type": t} for n, k, t in ms]}]
+    rules = NameRules(suffixes=("爵士",), prefixes=("国王",))
+    assert linked_form_counts(records)["阿岚"] == 1
+    c = linked_form_counts(records, rules)
+    assert c["阿岚"] == 4 and c["阿岚爵士"] == 3
+    assert c["大道"] == 0  # 称谓只对人物提及去掉

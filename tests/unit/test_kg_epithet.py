@@ -358,3 +358,16 @@ def test_apply_generic_links_moves_chapter_mentions_and_drops_rest():
                        links=[["demo-1", 1, MIRA, ""], ["demo-1", 3, MIRA, ""]])  # fmt: skip
     out3, drop3 = apply_attributions(ents3, m2e3, MENTIONS, [full], Counter())
     assert GHOST not in {e["entity_id"] for e in out3} and drop3 == set()
+
+
+def test_epithet_cluster_with_real_name_alias_must_match_target():
+    # 称呼簇"灰岩的幽灵"自己带着别名"米拉"（全名人物的名）：只能归给名字含"米拉"的人
+    ents = entities()
+    next(e for e in ents if e["entity_id"] == GHOST)["aliases"] = [
+        {"alias": "米拉", "visible_from": 1, "first_chunk": "", "link": "x"}
+    ]
+    forms, segs = name_forms(ents), full_name_segments(ents)
+    job = _job([(1, 1), (1, 2)])
+    assert decide(job, out(2, 2), BY_CHAPTER, segs, min_support=0.5, forms_of=forms).status == "no_target"  # 阿岚
+    ok = decide(job, out(1, 1), BY_CHAPTER, segs, min_support=0.5, forms_of=forms)
+    assert (ok.status, ok.target_id) == ("merged", MIRA)

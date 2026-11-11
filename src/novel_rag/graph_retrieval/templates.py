@@ -153,13 +153,21 @@ MATCH (a:Entity {{entity_id: $a}}), (b:Entity {{entity_id: $b}})
 WHERE a.first_ro <= $max_ro AND b.first_ro <= $max_ro
 MATCH p = allShortestPaths((a)-[:REL*..{hops}]-(b))
 WHERE all(r IN relationships(p) WHERE r.first_ro <= $max_ro AND ($types IS NULL OR r.type IN $types))
-  AND all(x IN nodes(p) WHERE x.first_ro <= $max_ro)
+  AND all(x IN nodes(p) WHERE x.first_ro <= $max_ro
+          AND ($node_types IS NULL OR x.type IN $node_types)
+          AND ($exclude_node_types IS NULL OR NOT x.type IN $exclude_node_types))
 WITH p LIMIT $limit
 RETURN [x IN nodes(p) | {{id: x.entity_id, name: {disp}, type: x.type, category: x.category}}] AS nodes,
        [r IN relationships(p) | {{type: r.type, role: r.role, from: startNode(r).entity_id,
           to: endNode(r).entity_id, evidence: {ev}[..$ev_per], n_evidence: size({ev})}}] AS rels
 """
 Q_PATHS = {h: _Q_PATHS.format(hops=h, disp=display("x"), ev=evs("r")) for h in (1, 2, 3)}
+
+Q_KG_VERSION = """
+MATCH (m:KGMeta) WHERE m.series_id = $sid
+RETURN m.kg_version AS kg_version
+LIMIT 1
+"""
 
 Q_TIMELINE_EVENTS = """
 MATCH (n:Entity {entity_id: $eid})-[r:REL {type: 'PARTICIPATES'}]->(e:Event)
@@ -317,17 +325,27 @@ class GraphQueries:
         *,
         max_hops: int | None = None,
         types: Sequence[str] | None = None,
+        node_types: Sequence[str] | None = None,
+        exclude_node_types: Sequence[str] | None = None,
         limit: int | None = None,
     ) -> QueryResult:
-        """两个实体之间不超过 3 跳的最短路径（可限定关系类型），每条边带可见证据。"""
+        """两个实体之间不超过 3 跳的最短路径（可限定关系类型、途经节点的类型），每条边带可见证据。
+        node_types：路径上所有节点（含两端）都必须是这些类型；exclude_node_types：路径不经过这些类型的节点。"""
         hops = self.cfg.path_max_hops if max_hops is None else int(max_hops)
         if hops not in Q_PATHS:
             raise QueryError(f"跳数只能是 1–3，收到 {max_hops}")
         rows = self._run(
             "paths", Q_PATHS[hops], max_reading_order, a=a, b=b, types=self._types(types), ev_per=2,
+            node_types=list(node_types) if node_types else None,
+            exclude_node_types=list(exclude_node_types) if exclude_node_types else None,
             limit=self._limit(limit),
         )  # fmt: skip
         return QueryResult("paths", {"a": a, "b": b, "max_hops": hops, "types": types}, rows)
+
+    def kg_version(self) -> str | None:
+        """当前写在 Neo4j 里的图谱版本（KGMeta），评测时记入运行配置。"""
+        rows = self._read(Q_KG_VERSION, sid=self.series_id)
+        return rows[0]["kg_version"] if rows else None
 
     def neighbors(
         self,

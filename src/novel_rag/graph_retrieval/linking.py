@@ -51,11 +51,21 @@ class LinkedSpan:
 
 
 class EntityLinker:
-    def __init__(self, rows: Iterable[dict[str, Any]], rules: NameRules | None = None, min_len: int = 2):
+    def __init__(
+        self,
+        rows: Iterable[dict[str, Any]],
+        rules: NameRules | None = None,
+        min_len: int = 2,
+        min_mentions: int = 1,
+    ):
+        """min_mentions：提及数少于此值的实体不参与链接（图谱范围消融；1 = 全部）。"""
         self.rules = rules or NameRules()
         self.min_len = min_len
+        self.min_mentions = min_mentions
         self.names: dict[str, list[NameEntry]] = defaultdict(list)
         for r in rows:
+            if int(r.get("n_mentions") or 0) < min_mentions:
+                continue
             first = int(r["first_ro"])
             weak_names = set(r.get("weak_names") or [])
             forms = [(r["name"], max(first, int(r.get("name_visible") or first)))]
@@ -76,10 +86,12 @@ class EntityLinker:
         return {n, n.replace("·", ""), self.rules.canonical(n), self.rules.canonical(n).replace("·", "")} - {""}
 
     @classmethod
-    def from_neo4j(cls, driver: Any, database: str, series_id: str, rules: NameRules | None = None) -> EntityLinker:
+    def from_neo4j(
+        cls, driver: Any, database: str, series_id: str, rules: NameRules | None = None, min_mentions: int = 1
+    ) -> EntityLinker:
         with driver.session(database=database) as s:
             rows = [r.data() for r in s.run(Q_NAMES, sid=series_id)]
-        return cls(rows, rules)
+        return cls(rows, rules, min_mentions=min_mentions)
 
     def visible(self, name: str, max_reading_order: int | None) -> list[NameEntry]:
         best: dict[str, NameEntry] = {}

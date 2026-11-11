@@ -114,6 +114,9 @@ class GraphRoute(Retriever):
         path_limit: int = 5,
         entity_types: Sequence[str] | None = None,
         max_tier: int = 3,
+        path_node_types: Sequence[str] | None = None,
+        path_exclude_node_types: Sequence[str] | None = None,
+        kg_version: str | None = None,
     ):
         self.q, self.linker, self.chunks = queries, linker, chunks
         self.max_entities = max_entities
@@ -122,6 +125,9 @@ class GraphRoute(Retriever):
         self.path_limit = path_limit
         self.entity_types = entity_types
         self.max_tier = max_tier  # 0 = 实体间直接关系；1 = + 路径；2 = + 各实体主要关系；3 = + 高频提及
+        self.path_node_types = path_node_types
+        self.path_exclude_node_types = path_exclude_node_types
+        self.kg_version = kg_version
         self.last_latency_ms: dict[str, float] = {}
         self.last_debug: dict[str, Any] = {}
         self._weak_spans: list[str] = []
@@ -155,7 +161,11 @@ class GraphRoute(Retriever):
             for b in ents[i + 1 :]:
                 for r in self.q.between(a, b, max_ro, limit=10).rows:
                     add(0, r["n_evidence"], r["evidence"])
-                for p in self.q.paths(a, b, max_ro, limit=self.path_limit).rows:
+                paths = self.q.paths(
+                    a, b, max_ro, limit=self.path_limit,
+                    node_types=self.path_node_types, exclude_node_types=self.path_exclude_node_types,
+                )  # fmt: skip
+                for p in paths.rows:
                     for r in p["rels"]:
                         add(1, r["n_evidence"], r["evidence"])
         for a in ents:
@@ -194,4 +204,9 @@ class GraphRoute(Retriever):
             "per_entity_mentions": self.per_entity_mentions,
             "path_limit": self.path_limit,
             "max_tier": self.max_tier,
+            "entity_types": list(self.entity_types) if self.entity_types else None,
+            "path_node_types": list(self.path_node_types) if self.path_node_types else None,
+            "path_exclude_node_types": list(self.path_exclude_node_types) if self.path_exclude_node_types else None,
+            "min_entity_mentions": self.linker.min_mentions,
+            "kg_version": self.kg_version,
         }

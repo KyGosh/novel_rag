@@ -13,6 +13,7 @@ bootstrap 置信区间与分阶段延迟，结果落盘到 eval/results/。
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name sum_restrict --summary-restrict 5
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name graph3 --routes bm25,vector,graph
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name es2 --es-analysis es2   # 回灌人名词典后的索引
+    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name g_p --routes bm25,vector,graph --graph-scope person
 
 所有覆盖项都会写回配置快照（run.json 的 config），实验记录与实际运行的参数一致。
 检索范围（--scope）默认是评测集涉及的卷（设置 A）；`all` 表示该分块版本下已切分的全部卷（设置 B）。
@@ -45,6 +46,15 @@ def _books_with_chunks(books_dir: Path, version: str) -> list[str]:
     return sorted(p.parents[2].name for p in books_dir.glob(f"*/chunks/{version}/chunks.jsonl"))
 
 
+# 图谱范围消融的预设（P3.1 验收 6）：都只改查询期行为，不改图谱
+GRAPH_SCOPES: dict[str, dict[str, object]] = {
+    "all": {},
+    "person": {"route_entity_types": ("Person",), "route_path_node_types": ("Person",)},
+    "no_event": {"route_path_exclude_node_types": ("Event",)},
+    "min2": {"route_min_entity_mentions": 2},
+}
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -66,6 +76,11 @@ def main() -> int:
     parser.add_argument("--summary-chapters", type=int, help="摘要定位取前几章（覆盖 summary.locate_top_chapters）")
     parser.add_argument("--summary-restrict", type=int, default=0, help="> 0：整条链路只在摘要选出的前 N 章内检索")
     parser.add_argument("--graph-tier", type=int, help="图谱第三路的证据层级（覆盖 kg.route_max_tier）")
+    parser.add_argument(
+        "--graph-scope", choices=sorted(GRAPH_SCOPES), default="all",
+        help="图谱范围消融：person = 只链接人物、路径只经过人物；no_event = 路径不经过事件；"
+        "min2 = 不链接只提及 1 次的实体",
+    )  # fmt: skip
     parser.add_argument("--scope", help="检索范围：逗号分隔的 book_id，或 all；默认为评测集涉及的卷")
     parser.add_argument("--spoiler-filter", action="store_true", help="用每题的 max_reading_order 过滤检索范围")
     parser.add_argument("--generate", action="store_true", help="对每题调用生成模型作答（消耗 LLM 调用，有缓存）")
@@ -73,6 +88,9 @@ def main() -> int:
     args = parser.parse_args()
 
     s = get_settings()
+    kg_overrides = dict(GRAPH_SCOPES[args.graph_scope])
+    if args.graph_tier is not None:
+        kg_overrides["route_max_tier"] = args.graph_tier
     overrides = {
         k: v
         for k, v in {
@@ -93,7 +111,7 @@ def main() -> int:
         update={
             "retrieval": s.retrieval.model_copy(update=overrides),
             "summary": s.summary.model_copy(update=summary_overrides),
-            "kg": s.kg.model_copy(update={"route_max_tier": args.graph_tier} if args.graph_tier is not None else {}),
+            "kg": s.kg.model_copy(update=kg_overrides),
         }
     )
     rc = s.retrieval
@@ -187,6 +205,8 @@ def main() -> int:
             **summary_overrides,
             "summary_restrict": args.summary_restrict,
             "graph_tier": args.graph_tier,
+            "graph_scope": args.graph_scope,
+            "kg": kg_overrides,
         },
         "config": s.snapshot(),
     }

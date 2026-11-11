@@ -41,7 +41,7 @@ from novel_rag.kg.schema import (
 from novel_rag.llm.base import ChatModel
 from novel_rag.prompts import Prompt
 
-CATEGORY_VERSION = "kg-category-4"  # 卡片内容、批次切分、默认值、清洗规则的版本
+CATEGORY_VERSION = "kg-category-5"  # 卡片内容、批次切分、默认值、清洗规则的版本
 
 
 class CategoryItem(BaseModel):
@@ -352,12 +352,19 @@ def weak_names(
     return out, details
 
 
-def linked_form_counts(records: Sequence[dict[str, Any]]) -> Counter:
-    """写法 → 被抽取为实体提及的总次数（任何类型；提及的 count 是该写法在本段出现的次数）。"""
+def linked_form_counts(records: Sequence[dict[str, Any]], rules: Any = None) -> Counter:
+    """写法 → 被抽取为实体提及的总次数（任何类型；提及的 count 是该写法在本段出现的次数）。
+    rules（NameRules）给出时，带称谓的人物提及（"某某爵士"）也记到去掉称谓的写法上：原文里这些出现同样是在指
+    这个名字，否则带称谓写法占多数的名字会被误判为弱名字。"""
     c: Counter = Counter()
     for rec in records:
         for m in rec["mentions"]:
-            c[normalize_name(m["name"])] += int(m.get("count", 1))
+            n, k = normalize_name(m["name"]), int(m.get("count", 1))
+            c[n] += k
+            if rules is not None and m.get("type") == PERSON:
+                cn = normalize_name(rules.canonical(n))
+                if cn and cn != n:
+                    c[cn] += k
     return c
 
 

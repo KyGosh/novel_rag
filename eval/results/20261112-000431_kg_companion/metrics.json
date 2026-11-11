@@ -1,0 +1,96 @@
+{
+  "created": "2026-11-12T00:04:31",
+  "git": {
+    "commit": "7c9d06cb373f09294300e6d9e178423af2d98314",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "56be6611",
+  "n": 24,
+  "verdicts": {
+    "partial": 3,
+    "supported": 13,
+    "unsupported": 8
+  },
+  "support_rate": 0.542,
+  "support_rate_incl_partial": 0.667,
+  "by_evidence_count": {
+    "n_evidence=1": {
+      "n": 16,
+      "verdicts": {
+        "partial": 3,
+        "unsupported": 5,
+        "supported": 8
+      },
+      "support_rate": 0.5,
+      "support_rate_incl_partial": 0.688
+    },
+    "n_evidence>=2": {
+      "n": 8,
+      "verdicts": {
+        "supported": 5,
+        "unsupported": 3
+      },
+      "support_rate": 0.625,
+      "support_rate_incl_partial": 0.625
+    }
+  },
+  "not_supported": [
+    {
+      "key": "asoiaf:person:卓耿|COMPANION||asoiaf:person:丹妮莉丝·坦格利安",
+      "verdict": "partial",
+      "note": "证据只说她的龙诞生，没点名卓耿"
+    },
+    {
+      "key": "asoiaf:person:夏天|COMPANION||asoiaf:person:布兰·史塔克",
+      "verdict": "partial",
+      "note": "证据把夏天、毛毛狗和布兰、瑞肯放在一起说，看不出夏天属于谁"
+    },
+    {
+      "key": "asoiaf:person:夏天|COMPANION||asoiaf:person:布兰登·陶哈",
+      "verdict": "unsupported",
+      "note": "证据是布兰·史塔克的冰原狼，宾语实体错成了布兰登·陶哈（消歧问题）"
+    },
+    {
+      "key": "asoiaf:person:夏天|COMPANION||asoiaf:person:瑞肯",
+      "verdict": "unsupported",
+      "note": "夏天是布兰的狼，不是瑞肯的；证据是笼统的一句"
+    },
+    {
+      "key": "asoiaf:person:娜梅莉亚|COMPANION||asoiaf:person:亲王",
+      "verdict": "unsupported",
+      "note": "这里的娜梅莉亚是道朗的侄女（沙蛇），不是动物；动物与同名人物被并成一簇"
+    },
+    {
+      "key": "asoiaf:person:娜梅莉亚|COMPANION||asoiaf:person:奥柏伦·马泰尔",
+      "verdict": "unsupported",
+      "note": "这里的娜梅莉亚是奥柏伦的私生女，不是动物"
+    },
+    {
+      "key": "asoiaf:person:娜梅莉亚|COMPANION||asoiaf:person:艾莉亚·史塔克|嫁拉姆斯",
+      "verdict": "unsupported",
+      "note": "证据是艾莉亚的冰原狼，但宾语是“嫁拉姆斯”那个艾莉亚簇（假艾莉亚），实体错"
+    },
+    {
+      "key": "asoiaf:person:毛毛狗|COMPANION||asoiaf:person:布兰·史塔克",
+      "verdict": "unsupported",
+      "note": "毛毛狗是瑞肯的狼，不是布兰的；证据是笼统的一句"
+    },
+    {
+      "key": "asoiaf:person:狡猾|COMPANION||asoiaf:person:琼恩·雪诺",
+      "verdict": "unsupported",
+      "note": "序章里呼唤狡猾小妹的是六形者瓦拉米尔，不是琼恩"
+    },
+    {
+      "key": "asoiaf:person:独眼|COMPANION||asoiaf:person:琼恩·雪诺",
+      "verdict": "unsupported",
+      "note": "同上，独眼是瓦拉米尔的狼"
+    },
+    {
+      "key": "asoiaf:person:韦赛利昂|COMPANION||asoiaf:person:丹妮莉丝·坦格利安",
+      "verdict": "partial",
+      "note": "证据只说她暴躁的孩子（龙），没点名韦赛利昂"
+    }
+  ],
+  "review": "Claude 预标 + 用户核对（2026-11-12，24 条全部同意预标，未改动）"
+}

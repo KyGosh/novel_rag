@@ -202,7 +202,7 @@ def main() -> int:
     weak_details: list[dict] = []
     if common_words is not None:
         weak, weak_details = weak_names(
-            entities, linked_form_counts(records), CorpusCounter(chunk_text[c] for c in sorted(used_ids)),
+            entities, linked_form_counts(records, series.rules), CorpusCounter(chunk_text[c] for c in sorted(used_ids)),
             common_words, min_linked_ratio=k.weak_name_min_linked_ratio, stats=cat_stats,
         )  # fmt: skip
         for e in entities:

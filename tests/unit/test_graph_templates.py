@@ -146,3 +146,22 @@ def test_render_budget_and_evidence():
     assert len(text) <= 600 and text.endswith("（结果过长，已截断）")
     assert "demo-1:0001:0000（卷一 · 米拉）" in text
     assert "没有找到" in render(QueryResult("profile", {}, []), lambda c: c, 100)
+
+
+def test_linker_min_mentions_threshold():
+    lk = EntityLinker(ROWS, min_mentions=6)
+    # 白桦只有 5 次提及：不参与链接
+    assert [c.entity_id for c in lk.link("阿岚来了", 10)[0].candidates] == ["demo:person:阿岚·铁杉"]
+    assert lk.link("阿岚·白桦", 10)[0].text != "阿岚·白桦"
+
+
+def test_paths_node_type_params():
+    drv = FakeDriver([])
+    g = GraphQueries(drv, "neo4j", KGConfig(), "demo")
+    g.paths("a", "b", 5)
+    p = drv.tx.calls[-1][1]
+    assert p["node_types"] is None and p["exclude_node_types"] is None
+    g.paths("a", "b", 5, node_types=("Person",), exclude_node_types=("Event",))
+    q, p = drv.tx.calls[-1]
+    assert p["node_types"] == ["Person"] and p["exclude_node_types"] == ["Event"]
+    assert "$node_types" in q and "$exclude_node_types" in q

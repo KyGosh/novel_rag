@@ -14,6 +14,8 @@
    与系统的提及 → 实体映射比较，报告成对 P / R / F1 与 B-cubed（只统计双方都有标签的提及）。
 3. 关系证据：随机 100 条关系，金标 relations_gold.jsonl：
    {"key": ..., "verdict": "supported|partial|unsupported"}。
+score 加 --gold-kg <旧版本>：用旧图谱的已核对金标评新图谱（抽取和消歧金标与图谱版本无关，直接沿用；
+关系证据只保留在新图谱中仍然存在的关系键，被改写或删除的剔除，报告剩余条数）。
 """
 
 from __future__ import annotations
@@ -56,6 +58,7 @@ def main() -> int:
     parser.add_argument("action", choices=["export", "score"])
     parser.add_argument("--kg", required=True, help="图谱版本")
     parser.add_argument("--extract-tag", default="all")
+    parser.add_argument("--gold-kg", help="score：金标所在的旧图谱版本（默认就是 --kg）")
     args = parser.parse_args()
 
     s = get_settings()
@@ -79,6 +82,7 @@ def main() -> int:
     ents = {e["entity_id"]: e for e in tables["entities"]}
     work = s.paths.reports_dir / "kg_quality" / args.kg
     work.mkdir(parents=True, exist_ok=True)
+    gold_dir = s.paths.reports_dir / "kg_quality" / (args.gold_kg or args.kg)
     rng = random.Random(SEED)
 
     # ---- 抽样（export 与 score 用同一种子，结果一致）----
@@ -152,6 +156,7 @@ def main() -> int:
         "created": datetime.now().isoformat(timespec="seconds"),
         "git": git_info(),
         "kg_version": args.kg,
+        "gold_from": args.gold_kg or args.kg,
         "extract_version": xver,
         "seed": SEED,
     }
@@ -159,7 +164,7 @@ def main() -> int:
     def canon(n: str) -> str:
         return normalize_name(rules.canonical(n)).replace("·", "")
 
-    gold_path = work / "extraction_gold.jsonl"
+    gold_path = gold_dir / "extraction_gold.jsonl"
     if gold_path.is_file():
         tp_e = fp_e = fn_e = tp_r = fp_r = fn_r = 0
         per_chunk = []
@@ -210,7 +215,7 @@ def main() -> int:
                          "recall": round(tp_r / max(tp_r + fn_r, 1), 3)},
         }  # fmt: skip
 
-    gold_path = work / "disamb_gold.jsonl"
+    gold_path = gold_dir / "disamb_gold.jsonl"
     if gold_path.is_file():
         gold = {g["mid"]: g["gold"] for g in map(json.loads, gold_path.open(encoding="utf-8")) if g.get("gold")}
         mids = [m for m in gold if m in m2e]
@@ -250,10 +255,11 @@ def main() -> int:
             ][:50],
         }
 
-    gold_path = work / "relations_gold.jsonl"
+    gold_path = gold_dir / "relations_gold.jsonl"
     if gold_path.is_file():
-        gold_rows = list(map(json.loads, gold_path.open(encoding="utf-8")))
         nev = {rel_key(r): r["n_evidence"] for r in rels}
+        all_rows = list(map(json.loads, gold_path.open(encoding="utf-8")))
+        gold_rows = [g for g in all_rows if g["key"] in nev]  # 旧金标里在新图谱中已被改写或删除的关系剔除
 
         def rates(vs: list[str]) -> dict:
             c = Counter(vs)
@@ -262,13 +268,15 @@ def main() -> int:
                     "support_rate_incl_partial": round((c["supported"] + c["partial"]) / n, 3)}  # fmt: skip
 
         out["relation_evidence"] = {
+            "gold_rows": len(all_rows),
+            "dropped_not_in_graph": [g["key"] for g in all_rows if g["key"] not in nev],
             **rates([g["verdict"] for g in gold_rows]),
             "by_evidence_count": {
                 "n_evidence=1": rates([g["verdict"] for g in gold_rows if nev[g["key"]] == 1]),
                 "n_evidence>=2": rates([g["verdict"] for g in gold_rows if nev[g["key"]] >= 2]),
             },
         }
-    review = work / "review_status.txt"
+    review = gold_dir / "review_status.txt"
     out["review"] = review.read_text(encoding="utf-8").strip() if review.is_file() else "Claude 预标（待用户核对）"
     res = s.paths.results_dir / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_kg_quality"
     res.mkdir(parents=True)

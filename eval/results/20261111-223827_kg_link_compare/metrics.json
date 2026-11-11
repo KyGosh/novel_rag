@@ -1,0 +1,2703 @@
+{
+  "created": "2026-11-11T22:38:27",
+  "git": {
+    "commit": "7c9d06cb373f09294300e6d9e178423af2d98314",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "dataset": "asoiaf_v1",
+  "splits": [
+    "dev",
+    "test"
+  ],
+  "old_kg": "d9c84c78",
+  "new_kg": "a9c5c244",
+  "n_questions": 282,
+  "identical": 190,
+  "changed": 92,
+  "changed_by_kind": {
+    "removed": 36,
+    "weak": 58,
+    "added": 3,
+    "span": 3,
+    "other": 3
+  },
+  "changed_only_weak": 52,
+  "weak_hits_new": [
+    {
+      "id": "fact-49952327",
+      "text": "总司令",
+      "entities": [
+        "asoiaf:title:总司令"
+      ]
+    },
+    {
+      "id": "fact-cb8b38ae",
+      "text": "圣堂",
+      "entities": [
+        "asoiaf:location:圣堂"
+      ]
+    },
+    {
+      "id": "fact-3e7e419e",
+      "text": "石山",
+      "entities": [
+        "asoiaf:location:石山"
+      ]
+    },
+    {
+      "id": "fact-d4b43c48",
+      "text": "白袍",
+      "entities": [
+        "asoiaf:title:白袍"
+      ]
+    },
+    {
+      "id": "fact-e132c824",
+      "text": "野人",
+      "entities": [
+        "asoiaf:location:野人",
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "fact-7186435a",
+      "text": "总司令",
+      "entities": [
+        "asoiaf:person:琼恩·雪诺",
+        "asoiaf:title:总司令"
+      ]
+    },
+    {
+      "id": "fact-7186435a",
+      "text": "指挥官",
+      "entities": [
+        "asoiaf:title:指挥官"
+      ]
+    },
+    {
+      "id": "fact-f02f4d99",
+      "text": "谷仓",
+      "entities": [
+        "asoiaf:location:谷仓"
+      ]
+    },
+    {
+      "id": "fact-b305e1a2",
+      "text": "团长",
+      "entities": [
+        "asoiaf:title:团长"
+      ]
+    },
+    {
+      "id": "fact-b305e1a2",
+      "text": "团长",
+      "entities": [
+        "asoiaf:title:团长"
+      ]
+    },
+    {
+      "id": "fact-008cc65f",
+      "text": "古城",
+      "entities": [
+        "asoiaf:location:古城"
+      ]
+    },
+    {
+      "id": "fact-fffc3f14",
+      "text": "亲王",
+      "entities": [
+        "asoiaf:person:亲王",
+        "asoiaf:person:道朗·马泰尔",
+        "asoiaf:title:多恩亲王"
+      ]
+    },
+    {
+      "id": "fact-a03e4e3a",
+      "text": "客栈",
+      "entities": [
+        "asoiaf:location:客栈"
+      ]
+    },
+    {
+      "id": "fact-87afda19",
+      "text": "大军",
+      "entities": [
+        "asoiaf:organization:大军"
+      ]
+    },
+    {
+      "id": "fact-87afda19",
+      "text": "佣兵",
+      "entities": [
+        "asoiaf:location:佣兵",
+        "asoiaf:organization:佣兵"
+      ]
+    },
+    {
+      "id": "fact-353b9116",
+      "text": "门房",
+      "entities": [
+        "asoiaf:person:阿蕊丽"
+      ]
+    },
+    {
+      "id": "fact-353b9116",
+      "text": "铜板",
+      "entities": [
+        "asoiaf:person:琼恩·海德"
+      ]
+    },
+    {
+      "id": "relation-a4650c9a",
+      "text": "此人",
+      "entities": [
+        "asoiaf:person:此人"
+      ]
+    },
+    {
+      "id": "relation-a9f0e8b1",
+      "text": "佣兵",
+      "entities": [
+        "asoiaf:location:佣兵",
+        "asoiaf:organization:佣兵"
+      ]
+    },
+    {
+      "id": "relation-c551bc1d",
+      "text": "野人",
+      "entities": [
+        "asoiaf:location:野人",
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "relation-905659c1",
+      "text": "组织",
+      "entities": [
+        "asoiaf:organization:组织"
+      ]
+    },
+    {
+      "id": "relation-e7737b06",
+      "text": "野人",
+      "entities": [
+        "asoiaf:location:野人",
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "relation-16603676",
+      "text": "都城",
+      "entities": [
+        "asoiaf:location:都城"
+      ]
+    },
+    {
+      "id": "relation-8d694692",
+      "text": "营地",
+      "entities": [
+        "asoiaf:location:营地"
+      ]
+    },
+    {
+      "id": "relation-eb199636",
+      "text": "外公",
+      "entities": [
+        "asoiaf:person:外公"
+      ]
+    },
+    {
+      "id": "relation-709622b8",
+      "text": "克里奥",
+      "entities": [
+        "asoiaf:person:克里奥·佛雷"
+      ]
+    },
+    {
+      "id": "relation-d42c0873",
+      "text": "克里奥",
+      "entities": [
+        "asoiaf:person:克里奥·佛雷"
+      ]
+    },
+    {
+      "id": "relation-1de80af5",
+      "text": "贵族",
+      "entities": [
+        "asoiaf:title:贵族"
+      ]
+    },
+    {
+      "id": "relation-a57ca8aa",
+      "text": "野人",
+      "entities": [
+        "asoiaf:location:野人",
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "multihop-995fc61c",
+      "text": "城墙",
+      "entities": [
+        "asoiaf:location:城墙"
+      ]
+    },
+    {
+      "id": "multihop-47d45e7b",
+      "text": "佣兵团",
+      "entities": [
+        "asoiaf:organization:佣兵团"
+      ]
+    },
+    {
+      "id": "multihop-aae769bc",
+      "text": "外公",
+      "entities": [
+        "asoiaf:person:外公"
+      ]
+    },
+    {
+      "id": "multihop-fb3c63cb",
+      "text": "北军",
+      "entities": [
+        "asoiaf:organization:北军"
+      ]
+    },
+    {
+      "id": "multihop-54de74b2",
+      "text": "教头",
+      "entities": [
+        "asoiaf:title:教头"
+      ]
+    },
+    {
+      "id": "multihop-ccfdc34e",
+      "text": "都城",
+      "entities": [
+        "asoiaf:location:都城"
+      ]
+    },
+    {
+      "id": "multihop-1ec89f19",
+      "text": "佣兵",
+      "entities": [
+        "asoiaf:location:佣兵",
+        "asoiaf:organization:佣兵"
+      ]
+    },
+    {
+      "id": "multihop-cca3e7ce",
+      "text": "高个",
+      "entities": [
+        "asoiaf:person:塔拉德",
+        "asoiaf:person:托雷格",
+        "asoiaf:person:邓肯"
+      ]
+    },
+    {
+      "id": "multihop-5ccd429a",
+      "text": "大道",
+      "entities": [
+        "asoiaf:location:大道"
+      ]
+    },
+    {
+      "id": "multihop-5ccd429a",
+      "text": "客栈",
+      "entities": [
+        "asoiaf:location:客栈"
+      ]
+    },
+    {
+      "id": "multihop-aae28913",
+      "text": "山洞",
+      "entities": [
+        "asoiaf:location:山洞"
+      ]
+    },
+    {
+      "id": "multihop-f9eaa232",
+      "text": "游骑兵",
+      "entities": [
+        "asoiaf:location:游骑兵",
+        "asoiaf:organization:守夜人"
+      ]
+    },
+    {
+      "id": "multihop-662fb02f",
+      "text": "老妪",
+      "entities": [
+        "asoiaf:title:老妪"
+      ]
+    },
+    {
+      "id": "multihop-662fb02f",
+      "text": "佣兵",
+      "entities": [
+        "asoiaf:location:佣兵",
+        "asoiaf:organization:佣兵"
+      ]
+    },
+    {
+      "id": "multihop-f558567a",
+      "text": "总司令",
+      "entities": [
+        "asoiaf:person:琼恩·雪诺",
+        "asoiaf:title:总司令"
+      ]
+    },
+    {
+      "id": "multihop-cbcf9387",
+      "text": "此人",
+      "entities": [
+        "asoiaf:person:此人"
+      ]
+    },
+    {
+      "id": "multihop-d1c20d4e",
+      "text": "山洞",
+      "entities": [
+        "asoiaf:location:山洞"
+      ]
+    },
+    {
+      "id": "multihop-a0a5f707",
+      "text": "男巫",
+      "entities": [
+        "asoiaf:organization:魁尔斯人"
+      ]
+    },
+    {
+      "id": "multihop-8b5f1bc0",
+      "text": "营地",
+      "entities": [
+        "asoiaf:location:营地"
+      ]
+    },
+    {
+      "id": "multihop-a5c45df6",
+      "text": "总司令",
+      "entities": [
+        "asoiaf:person:琼恩·雪诺",
+        "asoiaf:title:总司令"
+      ]
+    },
+    {
+      "id": "multihop-a5c45df6",
+      "text": "野人",
+      "entities": [
+        "asoiaf:location:野人",
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "multihop-20a4be97",
+      "text": "总司令",
+      "entities": [
+        "asoiaf:person:琼恩·雪诺",
+        "asoiaf:title:总司令"
+      ]
+    },
+    {
+      "id": "multihop-ef37c36f",
+      "text": "佣兵团",
+      "entities": [
+        "asoiaf:organization:佣兵团"
+      ]
+    },
+    {
+      "id": "multihop-ef37c36f",
+      "text": "军士",
+      "entities": [
+        "asoiaf:person:军士"
+      ]
+    },
+    {
+      "id": "multihop-ef37c36f",
+      "text": "佣兵",
+      "entities": [
+        "asoiaf:location:佣兵",
+        "asoiaf:organization:佣兵"
+      ]
+    },
+    {
+      "id": "multihop-6d9268fe",
+      "text": "高个",
+      "entities": [
+        "asoiaf:person:塔拉德",
+        "asoiaf:person:托雷格",
+        "asoiaf:person:邓肯"
+      ]
+    },
+    {
+      "id": "multihop-f7db6f08",
+      "text": "游骑兵",
+      "entities": [
+        "asoiaf:location:游骑兵",
+        "asoiaf:organization:守夜人"
+      ]
+    },
+    {
+      "id": "plot-2b54590f",
+      "text": "竞技场",
+      "entities": [
+        "asoiaf:location:竞技场"
+      ]
+    },
+    {
+      "id": "plot-36c88c80",
+      "text": "北军",
+      "entities": [
+        "asoiaf:organization:北军"
+      ]
+    },
+    {
+      "id": "plot-40dc50ae",
+      "text": "贵族",
+      "entities": [
+        "asoiaf:title:贵族"
+      ]
+    },
+    {
+      "id": "plot-40dc50ae",
+      "text": "金字塔",
+      "entities": [
+        "asoiaf:location:金字塔"
+      ]
+    },
+    {
+      "id": "plot-97469d62",
+      "text": "骑兵",
+      "entities": [
+        "asoiaf:location:骑兵"
+      ]
+    },
+    {
+      "id": "plot-1e4a6e4e",
+      "text": "总司令",
+      "entities": [
+        "asoiaf:person:琼恩·雪诺",
+        "asoiaf:title:总司令"
+      ]
+    },
+    {
+      "id": "plot-6ad685f5",
+      "text": "此人",
+      "entities": [
+        "asoiaf:person:此人"
+      ]
+    },
+    {
+      "id": "plot-cc2be0d6",
+      "text": "营地",
+      "entities": [
+        "asoiaf:location:营地"
+      ]
+    },
+    {
+      "id": "plot-e923c8ef",
+      "text": "头盔",
+      "entities": [
+        "asoiaf:person:亨克"
+      ]
+    },
+    {
+      "id": "plot-690ef506",
+      "text": "都城",
+      "entities": [
+        "asoiaf:location:都城"
+      ]
+    },
+    {
+      "id": "plot-64a72405",
+      "text": "野人",
+      "entities": [
+        "asoiaf:location:野人",
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "plot-622f9016",
+      "text": "野人",
+      "entities": [
+        "asoiaf:organization:野人"
+      ]
+    },
+    {
+      "id": "plot-622f9016",
+      "text": "野人",
+      "entities": [
+        "asoiaf:organization:野人"
+      ]
+    }
+  ],
+  "diffs": [
+    {
+      "id": "fact-88304fb4",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 7,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-49952327",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "总司令",
+          "start": 3,
+          "old": {
+            "asoiaf:title:总司令": false
+          },
+          "new": {
+            "asoiaf:title:总司令": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-241fffa3",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 0,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-9be5b4ac",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "武器",
+          "start": 14,
+          "old": {
+            "asoiaf:person:武器": false,
+            "asoiaf:title:武器师傅": false
+          },
+          "new": {
+            "asoiaf:title:武器师傅": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-cb8b38ae",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "圣堂",
+          "start": 28,
+          "old": {
+            "asoiaf:location:圣堂": false
+          },
+          "new": {
+            "asoiaf:location:圣堂": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-3e7e419e",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "石山",
+          "start": 13,
+          "old": {
+            "asoiaf:location:石山": false
+          },
+          "new": {
+            "asoiaf:location:石山": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-d4b43c48",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "白袍",
+          "start": 14,
+          "old": {
+            "asoiaf:title:白袍": false
+          },
+          "new": {
+            "asoiaf:title:白袍": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-e132c824",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "野人",
+          "start": 27,
+          "old": {
+            "asoiaf:organization:野人": false,
+            "asoiaf:location:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true,
+            "asoiaf:location:野人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-54c28f40",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 15,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false,
+            "asoiaf:title:奔流城伯爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false,
+            "asoiaf:title:奔流城伯爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-7186435a",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "总司令",
+          "start": 3,
+          "old": {
+            "asoiaf:person:琼恩·雪诺": false,
+            "asoiaf:title:总司令": false
+          },
+          "new": {
+            "asoiaf:person:琼恩·雪诺": true,
+            "asoiaf:title:总司令": true
+          }
+        },
+        {
+          "text": "指挥官",
+          "start": 17,
+          "old": {
+            "asoiaf:title:指挥官": false
+          },
+          "new": {
+            "asoiaf:title:指挥官": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-f02f4d99",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "谷仓",
+          "start": 18,
+          "old": {
+            "asoiaf:location:谷仓": false
+          },
+          "new": {
+            "asoiaf:location:谷仓": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-b305e1a2",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "团长",
+          "start": 15,
+          "old": {
+            "asoiaf:title:团长": false
+          },
+          "new": {
+            "asoiaf:title:团长": true
+          }
+        },
+        {
+          "text": "团长",
+          "start": 32,
+          "old": {
+            "asoiaf:title:团长": false
+          },
+          "new": {
+            "asoiaf:title:团长": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-008cc65f",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "古城",
+          "start": 24,
+          "old": {
+            "asoiaf:location:古城": false
+          },
+          "new": {
+            "asoiaf:location:古城": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-fffc3f14",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "亲王",
+          "start": 21,
+          "old": {
+            "asoiaf:person:道朗·马泰尔": false,
+            "asoiaf:person:亲王": false,
+            "asoiaf:title:多恩亲王": false
+          },
+          "new": {
+            "asoiaf:person:道朗·马泰尔": true,
+            "asoiaf:person:亲王": true,
+            "asoiaf:title:多恩亲王": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-a03e4e3a",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "客栈",
+          "start": 31,
+          "old": {
+            "asoiaf:location:客栈": false
+          },
+          "new": {
+            "asoiaf:location:客栈": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-f6f2e1d1",
+      "split": "test",
+      "kinds": [
+        "added"
+      ],
+      "spans": [
+        {
+          "text": "绿圣女",
+          "start": 17,
+          "old": {
+            "asoiaf:person:绿圣女": false
+          },
+          "new": {
+            "asoiaf:person:格拉茨旦·卡拉勒": false,
+            "asoiaf:person:绿圣女": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-87afda19",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "大军",
+          "start": 2,
+          "old": {
+            "asoiaf:organization:大军": false
+          },
+          "new": {
+            "asoiaf:organization:大军": true
+          }
+        },
+        {
+          "text": "佣兵",
+          "start": 22,
+          "old": {
+            "asoiaf:organization:佣兵": false,
+            "asoiaf:location:佣兵": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵": true,
+            "asoiaf:location:佣兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-b768cf97",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 0,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "fact-353b9116",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "门房",
+          "start": 5,
+          "old": {
+            "asoiaf:person:阿蕊丽": false
+          },
+          "new": {
+            "asoiaf:person:阿蕊丽": true
+          }
+        },
+        {
+          "text": "铜板",
+          "start": 24,
+          "old": {
+            "asoiaf:person:琼恩·海德": false
+          },
+          "new": {
+            "asoiaf:person:琼恩·海德": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-a4650c9a",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "此人",
+          "start": 17,
+          "old": {
+            "asoiaf:person:此人": false
+          },
+          "new": {
+            "asoiaf:person:此人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-85ffdc06",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 1,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-f095879a",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 0,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-a9f0e8b1",
+      "split": "dev",
+      "kinds": [
+        "removed",
+        "span",
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "奴隶",
+          "start": 4,
+          "old": {
+            "asoiaf:person:奴隶": false
+          },
+          "new": {}
+        },
+        {
+          "text": "佣兵",
+          "start": 17,
+          "old": {
+            "asoiaf:organization:佣兵": false,
+            "asoiaf:location:佣兵": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵": true,
+            "asoiaf:location:佣兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-c551bc1d",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "野人",
+          "start": 1,
+          "old": {
+            "asoiaf:organization:野人": false,
+            "asoiaf:location:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true,
+            "asoiaf:location:野人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-905659c1",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "组织",
+          "start": 29,
+          "old": {
+            "asoiaf:organization:组织": false
+          },
+          "new": {
+            "asoiaf:organization:组织": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-e7737b06",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "野人",
+          "start": 8,
+          "old": {
+            "asoiaf:organization:野人": false,
+            "asoiaf:location:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true,
+            "asoiaf:location:野人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-16603676",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "都城",
+          "start": 1,
+          "old": {
+            "asoiaf:location:都城": false
+          },
+          "new": {
+            "asoiaf:location:都城": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-8d694692",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "营地",
+          "start": 5,
+          "old": {
+            "asoiaf:location:营地": false
+          },
+          "new": {
+            "asoiaf:location:营地": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-eb199636",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "外公",
+          "start": 13,
+          "old": {
+            "asoiaf:person:外公": false
+          },
+          "new": {
+            "asoiaf:person:外公": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-709622b8",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "克里奥",
+          "start": 8,
+          "old": {
+            "asoiaf:person:克里奥·佛雷": false
+          },
+          "new": {
+            "asoiaf:person:克里奥·佛雷": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-d42c0873",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "克里奥",
+          "start": 4,
+          "old": {
+            "asoiaf:person:克里奥·佛雷": false
+          },
+          "new": {
+            "asoiaf:person:克里奥·佛雷": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-1de80af5",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "贵族",
+          "start": 19,
+          "old": {
+            "asoiaf:title:贵族": false
+          },
+          "new": {
+            "asoiaf:title:贵族": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-06e48690",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 1,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-8ff5cb6e",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 0,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-a57ca8aa",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "野人",
+          "start": 0,
+          "old": {
+            "asoiaf:organization:野人": false,
+            "asoiaf:location:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true,
+            "asoiaf:location:野人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-b190f56b",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 15,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-6e0be100",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 0,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false
+          }
+        },
+        {
+          "text": "劳勃",
+          "start": 11,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "relation-75f8846a",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 10,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-995fc61c",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "城墙",
+          "start": 39,
+          "old": {
+            "asoiaf:location:城墙": false
+          },
+          "new": {
+            "asoiaf:location:城墙": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-47d45e7b",
+      "split": "test",
+      "kinds": [
+        "removed",
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "首相",
+          "start": 16,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false,
+            "asoiaf:person:首相": false,
+            "asoiaf:title:泰温·兰尼斯特": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false,
+            "asoiaf:title:泰温·兰尼斯特": true
+          }
+        },
+        {
+          "text": "佣兵团",
+          "start": 23,
+          "old": {
+            "asoiaf:organization:佣兵团": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵团": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-f4af5f56",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 28,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-8c3ef2c8",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 1,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-aae769bc",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "外公",
+          "start": 3,
+          "old": {
+            "asoiaf:person:外公": false
+          },
+          "new": {
+            "asoiaf:person:外公": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-fb3c63cb",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "北军",
+          "start": 14,
+          "old": {
+            "asoiaf:organization:北军": false
+          },
+          "new": {
+            "asoiaf:organization:北军": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-54de74b2",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "教头",
+          "start": 14,
+          "old": {
+            "asoiaf:title:教头": false
+          },
+          "new": {
+            "asoiaf:title:教头": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-ccfdc34e",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "都城",
+          "start": 8,
+          "old": {
+            "asoiaf:location:都城": false
+          },
+          "new": {
+            "asoiaf:location:都城": true
+          }
+        },
+        {
+          "text": "首相",
+          "start": 19,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false,
+            "asoiaf:title:泰温·兰尼斯特": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false,
+            "asoiaf:title:泰温·兰尼斯特": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-1ec89f19",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "佣兵",
+          "start": 31,
+          "old": {
+            "asoiaf:organization:佣兵": false,
+            "asoiaf:location:佣兵": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵": true,
+            "asoiaf:location:佣兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-cca3e7ce",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "高个",
+          "start": 10,
+          "old": {
+            "asoiaf:person:托雷格": false,
+            "asoiaf:person:塔拉德": false,
+            "asoiaf:person:邓肯": false
+          },
+          "new": {
+            "asoiaf:person:托雷格": true,
+            "asoiaf:person:塔拉德": true,
+            "asoiaf:person:邓肯": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-f8b7f372",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "龙蛋",
+          "start": 3,
+          "old": {
+            "asoiaf:person:龙蛋": false,
+            "asoiaf:location:龙蛋": false
+          },
+          "new": {
+            "asoiaf:location:龙蛋": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-d9ea9126",
+      "split": "dev",
+      "kinds": [
+        "added",
+        "removed",
+        "span"
+      ],
+      "spans": [
+        {
+          "text": "史塔克",
+          "start": 15,
+          "old": {},
+          "new": {
+            "asoiaf:person:艾德·史塔克": false,
+            "asoiaf:person:凯特琳·史塔克": false,
+            "asoiaf:organization:史塔克": false,
+            "asoiaf:location:史塔克": false,
+            "asoiaf:title:史塔克夫人": false,
+            "asoiaf:title:奈德·史塔克": false
+          }
+        },
+        {
+          "text": "史塔克女孩",
+          "start": 15,
+          "old": {
+            "asoiaf:person:史塔克女孩": false
+          },
+          "new": {}
+        }
+      ]
+    },
+    {
+      "id": "multihop-54709cb2",
+      "split": "test",
+      "kinds": [
+        "other"
+      ],
+      "spans": [
+        {
+          "text": "首相",
+          "start": 19,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-5ccd429a",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "大道",
+          "start": 3,
+          "old": {
+            "asoiaf:location:大道": false
+          },
+          "new": {
+            "asoiaf:location:大道": true
+          }
+        },
+        {
+          "text": "客栈",
+          "start": 35,
+          "old": {
+            "asoiaf:location:客栈": false
+          },
+          "new": {
+            "asoiaf:location:客栈": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-aae28913",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "山洞",
+          "start": 31,
+          "old": {
+            "asoiaf:location:山洞": false
+          },
+          "new": {
+            "asoiaf:location:山洞": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-f9eaa232",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "游骑兵",
+          "start": 10,
+          "old": {
+            "asoiaf:organization:守夜人": false,
+            "asoiaf:location:游骑兵": false
+          },
+          "new": {
+            "asoiaf:organization:守夜人": true,
+            "asoiaf:location:游骑兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-c256be80",
+      "split": "test",
+      "kinds": [
+        "added",
+        "removed",
+        "span"
+      ],
+      "spans": [
+        {
+          "text": "史塔克",
+          "start": 14,
+          "old": {},
+          "new": {
+            "asoiaf:person:艾德·史塔克": false,
+            "asoiaf:person:凯特琳·史塔克": false,
+            "asoiaf:organization:史塔克": false,
+            "asoiaf:location:史塔克": false,
+            "asoiaf:title:史塔克夫人": false,
+            "asoiaf:title:奈德·史塔克": false
+          }
+        },
+        {
+          "text": "史塔克女孩",
+          "start": 14,
+          "old": {
+            "asoiaf:person:史塔克女孩": false
+          },
+          "new": {}
+        }
+      ]
+    },
+    {
+      "id": "multihop-662fb02f",
+      "split": "dev",
+      "kinds": [
+        "removed",
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "老妪",
+          "start": 0,
+          "old": {
+            "asoiaf:person:老妪": false,
+            "asoiaf:title:老妪": false
+          },
+          "new": {
+            "asoiaf:title:老妪": true
+          }
+        },
+        {
+          "text": "佣兵",
+          "start": 34,
+          "old": {
+            "asoiaf:organization:佣兵": false,
+            "asoiaf:location:佣兵": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵": true,
+            "asoiaf:location:佣兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-f558567a",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "总司令",
+          "start": 22,
+          "old": {
+            "asoiaf:person:琼恩·雪诺": false,
+            "asoiaf:title:总司令": false
+          },
+          "new": {
+            "asoiaf:person:琼恩·雪诺": true,
+            "asoiaf:title:总司令": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-cbcf9387",
+      "split": "test",
+      "kinds": [
+        "removed",
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "此人",
+          "start": 21,
+          "old": {
+            "asoiaf:person:此人": false
+          },
+          "new": {
+            "asoiaf:person:此人": true
+          }
+        },
+        {
+          "text": "奔流城",
+          "start": 32,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false,
+            "asoiaf:title:奔流城伯爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false,
+            "asoiaf:title:奔流城伯爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-4c7a5a29",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 2,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-d1c20d4e",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "山洞",
+          "start": 24,
+          "old": {
+            "asoiaf:location:山洞": false
+          },
+          "new": {
+            "asoiaf:location:山洞": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-dc2dd31f",
+      "split": "dev",
+      "kinds": [
+        "other"
+      ],
+      "spans": [
+        {
+          "text": "首相",
+          "start": 14,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-a0a5f707",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "男巫",
+          "start": 30,
+          "old": {
+            "asoiaf:organization:魁尔斯人": false
+          },
+          "new": {
+            "asoiaf:organization:魁尔斯人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-8b5f1bc0",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "营地",
+          "start": 32,
+          "old": {
+            "asoiaf:location:营地": false
+          },
+          "new": {
+            "asoiaf:location:营地": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-a0e88e1b",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 22,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-de4a0ef6",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 1,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-a5c45df6",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "总司令",
+          "start": 29,
+          "old": {
+            "asoiaf:person:琼恩·雪诺": false,
+            "asoiaf:title:总司令": false
+          },
+          "new": {
+            "asoiaf:person:琼恩·雪诺": true,
+            "asoiaf:title:总司令": true
+          }
+        },
+        {
+          "text": "野人",
+          "start": 35,
+          "old": {
+            "asoiaf:organization:野人": false,
+            "asoiaf:location:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true,
+            "asoiaf:location:野人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-20a4be97",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "总司令",
+          "start": 24,
+          "old": {
+            "asoiaf:person:琼恩·雪诺": false,
+            "asoiaf:title:总司令": false
+          },
+          "new": {
+            "asoiaf:person:琼恩·雪诺": true,
+            "asoiaf:title:总司令": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-6ff66ab5",
+      "split": "dev",
+      "kinds": [
+        "other"
+      ],
+      "spans": [
+        {
+          "text": "首相",
+          "start": 14,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-ef37c36f",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "佣兵团",
+          "start": 21,
+          "old": {
+            "asoiaf:organization:佣兵团": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵团": true
+          }
+        },
+        {
+          "text": "军士",
+          "start": 26,
+          "old": {
+            "asoiaf:person:军士": false
+          },
+          "new": {
+            "asoiaf:person:军士": true
+          }
+        },
+        {
+          "text": "佣兵",
+          "start": 36,
+          "old": {
+            "asoiaf:organization:佣兵": false,
+            "asoiaf:location:佣兵": false
+          },
+          "new": {
+            "asoiaf:organization:佣兵": true,
+            "asoiaf:location:佣兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-6d9268fe",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "高个",
+          "start": 10,
+          "old": {
+            "asoiaf:person:托雷格": false,
+            "asoiaf:person:塔拉德": false,
+            "asoiaf:person:邓肯": false
+          },
+          "new": {
+            "asoiaf:person:托雷格": true,
+            "asoiaf:person:塔拉德": true,
+            "asoiaf:person:邓肯": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-5fccaab6",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "龙蛋",
+          "start": 14,
+          "old": {
+            "asoiaf:person:龙蛋": false,
+            "asoiaf:location:龙蛋": false
+          },
+          "new": {
+            "asoiaf:location:龙蛋": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "multihop-f7db6f08",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "游骑兵",
+          "start": 10,
+          "old": {
+            "asoiaf:organization:守夜人": false,
+            "asoiaf:location:游骑兵": false
+          },
+          "new": {
+            "asoiaf:organization:守夜人": true,
+            "asoiaf:location:游骑兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-65322664",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "赫伦堡",
+          "start": 1,
+          "old": {
+            "asoiaf:location:赫伦堡": false,
+            "asoiaf:title:赫伦堡伯爵": false,
+            "asoiaf:title:赫伦堡公爵": false,
+            "asoiaf:person:赫伦堡": false,
+            "asoiaf:title:赫伦堡伯爵夫人": false
+          },
+          "new": {
+            "asoiaf:location:赫伦堡": false,
+            "asoiaf:title:赫伦堡伯爵": false,
+            "asoiaf:title:赫伦堡公爵": false,
+            "asoiaf:title:赫伦堡伯爵夫人": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-2b54590f",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "竞技场",
+          "start": 25,
+          "old": {
+            "asoiaf:location:竞技场": false
+          },
+          "new": {
+            "asoiaf:location:竞技场": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-36c88c80",
+      "split": "test",
+      "kinds": [
+        "removed",
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 5,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        },
+        {
+          "text": "北军",
+          "start": 43,
+          "old": {
+            "asoiaf:organization:北军": false
+          },
+          "new": {
+            "asoiaf:organization:北军": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-9a510fc7",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "赫伦堡",
+          "start": 4,
+          "old": {
+            "asoiaf:location:赫伦堡": false,
+            "asoiaf:title:赫伦堡伯爵": false,
+            "asoiaf:title:赫伦堡公爵": false,
+            "asoiaf:person:赫伦堡": false,
+            "asoiaf:title:赫伦堡伯爵夫人": false
+          },
+          "new": {
+            "asoiaf:location:赫伦堡": false,
+            "asoiaf:title:赫伦堡伯爵": false,
+            "asoiaf:title:赫伦堡公爵": false,
+            "asoiaf:title:赫伦堡伯爵夫人": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-81bcd95e",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 8,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-a3348e94",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 17,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false
+          }
+        },
+        {
+          "text": "首相",
+          "start": 27,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-40dc50ae",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "贵族",
+          "start": 35,
+          "old": {
+            "asoiaf:title:贵族": false
+          },
+          "new": {
+            "asoiaf:title:贵族": true
+          }
+        },
+        {
+          "text": "金字塔",
+          "start": 42,
+          "old": {
+            "asoiaf:location:金字塔": false
+          },
+          "new": {
+            "asoiaf:location:金字塔": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-97469d62",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "骑兵",
+          "start": 5,
+          "old": {
+            "asoiaf:location:骑兵": false
+          },
+          "new": {
+            "asoiaf:location:骑兵": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-1e4a6e4e",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "总司令",
+          "start": 4,
+          "old": {
+            "asoiaf:person:琼恩·雪诺": false,
+            "asoiaf:title:总司令": false
+          },
+          "new": {
+            "asoiaf:person:琼恩·雪诺": true,
+            "asoiaf:title:总司令": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-37866d96",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 26,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-6ad685f5",
+      "split": "test",
+      "kinds": [
+        "removed",
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 3,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false,
+            "asoiaf:title:奔流城伯爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false,
+            "asoiaf:title:奔流城伯爵": false
+          }
+        },
+        {
+          "text": "此人",
+          "start": 29,
+          "old": {
+            "asoiaf:person:此人": false
+          },
+          "new": {
+            "asoiaf:person:此人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-d2c92113",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "奔流城",
+          "start": 9,
+          "old": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:person:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          },
+          "new": {
+            "asoiaf:location:奔流城": false,
+            "asoiaf:title:奔流城公爵": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-cc2be0d6",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "营地",
+          "start": 5,
+          "old": {
+            "asoiaf:location:营地": false
+          },
+          "new": {
+            "asoiaf:location:营地": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-e923c8ef",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "头盔",
+          "start": 15,
+          "old": {
+            "asoiaf:person:亨克": false
+          },
+          "new": {
+            "asoiaf:person:亨克": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-6591b923",
+      "split": "dev",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 14,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-690ef506",
+      "split": "test",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "首相",
+          "start": 4,
+          "old": {
+            "asoiaf:title:首相": false,
+            "asoiaf:title:首相大人": false
+          },
+          "new": {
+            "asoiaf:title:首相": true,
+            "asoiaf:title:首相大人": false
+          }
+        },
+        {
+          "text": "都城",
+          "start": 9,
+          "old": {
+            "asoiaf:location:都城": false
+          },
+          "new": {
+            "asoiaf:location:都城": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-6c00b045",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 1,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        },
+        {
+          "text": "劳勃",
+          "start": 20,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-07adfcfc",
+      "split": "test",
+      "kinds": [
+        "removed"
+      ],
+      "spans": [
+        {
+          "text": "劳勃",
+          "start": 16,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        },
+        {
+          "text": "劳勃",
+          "start": 49,
+          "old": {
+            "asoiaf:person:劳勃": false,
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          },
+          "new": {
+            "asoiaf:person:劳勃·拜拉席恩": false,
+            "asoiaf:person:劳勃·艾林": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-64a72405",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "野人",
+          "start": 7,
+          "old": {
+            "asoiaf:organization:野人": false,
+            "asoiaf:location:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true,
+            "asoiaf:location:野人": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "plot-622f9016",
+      "split": "dev",
+      "kinds": [
+        "weak"
+      ],
+      "spans": [
+        {
+          "text": "野人",
+          "start": 4,
+          "old": {
+            "asoiaf:organization:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true
+          }
+        },
+        {
+          "text": "野人",
+          "start": 18,
+          "old": {
+            "asoiaf:organization:野人": false
+          },
+          "new": {
+            "asoiaf:organization:野人": true
+          }
+        }
+      ]
+    }
+  ]
+}

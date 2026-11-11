@@ -32,7 +32,7 @@ class MilvusConfig(_Frozen):
 
 
 class Neo4jConfig(_Frozen):
-    uri: str = "bolt://localhost:7687"
+    uri: str = "bolt://localhost:17687"
     user: str = "neo4j"
     password: SecretStr = SecretStr("")
     database: str = "neo4j"
@@ -288,7 +288,7 @@ class KGConfig(_Frozen):
     epithet_window_chars: int = 150  # 段落窗口：称呼前后各取这么多字
     epithet_max_candidates: int = 20  # 候选人物上限（段内出现的优先，其次同章按提及数）
     epithet_min_support: float = 0.5  # 指向同一人的段数 / 判定段数的下限
-    # 泛称（可指不同的人）：link = 只按章挂靠提及、不作别名、没挂上的删掉；
+    # 泛称（可指不同的人）：link = 只按章挂靠提及、不作别名，有多指证据而没挂上的删掉；
     # alias = 与专属称呼一样作别名（fd032ef1 的旧行为）
     epithet_generic_mode: Literal["link", "alias"] = "link"
     weak_name_min_linked_ratio: float = 0.5  # 常用词写法被抽取为提及的次数 / 原文出现次数低于此值 → 弱名字
@@ -300,6 +300,11 @@ class KGConfig(_Frozen):
     path_max_hops: int = 3
     # 图谱第三路取证据的层级：0 关系 / 1 +路径 / 2 +主要关系 / 3 +高频提及。消融表 v2：tier 1 从不变差、tier 3 略降
     route_max_tier: int = 1
+    # 图谱范围消融（P3.1 验收 6）：默认值等于现行行为
+    route_entity_types: tuple[str, ...] | None = None  # 查询期只链接这些类型的实体（("Person",) = 只用人物）
+    route_path_node_types: tuple[str, ...] | None = None  # 路径只经过这些类型的节点（("Person",) = 人—人）
+    route_path_exclude_node_types: tuple[str, ...] | None = None  # 路径不经过这些类型的节点（("Event",)）
+    route_min_entity_mentions: int = 1  # 提及数少于此值的实体不参与查询期链接（不删实体、不改词典）
     output_max_chars: int = 4000  # 模板输出转文本的长度上限
 
 

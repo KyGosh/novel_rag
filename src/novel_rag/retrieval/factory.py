@@ -98,10 +98,14 @@ def build_graph_route(settings: Settings, chunk_index: ChunkIndex, series_id: st
     driver = GraphDatabase.driver(nc.uri, auth=(nc.user, nc.password.get_secret_value()))
     books = sorted({c["book_id"] for c in chunk_index.chunks})
     rules = load_series_kg(settings.paths.books_dir, books).rules
-    linker = EntityLinker.from_neo4j(driver, nc.database, series_id, rules)
+    kc = settings.kg
+    linker = EntityLinker.from_neo4j(driver, nc.database, series_id, rules, min_mentions=kc.route_min_entity_mentions)
+    queries = GraphQueries(driver, nc.database, kc, series_id)
     return GraphRoute(
-        GraphQueries(driver, nc.database, settings.kg, series_id), linker, chunk_index,
-        max_tier=settings.kg.route_max_tier,
+        queries, linker, chunk_index,
+        max_tier=kc.route_max_tier, entity_types=kc.route_entity_types,
+        path_node_types=kc.route_path_node_types, path_exclude_node_types=kc.route_path_exclude_node_types,
+        kg_version=queries.kg_version(),
     )  # fmt: skip
 
 

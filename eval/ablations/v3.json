@@ -1,0 +1,25 @@
+{
+  "title": "消融表 v3：P3.1 图谱补丁的检索价值与图谱范围（固定 RAG + 图谱第三路 tier 1）",
+  "notes": [
+    "两组设置：v0 dev（asoiaf_v0 的 dev 划分 60 题，检索范围卷一，与消融表 v2 相同）；v1 dev（asoiaf_v1 的 dev 划分 141 题，全五卷检索 + 每题按 max_reading_order 过滤，与 P4 起点基线相同）。es2 索引，RRF(向量 + BM25-IK + 图谱) + rerank 候选 40。",
+    "旧图谱 d9c84c78（P3 定稿，消融表 v2 用的版本）；新图谱 56be6611（P3.1：人物类别与伙伴关系、常用词弱匹配、专属称呼 / 泛称归属）。图谱版本以 Neo4j 中 KGMeta 为准，新运行的配置里记有 kg_version。",
+    "图谱范围变体只改查询期行为，不改图谱：person = 只链接人物（含动物）、路径只经过人物节点；no_event = 路径不经过事件节点；min2 = 不链接只被提及 1 次的实体。",
+    "验收规则（docs/phases/P3.md 第十八节验收 6）：新图谱相对旧图谱不能显著变差；变体 1 在多跳和人物关系题上都不显著变差则 P4 图谱工具收窄到人物子图，显著变差则保留组织、地点、头衔；变体 2、3 不变差则相应采用；区间含 0、方向不一致记为“无显著差异”。",
+    "每类题数少（v0 每类 15 题，v1 多跳、跨章节各约 30 题），按题型的配对区间很宽，结论以区间是否含 0 为准。"
+  ],
+  "rows": [
+    {"group": "v0 dev", "label": "v0 基线（es2，无图谱）", "run": "p3a_baseline_es2"},
+    {"group": "v0 dev", "label": "v0 旧图谱 d9c84c78（消融表 v2 原记录）", "run": "p3a_graph3_t1_es2", "ref": "p3a_baseline_es2"},
+    {"group": "v0 dev", "label": "v0 旧图谱 d9c84c78（当前代码复跑）", "run": "p31_v0_g_old", "ref": "p3a_graph3_t1_es2"},
+    {"group": "v0 dev", "label": "v0 新图谱 56be6611", "run": "p31_v0_g_all", "ref": "p31_v0_g_old"},
+    {"group": "v0 dev", "label": "v0 新图谱 · 只用人物", "run": "p31_v0_g_person", "ref": "p31_v0_g_all"},
+    {"group": "v0 dev", "label": "v0 新图谱 · 去掉事件", "run": "p31_v0_g_no_event", "ref": "p31_v0_g_all"},
+    {"group": "v0 dev", "label": "v0 新图谱 · 提及 ≥ 2", "run": "p31_v0_g_min2", "ref": "p31_v0_g_all"},
+    {"group": "v1 dev", "label": "v1 基线（无图谱）", "run": "p3_v1_baseline_dev"},
+    {"group": "v1 dev", "label": "v1 旧图谱 d9c84c78", "run": "p31_v1_g_old", "ref": "p3_v1_baseline_dev"},
+    {"group": "v1 dev", "label": "v1 新图谱 56be6611", "run": "p31_v1_g_all", "ref": "p31_v1_g_old"},
+    {"group": "v1 dev", "label": "v1 新图谱 · 只用人物", "run": "p31_v1_g_person", "ref": "p31_v1_g_all"},
+    {"group": "v1 dev", "label": "v1 新图谱 · 去掉事件", "run": "p31_v1_g_no_event", "ref": "p31_v1_g_all"},
+    {"group": "v1 dev", "label": "v1 新图谱 · 提及 ≥ 2", "run": "p31_v1_g_min2", "ref": "p31_v1_g_all"}
+  ]
+}

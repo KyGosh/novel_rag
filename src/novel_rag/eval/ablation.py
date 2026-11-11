@@ -17,6 +17,7 @@ from novel_rag.eval.stats import paired_diff
 
 HEADLINE = ("recall@5", "recall@20", "mrr", "cov@4000")
 DIFF_METRICS = ("recall@5", "recall@20", "mrr", "cov@4000")
+TYPE_DIFF_METRICS = ("recall@5", "recall@20")  # 按题型的配对差值（每类题数少，区间宽，只报两个召回）
 
 
 def find_run(results_dir: Path, name: str) -> Path:
@@ -35,12 +36,17 @@ def load_run(path: Path) -> dict[str, Any]:
     }
 
 
-def _paired(a: dict[str, Any], b: dict[str, Any], metric: str, cfg: dict[str, Any]) -> dict[str, float] | None:
+def _paired(
+    a: dict[str, Any], b: dict[str, Any], metric: str, cfg: dict[str, Any], qtype: str | None = None
+) -> dict[str, float] | None:
+    """b 相对 a 的配对差值；qtype 给出时只在该题型的题上比较。"""
     ra = {r["id"]: r["metrics"] for r in a["rows"]}
     rb = {r["id"]: r["metrics"] for r in b["rows"]}
     if set(ra) != set(rb):
         raise ValueError(f"{a['dir']} 与 {b['dir']} 的题目集合不同，不能做配对比较")
-    ids = sorted(ra)
+    ids = sorted(ra) if qtype is None else sorted(r["id"] for r in a["rows"] if r.get("type") == qtype)
+    if not ids:
+        return None
     if not all(metric in ra[i] and metric in rb[i] for i in ids):
         return None
     return paired_diff(
@@ -77,6 +83,7 @@ def build_table(spec: dict[str, Any], results_dir: Path, eval_cfg: dict[str, Any
             "latency_ms": m.get("latency_ms", {}),
             "rerank_ms": m.get("latency_stages_ms", {}).get("rerank", {}),
             "diff": {},
+            "diff_by_type": {},
         }
         if row.get("ref"):
             ref = get(row["ref"])
@@ -85,6 +92,11 @@ def build_table(spec: dict[str, Any], results_dir: Path, eval_cfg: dict[str, Any
                 d = _paired(ref, cur, k, eval_cfg)
                 if d is not None:
                     out["diff"][k] = d
+            for t in TYPE_ORDER:
+                for k in TYPE_DIFF_METRICS:
+                    d = _paired(ref, cur, k, eval_cfg, qtype=t)
+                    if d is not None:
+                        out["diff_by_type"].setdefault(t, {})[k] = d
         rows.append(out)
     return {"title": spec.get("title", ""), "notes": spec.get("notes", []), "rows": rows, "eval": eval_cfg}
 
@@ -141,6 +153,18 @@ def render_markdown(table: dict[str, Any]) -> str:
                 + " | ".join(_diff(r["diff"].get(k)) for k in DIFF_METRICS)
                 + " |"
             )
+    for metric, title in (("recall@20", "R@20"), ("recall@5", "R@5")):
+        lines += [
+            "",
+            f"## 按题型的配对差值：{title}",
+            "",
+            "| 配置 | 对照 | " + " | ".join(TYPE_NAMES[t] for t in TYPE_ORDER) + " |",
+        ]
+        lines.append("|---" * (len(TYPE_ORDER) + 2) + "|")
+        for r in table["rows"]:
+            if r.get("ref"):
+                cells = [_diff(r.get("diff_by_type", {}).get(t, {}).get(metric)) for t in TYPE_ORDER]
+                lines.append(f"| {r['label']} | {labels.get(r['ref'], r['ref'])} | " + " | ".join(cells) + " |")
     for metric, title in (("recall@20", "R@20"), ("cov@4000", "cov@4000"), ("recall@5", "R@5")):
         lines += ["", f"## 按题型：{title}", "", "| 配置 | " + " | ".join(TYPE_NAMES[t] for t in TYPE_ORDER) + " |"]
         lines.append("|---" * (len(TYPE_ORDER) + 1) + "|")
