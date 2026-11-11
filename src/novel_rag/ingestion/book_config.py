@@ -12,6 +12,11 @@
     volume = 1
     title = "某章标题"
     type = "back_matter"
+
+    [kg]                        # 知识图谱的书籍专属配置（全部可选）
+    extensions = ["title"]      # 启用的 schema 领域扩展（目前只有 title：头衔节点与"持有头衔"关系）
+    honorifics = ["某称谓"]      # 实体名归一时额外去掉的称谓（通用称谓表在 kg/names.py）
+    generic_terms = ["某泛称"]   # 额外的泛称（不建实体节点）
 """
 
 from __future__ import annotations
@@ -20,6 +25,7 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+KG_EXTENSIONS = ("title",)
 SECTION_TYPES = ("narrative", "appendix", "front_matter", "back_matter", "dedication", "volume_title", "blank")
 
 
@@ -28,10 +34,18 @@ class BookConfigError(ValueError):
 
 
 @dataclass(frozen=True)
+class KGBookConfig:
+    extensions: tuple[str, ...] = ()
+    honorifics: tuple[str, ...] = ()
+    generic_terms: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class BookConfig:
     volume_titles: dict[int, str] = field(default_factory=dict)
     pov: dict[str, str | None] = field(default_factory=dict)
     section_types: dict[tuple[int | None, str], str] = field(default_factory=dict)
+    kg: KGBookConfig = field(default_factory=KGBookConfig)
     source: str | None = None  # 配置文件路径（写进质检报告）
 
     def section_type_for(self, volume: int, title: str) -> str | None:
@@ -43,7 +57,7 @@ def load_book_config(path: Path) -> BookConfig:
         return BookConfig()
     with path.open("rb") as f:
         raw = tomllib.load(f)
-    unknown = set(raw) - {"volumes", "pov", "sections"}
+    unknown = set(raw) - {"volumes", "pov", "sections", "kg"}
     if unknown:
         raise BookConfigError(f"{path} 中有未知的配置项：{sorted(unknown)}")
 
@@ -66,4 +80,17 @@ def load_book_config(path: Path) -> BookConfig:
             raise BookConfigError(f"sections 条目无效（type 取值 {SECTION_TYPES}）：{s}")
         section_types[(vol, title)] = st
 
-    return BookConfig(volume_titles, pov, section_types, source=str(path))
+    kg_raw = raw.get("kg", {})
+    unknown_kg = set(kg_raw) - {"extensions", "honorifics", "generic_terms"}
+    if unknown_kg:
+        raise BookConfigError(f"[kg] 中有未知的配置项：{sorted(unknown_kg)}")
+    lists = {}
+    for key in ("extensions", "honorifics", "generic_terms"):
+        v = kg_raw.get(key, [])
+        if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
+            raise BookConfigError(f"[kg].{key} 必须是字符串列表")
+        lists[key] = tuple(v)
+    bad = set(lists["extensions"]) - set(KG_EXTENSIONS)
+    if bad:
+        raise BookConfigError(f"未知的 schema 扩展：{sorted(bad)}（可选 {KG_EXTENSIONS}）")
+    return BookConfig(volume_titles, pov, section_types, KGBookConfig(**lists), source=str(path))

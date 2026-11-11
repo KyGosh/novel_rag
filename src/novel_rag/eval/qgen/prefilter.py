@@ -43,15 +43,21 @@ def hard_reasons(cand: dict[str, Any]) -> list[str]:
     if cand["type"] in _MULTI_CHAPTER:
         if len({e["window_id"] for e in cand["evidence"]}) < 2:
             reasons.append("single_window")
-        elif len({e["chapter_idx"] for e in cand["evidence"]}) < 2:
+        elif len({(e.get("book_id"), e["chapter_idx"]) for e in cand["evidence"]}) < 2:  # 跨卷时章号会重
             reasons.append("single_chapter")
     return reasons
 
 
 def apply_prefilter(
-    cands: list[dict[str, Any]], book: BookText, cfg: EvalGenConfig, *, earlier: list[dict[str, Any]]
+    cands: list[dict[str, Any]],
+    book: BookText | dict[str, BookText],
+    cfg: EvalGenConfig,
+    *,
+    earlier: list[dict[str, Any]],
 ) -> None:
-    """原地设置 status / drop_reasons / flags。earlier 是之前轮次已通过定位的候选，用于跨轮查重。"""
+    """原地设置 status / drop_reasons / flags。earlier 是之前轮次已通过定位的候选，用于跨轮查重。
+    book 可以是单卷（v0）或 book_id → BookText（多卷，证据按各自的 book_id 取原文）。"""
+    books = book if isinstance(book, dict) else None
     seen = [c for c in earlier if c["status"] == "ok"]
     for c in cands:
         if c["status"] != "ok":
@@ -61,7 +67,10 @@ def apply_prefilter(
             c["status"] = "dropped"
             c["drop_reasons"].extend(reasons)
             continue
-        evid_text = "".join(book.text[e["char_start"] : e["char_end"]] for e in c["evidence"])
+        evid_text = "".join(
+            (books[e["book_id"]] if books is not None else book).text[e["char_start"] : e["char_end"]]  # type: ignore[union-attr]
+            for e in c["evidence"]
+        )
         lcs = longest_common_substring(c["question"], evid_text)
         if lcs >= cfg.copy_lcs_chars:
             c["flags"].append(f"copy:{lcs}")

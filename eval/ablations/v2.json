@@ -1,0 +1,26 @@
+{
+  "title": "消融表 v2：P3 检索价值验证——摘要定位、图谱第三路、人名词典（asoiaf_v0 dev，设置 A：检索范围为卷一）",
+  "notes": [
+    "评测集 asoiaf_v0 的 dev 划分，60 题（四类各 15 题）；相关性判定与 v1 相同。按题型的数字每格只有 15 题，结论以配对差值及其置信区间为准。",
+    "基线 = P2 选定的固定流程 RAG：RRF(向量 + BM25-IK) k=60 + rerank 候选 40，不扩展，chunk 0c94b7e4。p3a_baseline_es1 在当前 commit 上复现了 P2 的 p2a_rr40，逐题一致。",
+    "摘要定位：章节摘要（d8139169，349 章）建 ES + Milvus 索引，先取前 N 章。route = 章内 BM25 + 向量结果作为第三路接入 RRF；restrict = 整条链路只在这 N 章内检索。",
+    "图谱第三路：问题中最长匹配链接实体（只用阅读进度内可见的名字），取实体间直接关系 / ≤3 跳路径的证据 chunk（tier 1），tier 3 再加各实体主要关系与高频提及 chunk；排成一个列表接入 RRF，再统一 rerank。图谱版本 d9c84c78。",
+    "人名词典：从图谱导出 5790 个实体名、别名及名字片段写入 IK 扩展词典，重启 ES 后新建 es2 索引。IK 词典是全局的，回灌后 es1 的查询端分词也变了，所以 es1 一侧的数字一律取回灌前的运行（p2a_bm25_ik、p3a_baseline_es1）。",
+    "章节定位诊断（eval/results/*_p3a_chapter_locate）：金标证据章节的召回@N，摘要检索 vs chunk 检索前 40 名所在章节。总体 @1 0.397 vs 0.456、@5 0.697 vs 0.792；人物关系 @1 0.567 vs 0.333、跨章节 @1 0.256 vs 0.222——摘要更擅长把最相关的一章排到第一，但纵深不如 chunk 检索。",
+    "检索延迟在 RTX 4060 Ti 上测得；图谱第三路的 Neo4j 查询在本机容器中执行。"
+  ],
+  "rows": [
+    {"group": "基线", "label": "固定 RAG 基线（es1，复现 P2）", "run": "p3a_baseline_es1"},
+    {"group": "摘要定位", "label": "+摘要定位 route，前 5 章", "run": "p3a_sum_route5", "ref": "p3a_baseline_es1"},
+    {"group": "摘要定位", "label": "+摘要定位 route，前 10 章", "run": "p3a_sum_route10", "ref": "p3a_baseline_es1"},
+    {"group": "摘要定位", "label": "摘要定位 restrict，前 5 章", "run": "p3a_sum_restrict5", "ref": "p3a_baseline_es1"},
+    {"group": "摘要定位", "label": "摘要定位 restrict，前 10 章", "run": "p3a_sum_restrict10", "ref": "p3a_baseline_es1"},
+    {"group": "图谱第三路", "label": "+图谱第三路 tier 3（关系 + 路径 + 邻居 + 提及）", "run": "p3a_graph3", "ref": "p3a_baseline_es1"},
+    {"group": "图谱第三路", "label": "+图谱第三路 tier 1（实体间关系 + 路径）", "run": "p3a_graph3_t1", "ref": "p3a_baseline_es1"},
+    {"group": "图谱第三路", "label": "+图谱 tier 3 + 摘要定位 route 5", "run": "p3a_graph3_sum", "ref": "p3a_baseline_es1"},
+    {"group": "人名词典", "label": "BM25-IK（es1，回灌前）", "run": "p2a_bm25_ik"},
+    {"group": "人名词典", "label": "BM25-IK + 人名词典（es2）", "run": "p3a_bm25_ik_es2", "ref": "p2a_bm25_ik"},
+    {"group": "人名词典", "label": "完整基线换用 es2", "run": "p3a_baseline_es2", "ref": "p3a_baseline_es1"},
+    {"group": "人名词典", "label": "es2 + 图谱第三路 tier 1", "run": "p3a_graph3_t1_es2", "ref": "p3a_baseline_es2"}
+  ]
+}

@@ -40,8 +40,9 @@ def index_name(chunk_version: str, analysis_version: str = ANALYSIS_VERSION) -> 
     return f"chunks_{chunk_version}_{analysis_version}"
 
 
-def index_body(description: str = "") -> dict[str, Any]:
-    """索引 settings + mappings。字段与 Milvus 的标量字段一致，额外存字符区间。"""
+def index_body(description: str = "", analysis_version: str = ANALYSIS_VERSION) -> dict[str, Any]:
+    """索引 settings + mappings。字段与 Milvus 的标量字段一致，额外存字符区间。
+    es2 起多一个 entity_ids（chunk 提及的实体 ID，来自图谱的提及记录），可用于"只在提到某人的段落里检索"。"""
     return {
         "settings": {
             "number_of_shards": 1,
@@ -57,7 +58,7 @@ def index_body(description: str = "") -> dict[str, Any]:
             },
         },
         "mappings": {
-            "_meta": {"description": description, "analysis_version": ANALYSIS_VERSION},
+            "_meta": {"description": description, "analysis_version": analysis_version},
             "dynamic": "strict",
             "properties": {
                 "chunk_id": {"type": "keyword"},
@@ -77,26 +78,33 @@ def index_body(description: str = "") -> dict[str, Any]:
                     "search_analyzer": "ik_smart",
                     "fields": {"bigram": {"type": "text", "analyzer": "cjk_bigram_std"}},
                 },
+                **({} if analysis_version == "es1" else {"entity_ids": {"type": "keyword"}}),
             },
         },
     }
 
 
 def to_doc(chunk: dict[str, Any]) -> dict[str, Any]:
-    return {f: (chunk.get(f) or "") if f in ("pov", "chapter_title") else chunk[f] for f in ES_FIELDS}
+    doc = {f: (chunk.get(f) or "") if f in ("pov", "chapter_title") else chunk[f] for f in ES_FIELDS}
+    if "entity_ids" in chunk:
+        doc["entity_ids"] = list(chunk["entity_ids"])
+    return doc
 
 
 class ESChunkStore:
-    def __init__(self, client: Any, name: str, cfg: RetrievalConfig):
+    def __init__(self, client: Any, name: str, cfg: RetrievalConfig, analysis_version: str = ANALYSIS_VERSION):
         self.client = client
         self.name = name
         self.cfg = cfg
+        self.analysis_version = analysis_version
 
     @classmethod
-    def connect(cls, ecfg: ESConfig, name: str, cfg: RetrievalConfig) -> ESChunkStore:
+    def connect(
+        cls, ecfg: ESConfig, name: str, cfg: RetrievalConfig, analysis_version: str = ANALYSIS_VERSION
+    ) -> ESChunkStore:
         from elasticsearch import Elasticsearch
 
-        return cls(Elasticsearch(ecfg.url, request_timeout=ecfg.request_timeout), name, cfg)
+        return cls(Elasticsearch(ecfg.url, request_timeout=ecfg.request_timeout), name, cfg, analysis_version)
 
     def exists(self) -> bool:
         return bool(self.client.indices.exists(index=self.name))
@@ -104,7 +112,7 @@ class ESChunkStore:
     def ensure_index(self, description: str = "") -> None:
         if self.exists():
             return
-        body = index_body(description)
+        body = index_body(description, self.analysis_version)
         self.client.indices.create(index=self.name, settings=body["settings"], mappings=body["mappings"])
 
     def _scan(self, book_ids: Iterable[str], *, source: bool) -> Iterable[dict[str, Any]]:

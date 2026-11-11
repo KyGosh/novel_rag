@@ -1,0 +1,140 @@
+{
+  "created": "2026-11-11T22:09:20",
+  "git": {
+    "commit": "4029a5c9c9ebcb8cd46bbebf5b2885de9332c106",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "93785ea8",
+  "seed": 20261112,
+  "legacy_sampling": false,
+  "population": {
+    "no_target": 116,
+    "merged": 67,
+    "linked": 51,
+    "generic_unlinked": 138,
+    "real_name": 15,
+    "possessive": 1,
+    "low_support": 1
+  },
+  "n_links": 64,
+  "sample": {
+    "alias": 30,
+    "link": 20,
+    "other": 20
+  },
+  "alias_precision": 0.733,
+  "link_precision": 0.75,
+  "missed_rate": 0.1,
+  "generic_dropped_in_sample": 0,
+  "wrong_drop_rate": null,
+  "visible_from_ok": 0.909,
+  "errors": [
+    {
+      "key": "asoiaf:person:蝴蝶骑士",
+      "stratum": "alias",
+      "system": "asoiaf:person:洛拉斯·提利尔",
+      "gold": "无",
+      "note": "错并：黑水河上丢了半条胳膊的蝴蝶骑士不是洛拉斯，段落没点名"
+    },
+    {
+      "key": "asoiaf:person:科伦大王",
+      "stratum": "alias",
+      "system": "asoiaf:person:科伦·汉博利",
+      "gold": "asoiaf:person:科伦·葛雷乔伊",
+      "note": "错并：攸伦是科伦大王的儿子，指科伦·葛雷乔伊，并进了同名的科伦·汉博利"
+    },
+    {
+      "key": "asoiaf:person:快斧",
+      "stratum": "alias",
+      "system": "asoiaf:person:科尔·肯宁",
+      "gold": "单人无名",
+      "note": "错并：段落把“古怪的”科尔·肯宁与“快斧”科尔并列，是两个人"
+    },
+    {
+      "key": "asoiaf:person:吧唧脚之王",
+      "stratum": "alias",
+      "system": "asoiaf:person:克莱伦斯·克莱勃",
+      "gold": "单人无名",
+      "note": "错并：吧唧脚之王是克莱伦斯·克莱勃爵士的对手，不是他本人"
+    },
+    {
+      "key": "asoiaf:person:血门骑士",
+      "stratum": "alias",
+      "system": "asoiaf:person:布林登·徒利",
+      "gold": "多人",
+      "note": "严格口径：阿莲章的血门骑士是另一个人（看守血门的骑士），泛称不该成为布林登的别名"
+    },
+    {
+      "key": "asoiaf:person:大呆瓜",
+      "stratum": "alias",
+      "system": "asoiaf:person:葛兰",
+      "gold": "无",
+      "note": "错并：段落看不出大呆瓜指葛兰（谈的是熊老帐篷和那只鸟）"
+    },
+    {
+      "key": "asoiaf:person:左手",
+      "stratum": "alias",
+      "system": "asoiaf:person:艾里克",
+      "gold": "无",
+      "note": "错并：段落只说双胞胎艾里克和阿里克被称为左手和右手，看不出左手是哪一个"
+    },
+    {
+      "key": "asoiaf:person:劳勃二世",
+      "stratum": "alias",
+      "system": "asoiaf:person:乔佛里·拜拉席恩一世",
+      "gold": "无",
+      "note": "错并：“他不是劳勃二世”是比喻，不是乔佛里的称呼"
+    },
+    {
+      "key": "asoiaf:person:胖女人@asoiaf-5:0019",
+      "stratum": "link",
+      "system": "asoiaf:person:里雅",
+      "gold": "无",
+      "note": "段落看不出凳子上的胖女人是谁（人鱼宫里与威曼同场的一位女士），请核对"
+    },
+    {
+      "key": "asoiaf:person:水手之妻@asoiaf-4:0046",
+      "stratum": "link",
+      "system": "asoiaf:person:泰丽亚",
+      "gold": "单人无名",
+      "note": "错挂：附录里泰丽亚是布鲁斯科的女儿，水手之妻是快乐码头的另一个妓女"
+    },
+    {
+      "key": "asoiaf:person:大老爷@asoiaf-5:0066",
+      "stratum": "link",
+      "system": "asoiaf:person:提利昂·兰尼斯特",
+      "gold": "无",
+      "note": "错挂：分妮梦见给“大老爷”比武，指买下他们的主人，不是提利昂"
+    },
+    {
+      "key": "asoiaf:person:水手之妻@asoiaf-5:0064",
+      "stratum": "link",
+      "system": "asoiaf:person:泰丽亚",
+      "gold": "单人无名",
+      "note": "错挂：丑女孩章的水手之妻是快乐码头的妓女，不是泰丽亚"
+    },
+    {
+      "key": "asoiaf:person:河渡口领主@asoiaf-3:0053",
+      "stratum": "link",
+      "system": "asoiaf:person:瓦德·佛雷|大瓦德养子",
+      "gold": "asoiaf:person:瓦德·佛雷",
+      "note": "人对（老瓦德·佛雷侯爵），但挂进了“大瓦德养子”那个簇，实体错"
+    },
+    {
+      "key": "asoiaf:person:提盖特叔叔",
+      "stratum": "other",
+      "system": "no_target",
+      "gold": "asoiaf:person:提盖特·兰尼斯特",
+      "note": "漏并：提利昂的叔叔提盖特，即提盖特·兰尼斯特"
+    },
+    {
+      "key": "asoiaf:person:史坦尼斯叔叔",
+      "stratum": "other",
+      "system": "no_target",
+      "gold": "asoiaf:person:史坦尼斯·拜拉席恩",
+      "note": "漏并：乔佛里的叔叔史坦尼斯"
+    }
+  ],
+  "review": "Claude 预标 + 用户核对（2026-11-11，70 条全部同意预标，未改动）"
+}

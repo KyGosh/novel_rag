@@ -52,6 +52,9 @@ def test_build_table_paired_diff_and_render(tmp_path):
     assert "cov@4000" not in table["rows"][1]["diff"]  # 两边都没有该指标时跳过
     md = render_markdown(table)
     assert "+0.500" in md and "↑" in md and "改进" in md and "20260101-000001_better" in md
+    # 按题型的配对差值：样例里全是 fact
+    assert table["rows"][1]["diff_by_type"]["fact"]["recall@5"]["diff"] == 0.5
+    assert "按题型的配对差值" in md
 
     _write(tmp_path, "20260101-000002", "other_q", [1.0] * 3)
     with pytest.raises(ValueError):

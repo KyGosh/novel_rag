@@ -1,0 +1,905 @@
+{
+  "created": "2026-11-08T02:15:43",
+  "git": {
+    "commit": "a5fdbea50778e50092d058f1817be157157f857d",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "summary_version": "d8139169",
+  "chunk_version": "0c94b7e4",
+  "prompt_version": "chapter_summary.v1",
+  "model": "workbuddy/deepseek-v4.1-flash",
+  "sample": {
+    "seed": 20261107,
+    "chapters": [
+      "asoiaf-1:0017",
+      "asoiaf-1:0033",
+      "asoiaf-1:0036",
+      "asoiaf-1:0038",
+      "asoiaf-2:0003",
+      "asoiaf-2:0004",
+      "asoiaf-2:0022",
+      "asoiaf-2:0036",
+      "asoiaf-2:0038",
+      "asoiaf-2:0051",
+      "asoiaf-3:0001",
+      "asoiaf-3:0016",
+      "asoiaf-3:0026",
+      "asoiaf-3:0051",
+      "asoiaf-3:0062",
+      "asoiaf-4:0001",
+      "asoiaf-5:0014",
+      "asoiaf-5:0018",
+      "asoiaf-5:0040",
+      "asoiaf-5:0067"
+    ],
+    "events": 146
+  },
+  "event_verdicts": {
+    "supported": 140,
+    "partial": 6
+  },
+  "event_support_rate": 0.9589,
+  "event_support_rate_incl_partial": 1.0,
+  "out_of_chapter_items": 0,
+  "chapters_with_out_of_chapter": 0,
+  "review": "Claude 预审（待用户确认）",
+  "verdicts": [
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": "asoiaf-1:0017:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0017",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e05",
+      "verdict": "partial",
+      "note": "'经龙石岛见史坦尼斯'一节在所引段落中找不到"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": "asoiaf-1:0033:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0033",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": "asoiaf-1:0036:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0036",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": "asoiaf-1:0038:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-1:0038",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": "asoiaf-2:0003:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0003",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": "asoiaf-2:0004:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0004",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e06",
+      "verdict": "partial",
+      "note": "'回避罗柏的军事部署'是概括性推断"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": "asoiaf-2:0022:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0022",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": "asoiaf-2:0036:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": "asoiaf-2:0036:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": "asoiaf-2:0036:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": "asoiaf-2:0036:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": "asoiaf-2:0036:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": "asoiaf-2:0036:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0036",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e02",
+      "verdict": "partial",
+      "note": "所引段落是艾莉亚自己不敢透露身份，不是詹德利警告"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e03",
+      "verdict": "partial",
+      "note": "'夺走长剑'细节在所引段落中不明确"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": "asoiaf-2:0038:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0038",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": "asoiaf-2:0051:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-2:0051",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": "asoiaf-3:0001:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0001",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e04",
+      "verdict": "partial",
+      "note": "'父亲已安排洛拉斯护卫'在所引段落中不明确"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": "asoiaf-3:0016:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0016",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": "asoiaf-3:0026:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": "asoiaf-3:0026:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": "asoiaf-3:0026:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": "asoiaf-3:0026:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": "asoiaf-3:0026:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": "asoiaf-3:0026:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0026",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": "asoiaf-3:0051:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0051",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": "asoiaf-3:0062:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-3:0062",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e04",
+      "verdict": "partial",
+      "note": "原文是攸伦坐上海石之位，事件写成了铁王座"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": "asoiaf-4:0001:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-4:0001",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": "asoiaf-5:0014:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0014",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": "asoiaf-5:0018:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0018",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": "asoiaf-5:0040:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0040",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e01",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e02",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e03",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e04",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e05",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e06",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e07",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": "asoiaf-5:0067:e08",
+      "verdict": "supported"
+    },
+    {
+      "chapter_key": "asoiaf-5:0067",
+      "event_id": null,
+      "out_of_chapter": 0,
+      "note": "摘要逐句与本章原文比对（低重合句人工核查），未发现越出本章或后续剧情的内容"
+    }
+  ]
+}

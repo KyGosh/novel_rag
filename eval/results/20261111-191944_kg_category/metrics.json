@@ -1,0 +1,169 @@
+{
+  "created": "2026-11-11T19:19:44",
+  "git": {
+    "commit": "839097cf8d945d5734f1d9c94112dd99ec97f7e5",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "7e9c8e49",
+  "seed": 20261111,
+  "sample": {
+    "total": 368,
+    "human_strata": [
+      899,
+      846,
+      764,
+      499
+    ]
+  },
+  "per_label": {
+    "人": {
+      "system": 100,
+      "precision": 0.99,
+      "recall_est": 0.996
+    },
+    "动物": {
+      "system": 84,
+      "precision": 0.893,
+      "recall_est": 0.987
+    },
+    "非角色": {
+      "system": 184,
+      "precision": 0.946,
+      "recall_est": 0.809
+    }
+  },
+  "confusion": {
+    "人->人": 99,
+    "人->非角色": 1,
+    "动物->人": 4,
+    "动物->动物": 75,
+    "动物->非角色": 5,
+    "非角色->人": 9,
+    "非角色->动物": 1,
+    "非角色->非角色": 174
+  },
+  "errors": [
+    {
+      "entity_id": "asoiaf:person:三位叮当",
+      "system": "非角色",
+      "gold": "人",
+      "note": "描述指一名将领；可议"
+    },
+    {
+      "entity_id": "asoiaf:person:三眼乌鸦",
+      "system": "动物",
+      "gold": "人",
+      "note": "实为以乌鸦形象出现的人（绿先知），按“附身的人仍是人”；可议"
+    },
+    {
+      "entity_id": "asoiaf:person:兰尼斯特女人",
+      "system": "非角色",
+      "gold": "人",
+      "note": "一贯指瑟曦"
+    },
+    {
+      "entity_id": "asoiaf:person:劳勃二世",
+      "system": "非角色",
+      "gold": "人",
+      "note": "提利昂对某位国王的称呼；可议"
+    },
+    {
+      "entity_id": "asoiaf:person:双塔骑士",
+      "system": "非角色",
+      "gold": "人",
+      "note": "指具体的骑士"
+    },
+    {
+      "entity_id": "asoiaf:person:古怪的",
+      "system": "非角色",
+      "gold": "人",
+      "note": "人的绰号"
+    },
+    {
+      "entity_id": "asoiaf:person:吧唧脚",
+      "system": "非角色",
+      "gold": "人",
+      "note": "描述以人为主；可议"
+    },
+    {
+      "entity_id": "asoiaf:person:唐纳·希山",
+      "system": "动物",
+      "gold": "人",
+      "note": "消歧错并：侍从唐纳（多数描述）+ 美女猪"
+    },
+    {
+      "entity_id": "asoiaf:person:培根",
+      "system": "非角色",
+      "gold": "动物",
+      "note": "厨子对美女猪的称呼"
+    },
+    {
+      "entity_id": "asoiaf:person:影子山猫",
+      "system": "动物",
+      "gold": "非角色",
+      "note": "物种名，不是个体"
+    },
+    {
+      "entity_id": "asoiaf:person:梅森特",
+      "system": "动物",
+      "gold": "人",
+      "note": "混簇：修女 + 狗，各半，拿不准判人"
+    },
+    {
+      "entity_id": "asoiaf:person:母狼",
+      "system": "动物",
+      "gold": "非角色",
+      "note": "泛称：混指莱安娜与狼群中的母狼"
+    },
+    {
+      "entity_id": "asoiaf:person:火蚯蚓",
+      "system": "动物",
+      "gold": "非角色",
+      "note": "物种名，不是个体"
+    },
+    {
+      "entity_id": "asoiaf:person:狮皮",
+      "system": "动物",
+      "gold": "非角色",
+      "note": "器物（狮皮），一条描述误作龙"
+    },
+    {
+      "entity_id": "asoiaf:person:红鸦",
+      "system": "动物",
+      "gold": "人",
+      "note": "人的绰号"
+    },
+    {
+      "entity_id": "asoiaf:person:芜菁骑士",
+      "system": "非角色",
+      "gold": "人",
+      "note": "人的外号"
+    },
+    {
+      "entity_id": "asoiaf:person:赛斯拉·科荷兰",
+      "system": "非角色",
+      "gold": "人",
+      "note": "描述不足，拿不准判人；可议"
+    },
+    {
+      "entity_id": "asoiaf:person:赫伦堡的鬼魂",
+      "system": "非角色",
+      "gold": "人",
+      "note": "艾莉亚的自称"
+    },
+    {
+      "entity_id": "asoiaf:person:金色雄狮",
+      "system": "动物",
+      "gold": "非角色",
+      "note": "比喻"
+    },
+    {
+      "entity_id": "asoiaf:person:史塔克父子",
+      "system": "人",
+      "gold": "非角色",
+      "note": "群体（父子二人）"
+    }
+  ],
+  "review": "Claude 预标 + 用户核对（2026-11-11，改判 5 条：乳头岛、亚兰城、多恩领、盛夏群岛、赫伦堡由人改为非角色——地名转指领主统一判非角色）"
+}

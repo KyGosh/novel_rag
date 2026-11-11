@@ -45,16 +45,24 @@ class ReviewState:
     difficulty: int | None = None
     drop_reason: str | None = None
     history: list[dict[str, Any]] = field(default_factory=list)  # 生效中的记录，供 undo 回退
+    answer_aliases: list[str] = field(default_factory=list)
 
     @classmethod
     def fresh(cls, cand: dict[str, Any]) -> ReviewState:
-        return cls(cand, question=cand["question"], answer=cand["answer"], evidence=deepcopy(cand["evidence"]))
+        return cls(
+            cand,
+            question=cand["question"],
+            answer=cand["answer"],
+            evidence=deepcopy(cand["evidence"]),
+            answer_aliases=list(cand.get("answer_aliases", [])),
+        )
 
     @property
     def changed(self) -> bool:
         return (
             self.question != self.cand["question"]
             or self.answer != self.cand["answer"]
+            or self.answer_aliases != list(self.cand.get("answer_aliases", []))
             or [(e["chapter_idx"], e["char_start"], e["char_end"]) for e in self.evidence]
             != [(e["chapter_idx"], e["char_start"], e["char_end"]) for e in self.cand["evidence"]]
         )
@@ -68,6 +76,7 @@ def _apply(state: ReviewState, rec: dict[str, Any]) -> None:
     elif action == "edit":
         state.question = rec.get("question", state.question)
         state.answer = rec.get("answer", state.answer)
+        state.answer_aliases = list(rec.get("answer_aliases", state.answer_aliases))
         state.difficulty = rec.get("difficulty", state.difficulty)
         state.status = "edited" if state.changed else "accepted"
     elif action == "respan":

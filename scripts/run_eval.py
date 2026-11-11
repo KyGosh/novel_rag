@@ -9,6 +9,11 @@ bootstrap 置信区间与分阶段延迟，结果落盘到 eval/results/。
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name final --split test             # 跑 test 要显式指定
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name stress --scope all             # 设置 B：全部已索引的卷
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name gen --generate                 # 顺带生成答案供抽查
+    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name sum_route --routes bm25,vector,summary_locate
+    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name sum_restrict --summary-restrict 5
+    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name graph3 --routes bm25,vector,graph
+    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name es2 --es-analysis es2   # 回灌人名词典后的索引
+    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name g_p --routes bm25,vector,graph --graph-scope person
 
 所有覆盖项都会写回配置快照（run.json 的 config），实验记录与实际运行的参数一致。
 检索范围（--scope）默认是评测集涉及的卷（设置 A）；`all` 表示该分块版本下已切分的全部卷（设置 B）。
@@ -41,6 +46,15 @@ def _books_with_chunks(books_dir: Path, version: str) -> list[str]:
     return sorted(p.parents[2].name for p in books_dir.glob(f"*/chunks/{version}/chunks.jsonl"))
 
 
+# 图谱范围消融的预设（P3.1 验收 6）：都只改查询期行为，不改图谱
+GRAPH_SCOPES: dict[str, dict[str, object]] = {
+    "all": {},
+    "person": {"route_entity_types": ("Person",), "route_path_node_types": ("Person",)},
+    "no_event": {"route_path_exclude_node_types": ("Event",)},
+    "min2": {"route_min_entity_mentions": 2},
+}
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -58,6 +72,15 @@ def main() -> int:
     parser.add_argument("--rerank", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--rerank-candidates", type=int)
     parser.add_argument("--expand-window", type=int, help="small-to-big 窗口（0 = 不扩展）")
+    parser.add_argument("--es-analysis", help="ES 分析方案版本（es1 / es2），覆盖 retrieval.es_analysis_version")
+    parser.add_argument("--summary-chapters", type=int, help="摘要定位取前几章（覆盖 summary.locate_top_chapters）")
+    parser.add_argument("--summary-restrict", type=int, default=0, help="> 0：整条链路只在摘要选出的前 N 章内检索")
+    parser.add_argument("--graph-tier", type=int, help="图谱第三路的证据层级（覆盖 kg.route_max_tier）")
+    parser.add_argument(
+        "--graph-scope", choices=sorted(GRAPH_SCOPES), default="all",
+        help="图谱范围消融：person = 只链接人物、路径只经过人物；no_event = 路径不经过事件；"
+        "min2 = 不链接只提及 1 次的实体",
+    )  # fmt: skip
     parser.add_argument("--scope", help="检索范围：逗号分隔的 book_id，或 all；默认为评测集涉及的卷")
     parser.add_argument("--spoiler-filter", action="store_true", help="用每题的 max_reading_order 过滤检索范围")
     parser.add_argument("--generate", action="store_true", help="对每题调用生成模型作答（消耗 LLM 调用，有缓存）")
@@ -65,6 +88,9 @@ def main() -> int:
     args = parser.parse_args()
 
     s = get_settings()
+    kg_overrides = dict(GRAPH_SCOPES[args.graph_scope])
+    if args.graph_tier is not None:
+        kg_overrides["route_max_tier"] = args.graph_tier
     overrides = {
         k: v
         for k, v in {
@@ -76,10 +102,18 @@ def main() -> int:
             "rerank_candidates": args.rerank_candidates,
             "expand_window": args.expand_window,
             "embed_text_template": args.template,
+            "es_analysis_version": args.es_analysis,
         }.items()
         if v is not None
     }
-    s = s.model_copy(update={"retrieval": s.retrieval.model_copy(update=overrides)})
+    summary_overrides = {"locate_top_chapters": args.summary_chapters} if args.summary_chapters else {}
+    s = s.model_copy(
+        update={
+            "retrieval": s.retrieval.model_copy(update=overrides),
+            "summary": s.summary.model_copy(update=summary_overrides),
+            "kg": s.kg.model_copy(update=kg_overrides),
+        }
+    )
     rc = s.retrieval
 
     ds_dir = args.dataset_dir or s.paths.datasets_dir / args.dataset
@@ -114,7 +148,10 @@ def main() -> int:
         all_chunks.extend(chunks)
     index = ChunkIndex(all_chunks)
 
-    retriever = build_retriever(s, scope, args.retriever, version=version, template=rc.embed_text_template)
+    retriever = build_retriever(
+        s, scope, args.retriever, version=version, template=rc.embed_text_template, chunk_index=index,
+        summary_restrict=args.summary_restrict,
+    )  # fmt: skip
     counter = get_token_counter()
 
     @lru_cache(maxsize=100_000)
@@ -163,7 +200,14 @@ def main() -> int:
         "relevance": {"min_ratio": s.eval.relevance_min_ratio, "min_chars": s.eval.relevance_min_chars},
         "ks": list(s.eval.ks),
         "generate": args.generate,
-        "overrides": overrides,
+        "overrides": {
+            **overrides,
+            **summary_overrides,
+            "summary_restrict": args.summary_restrict,
+            "graph_tier": args.graph_tier,
+            "graph_scope": args.graph_scope,
+            "kg": kg_overrides,
+        },
         "config": s.snapshot(),
     }
     out = write_run(s.paths.results_dir, args.name, run, metrics, rows, s.eval.ks)

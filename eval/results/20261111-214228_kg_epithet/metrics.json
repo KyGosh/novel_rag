@@ -1,0 +1,79 @@
+{
+  "created": "2026-11-11T21:42:28",
+  "git": {
+    "commit": "4029a5c9c9ebcb8cd46bbebf5b2885de9332c106",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "fd032ef1",
+  "seed": 20261112,
+  "population": {
+    "no_target": 252,
+    "merged": 118,
+    "real_name": 15,
+    "low_support": 2,
+    "possessive": 2
+  },
+  "sample": {
+    "merged": 40,
+    "not_merged": 20
+  },
+  "merge_precision": 0.825,
+  "missed_rate": 0.1,
+  "visible_from_ok": 0.97,
+  "wrong_merges": [
+    {
+      "epithet_id": "asoiaf:person:流浪儿",
+      "system": "asoiaf:person:乌玛",
+      "gold": "无",
+      "note": "错并：流浪儿是黑白之院的另一位牧师，不是厨子乌玛"
+    },
+    {
+      "epithet_id": "asoiaf:person:暴躁的弟弟",
+      "system": "asoiaf:person:夏天",
+      "gold": "asoiaf:person:毛毛狗",
+      "note": "错并：夏天视角，“眼里闪动绿火的暴躁弟弟”是毛毛狗"
+    },
+    {
+      "epithet_id": "asoiaf:person:河渡口领主",
+      "system": "asoiaf:person:瓦德·佛雷|大瓦德养子",
+      "gold": "asoiaf:person:瓦德·佛雷",
+      "note": "人对（老瓦德·佛雷侯爵），但并进了“大瓦德养子”那个簇（佛雷家的男孩），实体错"
+    },
+    {
+      "epithet_id": "asoiaf:person:老男人",
+      "system": "asoiaf:person:林恩·科布瑞",
+      "gold": "无",
+      "note": "错并：“以老男人的标准而论”是比较标准，不是称呼某个人"
+    },
+    {
+      "epithet_id": "asoiaf:person:兔牙将领",
+      "system": "asoiaf:person:西茨达拉·佐·洛拉克十四世",
+      "gold": "无",
+      "note": "错并：挥手的是渊凯的一位将领，不是西茨达拉"
+    },
+    {
+      "epithet_id": "asoiaf:person:小个子泽地人",
+      "system": "asoiaf:person:梅拉·黎德",
+      "gold": "无",
+      "note": "错并：段落是布兰讲的故事，看不出小个子泽地人指梅拉"
+    },
+    {
+      "epithet_id": "asoiaf:person:史塔克女孩",
+      "system": "asoiaf:person:珊莎·史塔克",
+      "gold": "多人",
+      "note": "用户改：泛称，第四段（席恩章）指珍妮·普尔伪装的艾莉亚，不是珊莎，不应归属"
+    }
+  ],
+  "missed": [
+    {
+      "epithet_id": "asoiaf:person:小国王",
+      "gold": "asoiaf:person:托曼·拜拉席恩"
+    },
+    {
+      "epithet_id": "asoiaf:person:班扬叔叔",
+      "gold": "asoiaf:person:班扬·史塔克"
+    }
+  ],
+  "review": "用户已核对（2026-11-11）：60 条中改 1 条（P39 史塔克女孩 → 多人），其余同意 Claude 预标"
+}

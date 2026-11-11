@@ -1,0 +1,89 @@
+{
+  "overall": {
+    "summary": {
+      "ch_recall@1": 0.397,
+      "ch_recall@3": 0.578,
+      "ch_recall@5": 0.697,
+      "ch_recall@10": 0.803,
+      "ch_recall@20": 0.9
+    },
+    "chunk": {
+      "ch_recall@1": 0.456,
+      "ch_recall@3": 0.703,
+      "ch_recall@5": 0.792,
+      "ch_recall@10": 0.886,
+      "ch_recall@20": 0.928
+    },
+    "n": 60
+  },
+  "by_type": {
+    "fact": {
+      "summary": {
+        "ch_recall@1": 0.533,
+        "ch_recall@3": 0.733,
+        "ch_recall@5": 0.867,
+        "ch_recall@10": 0.933,
+        "ch_recall@20": 1.0
+      },
+      "chunk": {
+        "ch_recall@1": 0.933,
+        "ch_recall@3": 1.0,
+        "ch_recall@5": 1.0,
+        "ch_recall@10": 1.0,
+        "ch_recall@20": 1.0
+      },
+      "n": 15
+    },
+    "relation": {
+      "summary": {
+        "ch_recall@1": 0.567,
+        "ch_recall@3": 0.7,
+        "ch_recall@5": 0.767,
+        "ch_recall@10": 0.867,
+        "ch_recall@20": 1.0
+      },
+      "chunk": {
+        "ch_recall@1": 0.333,
+        "ch_recall@3": 0.667,
+        "ch_recall@5": 0.733,
+        "ch_recall@10": 0.933,
+        "ch_recall@20": 1.0
+      },
+      "n": 15
+    },
+    "multihop": {
+      "summary": {
+        "ch_recall@1": 0.233,
+        "ch_recall@3": 0.5,
+        "ch_recall@5": 0.567,
+        "ch_recall@10": 0.667,
+        "ch_recall@20": 0.8
+      },
+      "chunk": {
+        "ch_recall@1": 0.333,
+        "ch_recall@3": 0.667,
+        "ch_recall@5": 0.8,
+        "ch_recall@10": 0.867,
+        "ch_recall@20": 0.867
+      },
+      "n": 15
+    },
+    "plot": {
+      "summary": {
+        "ch_recall@1": 0.256,
+        "ch_recall@3": 0.378,
+        "ch_recall@5": 0.589,
+        "ch_recall@10": 0.744,
+        "ch_recall@20": 0.8
+      },
+      "chunk": {
+        "ch_recall@1": 0.222,
+        "ch_recall@3": 0.478,
+        "ch_recall@5": 0.633,
+        "ch_recall@10": 0.744,
+        "ch_recall@20": 0.844
+      },
+      "n": 15
+    }
+  }
+}

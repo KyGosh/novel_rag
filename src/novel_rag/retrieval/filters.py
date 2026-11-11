@@ -4,7 +4,7 @@ Neo4j（P3）沿用同一个定义。"""
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
@@ -13,9 +13,14 @@ class SearchFilter:
     max_reading_order: int | None = None  # 防剧透：只返回 reading_order <= 该值的内容
     section_types: tuple[str, ...] | None = None
     chunk_types: tuple[str, ...] | None = None
+    # 只在这些章节内检索（reading_order 全系列唯一，即章节集合）；与 max_reading_order 同时生效
+    reading_orders: tuple[int, ...] | None = None
 
     def with_max_reading_order(self, value: int | None) -> SearchFilter:
-        return SearchFilter(self.book_ids, value, self.section_types, self.chunk_types)
+        return replace(self, max_reading_order=value)
+
+    def with_reading_orders(self, values: tuple[int, ...] | None) -> SearchFilter:
+        return replace(self, reading_orders=None if values is None else tuple(sorted({int(v) for v in values})))
 
     def to_milvus_expr(self) -> str:
         """Milvus 标量过滤表达式；没有任何条件时返回空字符串。"""
@@ -28,6 +33,8 @@ class SearchFilter:
             parts.append(f"section_type in {json.dumps(list(self.section_types), ensure_ascii=False)}")
         if self.chunk_types is not None:
             parts.append(f"chunk_type in {json.dumps(list(self.chunk_types), ensure_ascii=False)}")
+        if self.reading_orders is not None:
+            parts.append(f"reading_order in {json.dumps([int(x) for x in self.reading_orders])}")
         return " and ".join(parts)
 
     def to_es_filter(self) -> list[dict]:
@@ -41,6 +48,8 @@ class SearchFilter:
             clauses.append({"terms": {"section_type": list(self.section_types)}})
         if self.chunk_types is not None:
             clauses.append({"terms": {"chunk_type": list(self.chunk_types)}})
+        if self.reading_orders is not None:
+            clauses.append({"terms": {"reading_order": [int(x) for x in self.reading_orders]}})
         return clauses
 
     def accepts(self, fields: dict) -> bool:
@@ -50,5 +59,7 @@ class SearchFilter:
         if self.max_reading_order is not None and fields.get("reading_order", 0) > self.max_reading_order:
             return False
         if self.section_types is not None and fields.get("section_type") not in self.section_types:
+            return False
+        if self.reading_orders is not None and fields.get("reading_order") not in self.reading_orders:
             return False
         return not (self.chunk_types is not None and fields.get("chunk_type") not in self.chunk_types)

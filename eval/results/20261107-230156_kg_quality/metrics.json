@@ -1,0 +1,61 @@
+{
+  "created": "2026-11-07T23:01:55",
+  "git": {
+    "commit": "a5fdbea50778e50092d058f1817be157157f857d",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "d9c84c78",
+  "extract_version": "19870d24",
+  "seed": 20261107,
+  "extraction": {
+    "chunks": 22,
+    "entity": {
+      "tp": 234,
+      "fp": 56,
+      "fn": 21,
+      "precision": 0.807,
+      "recall": 0.918
+    },
+    "relation": {
+      "tp": 34,
+      "fp": 56,
+      "fn": 14,
+      "precision": 0.378,
+      "recall": 0.708
+    }
+  },
+  "relation_evidence": {
+    "n": 100,
+    "verdicts": {
+      "partial": 35,
+      "unsupported": 28,
+      "supported": 37
+    },
+    "support_rate": 0.37,
+    "support_rate_incl_partial": 0.72,
+    "by_evidence_count": {
+      "n_evidence=1": {
+        "n": 76,
+        "verdicts": {
+          "partial": 29,
+          "unsupported": 24,
+          "supported": 23
+        },
+        "support_rate": 0.303,
+        "support_rate_incl_partial": 0.684
+      },
+      "n_evidence>=2": {
+        "n": 24,
+        "verdicts": {
+          "supported": 14,
+          "partial": 6,
+          "unsupported": 4
+        },
+        "support_rate": 0.583,
+        "support_rate_incl_partial": 0.833
+      }
+    }
+  },
+  "review": "Claude 预标（待用户核对）"
+}

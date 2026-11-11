@@ -1,0 +1,18 @@
+# p3a_graph3_t1
+
+- 时间：2026-11-07T22:52:05；commit `a5fdbea507`（有未提交改动）
+- 评测集：asoiaf_v0，划分 dev，60 题
+- 检索器：{"name": "bm25+vector+graph+rerank", "routes": {"bm25": {"name": "bm25_ik", "index": "chunks_0c94b7e4_es1", "fields": ["text"], "boosts": {"text": 1.0}}, "vector": {"name": "vector", "collection": "chunks_bgem3_1024_0c94b7e4", "embedding_model": "BAAI/bge-m3", "metric": "COSINE", "hnsw_ef": 128}, "graph": {"name": "graph", "max_entities": 4, "per_entity_relations": 10, "per_entity_mentions": 10, "path_limit": 5, "max_tier": 1}}, "route_top_k": {"bm25": 50, "vector": 50, "graph": 50}, "rrf_k": 60, "fusion_top_k": 40, "reranker": "BAAI/bge-reranker-v2-m3", "rerank_candidates": 40}
+- 分块版本：0c94b7e4；防剧透过滤：关
+- 相关性判定：重叠 ≥ min(区间 × 0.5, 50 字)
+- 检索延迟（ms）：{'p50': 665.4, 'p95': 741.4}；分阶段：{"bm25.search": {"p50": 7.2, "p95": 9.6}, "bm25.total": {"p50": 7.3, "p95": 9.6}, "fusion": {"p50": 0.4, "p95": 0.5}, "graph.total": {"p50": 32.2, "p95": 74.6}, "rerank": {"p50": 594.2, "p95": 654.2}, "routes": {"p50": 63.6, "p95": 87.0}, "vector.embed": {"p50": 51.3, "p95": 70.1}, "vector.search": {"p50": 11.8, "p95": 15.0}, "vector.total": {"p50": 63.0, "p95": 86.0}}
+- 范围：['asoiaf-1']；small-to-big 窗口：0
+
+| 分组 | 题数 | recall@5 | recall@10 | recall@20 | hit@5 | hit@10 | hit@20 | mrr | cov@2000 | cov@4000 | cov@8000 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 事实 | 15 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.872 | 1.000 | 1.000 | 1.000 |
+| 人物关系 | 15 | 0.467 | 0.667 | 0.800 | 0.533 | 0.733 | 0.867 | 0.453 | 0.467 | 0.667 | 0.733 |
+| 多跳 | 15 | 0.633 | 0.700 | 0.800 | 0.800 | 0.933 | 0.933 | 0.693 | 0.633 | 0.700 | 0.800 |
+| 跨章节情节 | 15 | 0.144 | 0.344 | 0.444 | 0.333 | 0.600 | 0.667 | 0.247 | 0.167 | 0.311 | 0.444 |
+| 来源：generated | 60 | 0.561 | 0.678 | 0.761 | 0.667 | 0.817 | 0.867 | 0.566 | 0.567 | 0.669 | 0.744 |
+| **总体** | 60 | 0.561 | 0.678 | 0.761 | 0.667 | 0.817 | 0.867 | 0.566 | 0.567 | 0.669 | 0.744 |

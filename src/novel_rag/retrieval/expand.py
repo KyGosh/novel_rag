@@ -32,6 +32,10 @@ class ChunkIndex:
     def __len__(self) -> int:
         return len(self._by_id)
 
+    @property
+    def chunks(self) -> list[dict[str, Any]]:
+        return list(self._by_id.values())
+
     def by_id(self, chunk_id: str) -> dict[str, Any]:
         return self._by_id[chunk_id]
 

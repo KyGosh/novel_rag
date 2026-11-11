@@ -42,6 +42,7 @@ class EvalItem(BaseModel):
     review: Literal["accepted", "edited"] = "accepted"
     difficulty: int | None = None  # 校验时的人工难度标注 1–3（可选）
     origin: str | None = None  # 候选题 id，便于回溯到出题与校验记录
+    answer_aliases: list[str] = Field(default_factory=list)  # 可接受的其他写法（别名、简称），供规则匹配判分（v1 起）
 
 
 class DatasetManifest(BaseModel):
