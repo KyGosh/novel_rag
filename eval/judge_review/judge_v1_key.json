@@ -1,0 +1,311 @@
+{
+ "runs": [
+  "eval/results/20261112-004032_p4_closed_dev",
+  "eval/results/20261112-004212_p4_rag_dev",
+  "eval/results/20261112-004438_p4_graphrag_dev",
+  "eval/results/20261112-004714_p4_smoke_a1"
+ ],
+ "created": "2026-11-12T00:51:40",
+ "items": {
+  "graphrag:plot-6591b923": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案说的是监视丹妮莉丝和向劳勃报告御前会议情报，与标准答案的两件事（挑选送给艾德瑞克的礼物、报告韦赛里斯的行动）完全不同。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "rag:multihop-0fdd6d42": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案是孪河城，系统答案答成红堡并要献给乔佛里和太后，与标准答案矛盾。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "graphrag:plot-19edc5e7": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案准确写明了珊莎透露父亲送她回临冬城的计划，并指出父亲在贝勒大圣堂被处死，与标准答案一致。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "graphrag:multihop-995fc61c": {
+   "label": "correct",
+   "scored_by": "rule",
+   "judge_reason": null,
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "agent:fact-e53ff9cb": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案列出了标准答案中的两首歌曲，顺序不同但内容一致。",
+   "run": "20261112-004714_p4_smoke_a1"
+  },
+  "rag:relation-5840351e": {
+   "label": "correct",
+   "scored_by": "rule",
+   "judge_reason": null,
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "graphrag:relation-7f0252c7": {
+   "label": "correct",
+   "scored_by": "rule",
+   "judge_reason": null,
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "closed:multihop-ccfdc34e": {
+   "label": "abstain",
+   "scored_by": "abstain",
+   "judge_reason": null,
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:fact-f1baf4db": {
+   "label": "abstain",
+   "scored_by": "abstain",
+   "judge_reason": null,
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "agent:relation-75f8846a": {
+   "label": "correct",
+   "scored_by": "rule",
+   "judge_reason": null,
+   "run": "20261112-004714_p4_smoke_a1"
+  },
+  "graphrag:multihop-212423b7": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案为娜娜，系统答案给出黄鼠狼，二者不一致。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "agent:plot-666aad95": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "系统答案提到了被魔山杀过且总次数四次、闪电图案正确，但未准确说明被魔山杀过两次，还加了洛奇之外的瓦格·赫特，与标准答案的杀过者不完全一致。",
+   "run": "20261112-004714_p4_smoke_a1"
+  },
+  "rag:plot-37866d96": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案称罗宾爵士下令放箭、莫尔蒙夫人想吊死凯特琳，与标准答案中罗宾爵士拒不放行并理解凯特琳做法、莫尔蒙夫人也认同的做法均相矛盾。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "graphrag:multihop-d794b562": {
+   "label": "correct",
+   "scored_by": "rule",
+   "judge_reason": null,
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "closed:fact-e3223daa": {
+   "label": "abstain",
+   "scored_by": "abstain",
+   "judge_reason": null,
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "graphrag:multihop-422a390b": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“布兰登叔叔的武器”与标准答案“布兰登叔叔的剑”意思一致，替换为更泛的“武器”不改变指代对象。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "rag:relation-a57ca8aa": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案与标准答案意思一致，均指出格里克出自红胡子雷蒙的弟弟一脉。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "closed:relation-35ae3a9c": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案称主仆关系，与标准答案的私生兄弟关系矛盾。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "graphrag:plot-81bcd95e": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "第一问庞洛斯的态度答对，但第二问戴佛斯的职位答成“骑士”，与标准答案“国王之手（首相）”不符，只答对了一半。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "closed:multihop-c0ac8fb7": {
+   "label": "abstain",
+   "scored_by": "abstain",
+   "judge_reason": null,
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "agent:plot-97469d62": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "答出了队伍溃散，但把“仍有许多野人追随他和哭泣者”误作逃脱追捕和可能集结部队，关键信息不完整且有偏差。",
+   "run": "20261112-004714_p4_smoke_a1"
+  },
+  "graphrag:multihop-6ff66ab5": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案是打了情妇一巴掌，系统答案答成把酒泼到父亲脸上，行为与对象均不符。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "closed:plot-0178cbde": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "第一问正确答出劳勃·拜拉席恩，但第二问“蓝冬雪玫瑰”与标准答案“碧蓝玫瑰花冠”不一致，未答对花冠。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "rag:relation-0d37fcd8": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案包含“连父亲的名字都不清楚”，与标准答案一致，额外信息不矛盾。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "graphrag:plot-0178cbde": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案与标准答案一致，劳勃·拜拉席恩即风息堡的年轻公爵劳勃，花冠为碧蓝玫瑰花冠。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "rag:multihop-d3e18f3b": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案是恐怖堡，系统答案风息堡与之矛盾。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "closed:fact-e53ff9cb": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案给出的两首歌与标准答案完全不符。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "rag:plot-666aad95": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案给出了洛奇一次、魔山两次及紫色分叉闪电的图案，与标准答案一致，额外提到的瓦格·赫特一次不与标准答案矛盾。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "closed:relation-a03b8389": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“艾德计划把女儿送回北境”与标准答案“父亲打算送她离开的计划”意思一致，只是表达更具体（送回北境），核心信息相同。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "graphrag:plot-a6e3b8df": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "地点和留下的物品（一袋银鹿）均与标准答案一致。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "graphrag:plot-c6fd4517": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案答的是刺客和王冠，与标准答案的瓦里斯盯梢及许诺财政大臣之位和公爵头衔完全不符。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "closed:relation-471514be": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "婚配对象崔斯丹答对，但保护人答成奥巴娅·沙德，标准答案是道朗亲王。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:plot-622f9016": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案为托蒙德且白灵独自去黑城堡，系统答耶哥蕊特且白灵留在长城以南，两个要点均错误。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "rag:fact-b91971f0": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“割去辫子以示不誉”与标准答案“割掉自己的辫子”意思一致，属于同义表述。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "closed:fact-069aa202": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案的“毒虫（manticore）”与标准答案“蝎尾兽”指同一生物，意思一致。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "graphrag:relation-0f98b266": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "曾孙属于后代，系统答案与标准答案意思一致。",
+   "run": "20261112-004438_p4_graphrag_dev"
+  },
+  "closed:relation-0f98b266": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案说阿多是老奶妈的后代，系统答成儿子，属于更具体但错误的血缘关系（儿子不等于后代概括）。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:fact-6d0127ba": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案是密肯，系统答成米凯尔·雷德温，人物不同。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:fact-5e4b11b1": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案为梅里·佛雷，系统答成瓦德·佛雷，错误。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "rag:fact-fb51943a": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“不到一千”与标准答案“不到一千人”意思一致。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "closed:relation-5263ba62": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案称死于“一场意外”，与标准答案“被拉姆斯毒死”不符，且未提供被毒死的信息。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:relation-b31a38aa": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案是封臣，系统回答顾问，两者不一致。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "agent:multihop-f4af5f56": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案与标准答案一致，均指出泰温·兰尼斯特并献上雷加妻儿的尸体。",
+   "run": "20261112-004714_p4_smoke_a1"
+  },
+  "agent:multihop-8c3ef2c8": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“倒进便池”与标准答案“倒进了便池”意思一致。",
+   "run": "20261112-004714_p4_smoke_a1"
+  },
+  "closed:fact-e132c824": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“灰死”与标准答案“灰死病”指同一种病，意思一致。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:fact-d27dee81": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "系统答案“薇拉·佛雷”与标准答案“史坦尼斯”完全不符，答错了信件收信人。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "rag:multihop-adabd5ed": {
+   "label": "correct",
+   "scored_by": "judge",
+   "judge_reason": "系统答案表达了认为叮当衫会强暴、谋害妹妹的核心原因，与标准答案意思一致。",
+   "run": "20261112-004212_p4_rag_dev"
+  },
+  "closed:multihop-5ccd429a": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "只答对了波利佛，另一人应为记事本而非格雷格。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:fact-353b9116": {
+   "label": "wrong",
+   "scored_by": "judge",
+   "judge_reason": "标准答案为助理学士拉蕾萨（斯芬克斯），系统答成山姆的朋友鲍勃，属答错。",
+   "run": "20261112-004032_p4_closed_dev"
+  },
+  "closed:fact-ff7ecc70": {
+   "label": "partial",
+   "scored_by": "judge",
+   "judge_reason": "系统答案只给出了亚夏，而标准答案要求指出东方，亚夏彼端的阴影之地和玉海中的岛群，关键信息不完整。",
+   "run": "20261112-004032_p4_closed_dev"
+  }
+ }
+}
