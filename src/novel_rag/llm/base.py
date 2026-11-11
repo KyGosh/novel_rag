@@ -11,7 +11,10 @@ from typing import Any, TypeVar
 import numpy as np
 from pydantic import BaseModel
 
-Message = dict[str, Any]  # OpenAI 风格：{"role": "system" | "user" | "assistant", "content": "..."}
+# OpenAI 风格：{"role": "system" | "user" | "assistant" | "tool", "content": "..."}；
+# assistant 的工具调用消息带 "tool_calls"，tool 结果消息带 "tool_call_id"（见 tool_call_message / tool_result_message）
+Message = dict[str, Any]
+ToolSchema = dict[str, Any]  # {"name", "description", "parameters": JSON Schema}，由 llm/ 转成厂商格式
 SchemaT = TypeVar("SchemaT", bound=BaseModel)
 
 
@@ -29,6 +32,48 @@ class TokenUsage:
 
 
 @dataclass(frozen=True)
+class ToolCall:
+    """模型发出的一次工具调用。arguments 是模型给出的原始字符串；不合法的 JSON 不在 llm/ 层报错，
+    args 为 None、args_error 写明原因，由上层（Agent 循环）把错误作为观察结果还给模型。"""
+
+    id: str
+    name: str
+    arguments: str
+    args: dict[str, Any] | None = None
+    args_error: str | None = None
+
+    @classmethod
+    def parse(cls, id: str, name: str, arguments: str | None) -> ToolCall:
+        import json
+
+        raw = arguments or ""
+        try:
+            val = json.loads(raw) if raw.strip() else {}
+        except json.JSONDecodeError as e:
+            return cls(id, name, raw, None, f"参数不是合法的 JSON：{e.msg}")
+        if not isinstance(val, dict):
+            return cls(id, name, raw, None, "参数必须是 JSON 对象")
+        return cls(id, name, raw, val, None)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"id": self.id, "name": self.name, "arguments": self.arguments}
+
+
+def tool_call_message(text: str, calls: Sequence[ToolCall]) -> Message:
+    """assistant 发出工具调用的那条消息（OpenAI 格式），用于把调用续写进对话历史。"""
+    msg: Message = {"role": "assistant", "content": text or None}
+    if calls:
+        msg["tool_calls"] = [
+            {"id": c.id, "type": "function", "function": {"name": c.name, "arguments": c.arguments}} for c in calls
+        ]
+    return msg
+
+
+def tool_result_message(call_id: str, content: str) -> Message:
+    return {"role": "tool", "tool_call_id": call_id, "content": content}
+
+
+@dataclass(frozen=True)
 class ChatResult:
     text: str  # 最终回答（思考类模型的推理内容已丢弃）
     model: str
@@ -37,6 +82,7 @@ class ChatResult:
     parsed: BaseModel | None = None  # 传入 schema 时为通过校验的对象
     cached: bool = False
     attempts: int = 1  # 结构化输出校验失败重试时 > 1
+    tool_calls: tuple[ToolCall, ...] = ()  # 传入 tools 且模型选择调用工具时非空
 
 
 class StructuredOutputError(RuntimeError):
@@ -48,7 +94,11 @@ class StructuredOutputError(RuntimeError):
 
 
 class ChatModel(ABC):
-    """对话模型。一个实例绑定一个任务（抽取 / 生成 / judge ……）及其模型参数。"""
+    """对话模型。一个实例绑定一个任务（抽取 / 生成 / judge ……）及其模型参数。
+
+    tools：可用工具列表（function calling）；模型调用工具时 ChatResult.tool_calls 非空。
+    sample：采样编号，只参与缓存键：同一编号可复现，换一个编号就是独立的新样本（"Agent 跑两次"用）。
+    """
 
     task: str
     model_name: str
@@ -60,6 +110,8 @@ class ChatModel(ABC):
         *,
         schema: type[BaseModel] | None = None,
         prompt_version: str | None = None,
+        tools: Sequence[ToolSchema] | None = None,
+        sample: int = 0,
     ) -> ChatResult: ...
 
     @abstractmethod
@@ -69,6 +121,8 @@ class ChatModel(ABC):
         *,
         schema: type[BaseModel] | None = None,
         prompt_version: str | None = None,
+        tools: Sequence[ToolSchema] | None = None,
+        sample: int = 0,
     ) -> ChatResult: ...
 
     def cache_identity(self) -> dict[str, Any]:

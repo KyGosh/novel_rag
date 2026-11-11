@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from pydantic import BaseModel
@@ -17,6 +20,7 @@ from novel_rag.llm.base import (
     Reranker,
     TokenCounter,
     TokenUsage,
+    ToolCall,
     VisionModel,
     l2_normalize,
 )
@@ -38,15 +42,81 @@ class FakeChatModel(ChatModel):
         self.model_name = model_name
         self.calls = 0
 
-    def chat(self, messages, *, schema=None, prompt_version=None) -> ChatResult:
+    def chat(self, messages, *, schema=None, prompt_version=None, tools=None, sample=0) -> ChatResult:
         self.calls += 1
         text = self.responder(messages)
         parsed: BaseModel | None = parse_structured(text, schema) if schema is not None else None
         usage = TokenUsage(sum(len(str(m.get("content", ""))) for m in messages), len(text))
         return ChatResult(text=text, model=self.model_name, usage=usage, parsed=parsed)
 
-    async def achat(self, messages, *, schema=None, prompt_version=None) -> ChatResult:
-        return self.chat(messages, schema=schema, prompt_version=prompt_version)
+    async def achat(self, messages, *, schema=None, prompt_version=None, tools=None, sample=0) -> ChatResult:
+        return self.chat(messages, schema=schema, prompt_version=prompt_version, tools=tools, sample=sample)
+
+
+@dataclass(frozen=True)
+class Say:
+    """脚本步骤：回复一段文本（传了 schema 时按结构化输出解析）。"""
+
+    text: str
+
+
+@dataclass(frozen=True)
+class Call:
+    """脚本步骤：发出一个或多个工具调用。arguments 可以是 dict，也可以是原样的字符串（用来模拟非法 JSON）。"""
+
+    calls: tuple[tuple[str, dict[str, Any] | str], ...]
+    text: str = ""
+
+    @classmethod
+    def one(cls, name: str, arguments: dict[str, Any] | str | None = None) -> Call:
+        return cls(((name, {} if arguments is None else arguments),))
+
+
+ScriptStep = Say | Call | Callable[[Sequence[Message], Any], "Say | Call"]
+
+
+@dataclass
+class ScriptedChatModel(ChatModel):
+    """按脚本依次返回预设的回答或工具调用，让 Agent 循环的单测完全确定、不调用真实模型。
+
+    脚本可以是一个列表（所有调用共用，按顺序消耗），也可以按 prompt_version 分开（{"agent.v1": [...], ...}），
+    这样规划、行动、反思、作答各自的脚本互不干扰。步骤也可以是函数 (messages, tools) → Say | Call。
+    脚本用完时抛出 AssertionError。每次调用的消息与工具都记录在 history 里供断言。
+    """
+
+    script: list[ScriptStep] | dict[str, list[ScriptStep]] = field(default_factory=list)
+    task: str = "scripted"
+    model_name: str = "fake-scripted"
+    tokens_per_call: tuple[int, int] = (100, 20)
+    history: list[dict[str, Any]] = field(default_factory=list)
+
+    def _next(self, prompt_version: str | None) -> ScriptStep:
+        queue = self.script if isinstance(self.script, list) else self.script.get(prompt_version or "", [])
+        if not queue:
+            raise AssertionError(f"脚本已用完（prompt_version={prompt_version}）")
+        return queue.pop(0)
+
+    def chat(self, messages, *, schema=None, prompt_version=None, tools=None, sample=0) -> ChatResult:
+        step = self._next(prompt_version)
+        if callable(step) and not isinstance(step, Say | Call):
+            step = step(messages, tools)
+        self.history.append(
+            {"messages": list(messages), "tools": [t["name"] for t in tools or []], "prompt_version": prompt_version}
+        )
+        usage = TokenUsage(*self.tokens_per_call)
+        if isinstance(step, Call):
+            calls = tuple(
+                ToolCall.parse(
+                    f"call_{len(self.history)}_{i}", name, args if isinstance(args, str) else json.dumps(args)
+                )
+                for i, (name, args) in enumerate(step.calls)
+            )
+            return ChatResult(text=step.text, model=self.model_name, usage=usage, tool_calls=calls)
+        parsed = parse_structured(step.text, schema) if schema is not None else None
+        return ChatResult(text=step.text, model=self.model_name, usage=usage, parsed=parsed)
+
+    async def achat(self, messages, *, schema=None, prompt_version=None, tools=None, sample=0) -> ChatResult:
+        return self.chat(messages, schema=schema, prompt_version=prompt_version, tools=tools, sample=sample)
 
 
 class FakeEmbedder(Embedder):

@@ -59,6 +59,12 @@ def _default_tasks() -> dict[str, LLMTaskConfig]:
         "generation": LLMTaskConfig(model=model, extra_body=no_thinking),
         "judge": LLMTaskConfig(model=model, extra_body=no_thinking),
         "smoke": LLMTaskConfig(model=model, max_tokens=256, extra_body=no_thinking),
+        # P4：Agent 的规划与行动、反思、统一作答环节（四个系统共用）、答案 judge
+        "agent": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "agent_thinking": LLMTaskConfig(model=model),  # 开启思考的对照（agent.thinking=True 时用于规划与行动）
+        "reflect": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "answer": LLMTaskConfig(model=model, extra_body=no_thinking),
+        "answer_judge": LLMTaskConfig(model=model, temperature=0.0, extra_body=no_thinking),
     }
 
 
@@ -308,6 +314,50 @@ class KGConfig(_Frozen):
     output_max_chars: int = 4000  # 模板输出转文本的长度上限
 
 
+class ToolsConfig(_Frozen):
+    """P4 工具层：每个工具的默认参数与输出上限（字符数）。阅读进度和检索范围由运行环境注入，不在这里。"""
+
+    search_top_k: int = 5  # 原文检索默认返回几个 chunk
+    search_max_top_k: int = 8
+    search_max_chars: int = 4500  # 原文检索输出总长上限（返回 chunk 全文，按此截断）
+    read_max_window: int = 3  # 读原文时前后最多各扩展几块（不跨章）
+    read_max_chars: int = 4000
+    summary_search_top_k: int = 5
+    summary_snippet_chars: int = 160
+    summary_search_max_chars: int = 2000
+    read_summary_max_chars: int = 3000
+    entity_max_candidates: int = 5
+    entity_filter_max_chunks: int = 5000  # 实体限定检索：提及该实体的 chunk 超过此数时不限定（几乎覆盖全书）
+    graph_max_chars: int = 3000
+    graph_default_limit: int = 15
+    # 服务超时 / 连接失败的重试（参数错误、找不到实体不重试）
+    max_retries: int = 2
+    retry_backoff_s: float = 0.5
+
+
+class AgentConfig(_Frozen):
+    """P4 Agent 循环的上限与开关（默认值见 P4 方案第十一节；P5 做敏感性消融）。"""
+
+    max_rounds: int = 6  # 行动轮数上限（每轮 = 行动 + 执行 + 反思）
+    max_tool_calls: int = 12
+    max_tokens: int = 40_000  # 每题 token 上限（规划 + 行动 + 反思；作答另计）
+    max_calls_per_round: int = 4  # 单轮内并行调用的工具数上限，多出的不执行并告知模型
+    max_error_rounds: int = 3  # 连续这么多轮都只产生错误 → 强制作答（终止原因"异常"）
+    thinking: bool = False  # True：规划与行动用 agent_thinking 任务（开启思考）
+    observation_max_chars: int = 12_000  # 一轮全部观察交给反思时的总长上限
+    max_notes: int = 30  # 证据笔记条数上限（超出后只保留最早的，后续新增作废并计数）
+
+
+class AnswerConfig(_Frozen):
+    """统一作答环节（闭卷 / 固定 RAG / 固定 GraphRAG / Agent 共用）。"""
+
+    context_token_budget: int = 4000  # 与固定 RAG 的 cov@4000 同一口径（reranker tokenizer 计数）
+    fixed_top_k: int = 8  # 固定 RAG 取检索结果的前几个 chunk
+    abstain_text: str = "原文未提及"
+    # 答案评分：规则匹配（规范化后包含）+ judge
+    rule_min_chars: int = 2  # 规范化后少于此长度的标准答案 / 写法不做包含匹配（避免单字误配）
+
+
 class PathsConfig(_Frozen):
     data_dir: Path = PROJECT_ROOT / "data"
     cache_dir: Path = PROJECT_ROOT / "data" / "cache"
@@ -334,6 +384,11 @@ class PathsConfig(_Frozen):
     @property
     def embedding_cache_dir(self) -> Path:
         return self.cache_dir / "embeddings"
+
+    @property
+    def traces_dir(self) -> Path:
+        """含原文的完整 trace（不入库）；eval/results/ 中只存不含原文的结构化摘要。"""
+        return self.data_dir / "traces"
 
     @property
     def eval_work_dir(self) -> Path:
@@ -375,6 +430,9 @@ class Settings(BaseSettings):
     evalgen: EvalGenConfig = EvalGenConfig()
     summary: SummaryConfig = SummaryConfig()
     kg: KGConfig = KGConfig()
+    tools: ToolsConfig = ToolsConfig()
+    agent: AgentConfig = AgentConfig()
+    answer: AnswerConfig = AnswerConfig()
     paths: PathsConfig = PathsConfig()
 
     def snapshot(self) -> dict[str, Any]:

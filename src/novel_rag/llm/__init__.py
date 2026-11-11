@@ -9,7 +9,11 @@ from novel_rag.llm.base import (
     StructuredOutputError,
     TokenCounter,
     TokenUsage,
+    ToolCall,
+    ToolSchema,
     VisionModel,
+    tool_call_message,
+    tool_result_message,
 )
 from novel_rag.llm.factory import (
     get_chat_model,
@@ -29,6 +33,8 @@ __all__ = [
     "StructuredOutputError",
     "TokenCounter",
     "TokenUsage",
+    "ToolCall",
+    "ToolSchema",
     "UsageRecord",
     "UsageTracker",
     "VisionModel",
@@ -38,4 +44,6 @@ __all__ = [
     "get_token_counter",
     "get_usage_tracker",
     "get_vision_model",
+    "tool_call_message",
+    "tool_result_message",
 ]

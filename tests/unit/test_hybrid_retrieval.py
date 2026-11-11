@@ -46,9 +46,10 @@ FILTERS = [
     SearchFilter(max_reading_order=3),
     SearchFilter(book_ids=("demo-1", "demo-2"), max_reading_order=0),
     SearchFilter(section_types=("narrative",), chunk_types=("text",), max_reading_order=5),
+    SearchFilter(max_reading_order=4, chunk_ids=("demo-1:0001", "demo-2:0003")),
 ]
 DOCS = [
-    {"book_id": b, "reading_order": ro, "section_type": st, "chunk_type": ct}
+    {"book_id": b, "reading_order": ro, "section_type": st, "chunk_type": ct, "chunk_id": f"{b}:{ro:04d}"}
     for b, ro, st, ct in itertools.product(
         ("demo-1", "demo-2", "demo-3"), (0, 3, 4, 9), ("narrative", "appendix"), ("text", "note")
     )
