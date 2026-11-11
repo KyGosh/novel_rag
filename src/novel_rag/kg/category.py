@@ -1,7 +1,8 @@
 """人物类别判定与关系清洗（P3.1，kg-schema-2）。
 
 抽取口径里"人物"包括有名字的动物伙伴，还会混进少量器物、钱币、道具之类的非角色。消歧之后：
-1. 类别判定：每个人物实体的名字、所属群体和若干条抽取描述成批交给 LLM，判为 人 / 动物 / 非角色。
+1. 类别判定：每个人物实体的名字、所属群体和若干条抽取描述成批交给 LLM，判为 人 / 动物 / 非角色 / 称呼
+   （称呼交给 kg/epithet.py 做归属，归属不上的按"人"处理）。
    批次按实体 ID 排序后切分（确定性），LLM 结果按内容 hash 缓存。覆盖文件（aliases.toml 的 [[category]]）
    可以纠正个例。没有 LLM 结果（失败、漏项、不做判定）时默认是"人"。
 2. 非角色实体连同它的提及、关系一起从图谱中去掉。
@@ -30,7 +31,9 @@ from novel_rag.kg.schema import (
     ANIMAL,
     CATEGORY_JUDGMENTS,
     COMPANION_REWRITE_FROM,
+    EPITHET,
     HUMAN,
+    LOC,
     NON_CHARACTER,
     PERSON,
     category_allows,
@@ -38,7 +41,7 @@ from novel_rag.kg.schema import (
 from novel_rag.llm.base import ChatModel
 from novel_rag.prompts import Prompt
 
-CATEGORY_VERSION = "kg-category-1"  # 卡片内容、批次切分、默认值、清洗规则的版本
+CATEGORY_VERSION = "kg-category-4"  # 卡片内容、批次切分、默认值、清洗规则的版本
 
 
 class CategoryItem(BaseModel):
@@ -153,6 +156,22 @@ async def judge_categories(
     return out
 
 
+def place_name_rule(judgments: dict[str, Judgment], entities: Sequence[dict[str, Any]], stats: Counter) -> None:
+    """地名转指（用地名指代该地的领主或居民）：被判为"称呼"的人物实体，规范名（不含间隔号）与某个地点实体的
+    名字或别名相同时，改判"非角色"，不做称呼归属。只作用于"称呼"：判为"人"的同名实体多是碰巧与地名同名的
+    真人（P3.1 试过对"人"也生效，误删了大量真人）。在覆盖文件之前执行，覆盖文件可以改回。"""
+    places = set()
+    for e in entities:
+        if e["type"] == LOC:
+            places.update(normalize_name(n) for n in [e["name"], *(a["alias"] for a in e.get("aliases", []))])
+    for e in entities:
+        n = normalize_name(e["name"])
+        j = judgments.get(e["entity_id"])
+        if e["type"] == PERSON and "·" not in n and n in places and j is not None and j.category == EPITHET:
+            judgments[e["entity_id"]] = Judgment(NON_CHARACTER, "与地点同名（地名转指）", "rule")
+            stats["category_place_name"] += 1
+
+
 def apply_category_overrides(
     judgments: dict[str, Judgment],
     entities: Sequence[dict[str, Any]],
@@ -179,13 +198,15 @@ def apply_category_overrides(
 
 
 def assign_categories(entities: list[dict[str, Any]], judgments: Mapping[str, Judgment]) -> set[str]:
-    """把类别写进人物实体（没有判定的默认为"人"）；返回判为非角色的实体 ID。"""
+    """把类别写进人物实体（没有判定的、判为"称呼"而没被归属掉的都按"人"）；返回判为非角色的实体 ID。"""
     dropped = set()
     for e in entities:
         if e["type"] != PERSON:
             continue
         j = judgments.get(e["entity_id"])
         cat = j.category if j else HUMAN
+        if cat == EPITHET:
+            cat = HUMAN
         if cat == NON_CHARACTER:
             dropped.add(e["entity_id"])
         e["category"] = cat if cat != NON_CHARACTER else None

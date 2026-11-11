@@ -1,4 +1,4 @@
-"""构建知识图谱导出文件：抽取记录 → 实体消歧 → 人物类别判定 → 关系聚合与清洗 → 事件（来自章节摘要）→
+"""构建知识图谱导出文件：抽取记录 → 实体消歧 → 人物类别判定 → 称呼归属 → 关系聚合与清洗 → 事件（来自章节摘要）→
 data/kg/{图谱版本}/。
 
 用法：
@@ -6,10 +6,11 @@ data/kg/{图谱版本}/。
     uv run python scripts/build_kg.py --extract-tag all --books asoiaf-1       # 只用某几卷的抽取记录
     uv run python scripts/build_kg.py --extract-tag all --no-overrides        # 不用人工覆盖文件（消融）
     uv run python scripts/build_kg.py --extract-tag all --no-category         # 不做人物类别判定（全部按"人"）
+    uv run python scripts/build_kg.py --extract-tag all --no-epithet          # 判为"称呼"的不做归属（按"人"）
 常用词表（判定"弱名字"用）是 IK 自带主词典的副本，从 ES 容器导出一次即可（不存在时不做常用词判定）：
     docker cp novel-rag-es:/usr/share/elasticsearch/config/analysis-ik/main.dic data/lexicon/ik_main.dic
 写入 Neo4j 用 scripts/load_kg.py（Neo4j 是可以随时重建的查询副本）。
-LLM 调用（拆分检查、候选对判定、类别判定、因果判断）都按内容 hash 缓存，重跑只花新增的部分。
+LLM 调用（拆分检查、候选对判定、类别判定、称呼归属、因果判断）都按内容 hash 缓存，重跑只花新增的部分。
 """
 
 from __future__ import annotations
@@ -47,9 +48,18 @@ from novel_rag.kg.category import (
     linked_form_counts,
     load_word_list,
     person_category_of,
+    place_name_rule,
     weak_names,
 )
 from novel_rag.kg.common import extract_dir, kg_root, load_series_kg
+from novel_rag.kg.epithet import (
+    EPITHET_VERSION,
+    apply_attributions,
+    attribute_epithets,
+    build_jobs,
+    full_name_segments,
+    name_forms,
+)
 from novel_rag.kg.events import extract_causes
 from novel_rag.kg.extract import VALIDATION_VERSION, extract_version
 from novel_rag.kg.names import normalize_name
@@ -68,6 +78,7 @@ def main() -> int:
     parser.add_argument("--no-overrides", action="store_true", help="不使用 aliases.toml（消融）")
     parser.add_argument("--no-causes", action="store_true", help="跳过事件因果判断")
     parser.add_argument("--no-category", action="store_true", help="不做人物类别判定（全部按「人」，不清洗关系）")
+    parser.add_argument("--no-epithet", action="store_true", help="判为「称呼」的不做归属（按「人」处理）")
     args = parser.parse_args()
 
     s = get_settings()
@@ -102,6 +113,7 @@ def main() -> int:
     split_prompt, judge_prompt = load_prompt("kg_split"), load_prompt("kg_judge")
     causes_prompt = load_prompt("kg_causes")
     category_prompt = None if args.no_category else load_prompt("kg_category")
+    epithet_prompt = None if args.no_category or args.no_epithet else load_prompt("kg_epithet")
     embedder = EmbeddingCache(get_embedder(), open_embedding_store(s.paths.embedding_cache_dir))
     overrides_path = s.paths.books_dir / series.series_id / "aliases.toml"
     use_overrides = not args.no_overrides and overrides_path.is_file()
@@ -145,9 +157,36 @@ def main() -> int:
                 stats=cat_stats,
             )  # fmt: skip
         )
+        place_name_rule(judgments, entities, cat_stats)
         if use_overrides:
             apply_category_overrides(judgments, entities, Overrides.load(overrides_path).categories, cat_stats)
-    dropped = assign_categories(entities, judgments)
+    # 称呼归属：判为"称呼"的孤立簇并进它所指的真实人物（作为别名），归属不上的按"人"处理
+    attributions = []
+    if epithet_prompt is not None:
+        ep_jobs = build_jobs(
+            entities, m2e_full, resolver.mentions, chunk_text, {eid: j.category for eid, j in judgments.items()},
+            max_passages=k.epithet_max_passages, window_chars=k.epithet_window_chars,
+            max_candidates=k.epithet_max_candidates,
+        )  # fmt: skip
+        attributions = asyncio.run(
+            attribute_epithets(
+                ep_jobs,
+                disamb,
+                epithet_prompt,
+                m2e_full,
+                resolver.mentions,
+                full_name_segments(entities),
+                min_support=k.epithet_min_support,
+                concurrency=k.jobs_in_flight,
+                stats=cat_stats,
+                forms_of=name_forms(entities),
+                generic_mode=k.epithet_generic_mode,
+            )  # fmt: skip
+        )
+        entities, generic_drop = apply_attributions(entities, m2e_full, resolver.mentions, attributions, cat_stats)
+    else:
+        generic_drop = set()
+    dropped = assign_categories(entities, judgments) | generic_drop
     relations = aggregate_relations(records, m2e_full, stats)
     entities, m2e = drop_entities(entities, m2e_full, dropped, cat_stats)
     index = ChapterNameIndex(records, m2e, series.rules)
@@ -204,6 +243,18 @@ def main() -> int:
             "prompt": category_prompt.version_id,
             "params": k.model_dump(include={"category_batch_size", "category_max_descriptions"}),
         },
+        "epithet": None
+        if epithet_prompt is None
+        else {
+            "version": EPITHET_VERSION,
+            "prompt": epithet_prompt.version_id,
+            "params": k.model_dump(
+                include={
+                    f"epithet_{x}"
+                    for x in ("max_passages", "window_chars", "max_candidates", "min_support", "generic_mode")
+                }
+            ),
+        },
         "common_words": None
         if common_words is None
         else {
@@ -257,6 +308,9 @@ def main() -> int:
         ),
         encoding="utf-8",
     )  # fmt: skip
+    (internal / "epithets.jsonl").write_text(
+        "".join(json.dumps(vars(a), ensure_ascii=False) + "\n" for a in attributions), encoding="utf-8"
+    )
     (internal / "weak_names.json").write_text(json.dumps(weak_details, ensure_ascii=False, indent=1), encoding="utf-8")
     by_type = Counter(e["type"] for e in entities)
     rel_types = Counter(r["type"] for r in all_relations)

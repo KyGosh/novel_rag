@@ -1,0 +1,274 @@
+{
+  "created": "2026-11-11T22:01:45",
+  "git": {
+    "commit": "4029a5c9c9ebcb8cd46bbebf5b2885de9332c106",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "93785ea8",
+  "gold_from": "7e9c8e49",
+  "n": 368,
+  "errors_new": 21,
+  "errors_old": 20,
+  "error_types_new": {
+    "人->非角色": 14,
+    "动物->人": 2,
+    "动物->非角色": 3,
+    "非角色->人": 2
+  },
+  "error_types_old": {
+    "人->非角色": 1,
+    "动物->人": 4,
+    "动物->非角色": 5,
+    "非角色->人": 9,
+    "非角色->动物": 1
+  },
+  "epithets_merged_in_sample": 9,
+  "generic_dropped_in_sample": 1,
+  "changed": [
+    {
+      "entity_id": "asoiaf:person:VALONQAR",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:乳头岛",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:兽舍掌管",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:军士",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:军官",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:劳勃二世",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:乔佛里·拜拉席恩一世",
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:北境领主",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:卢小姐",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:双塔骑士",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:古怪的",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:科尔·肯宁",
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:吧唧脚",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:唐突",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:唐纳·希山",
+      "gold": "人",
+      "old": "动物",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:培根",
+      "gold": "动物",
+      "old": "非角色",
+      "new": "动物",
+      "new_raw": "动物",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:夜火",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "动物",
+      "new_raw": "动物",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:恐怖堡领主",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:火蚯蚓",
+      "gold": "非角色",
+      "old": "动物",
+      "new": "非角色",
+      "new_raw": "非角色",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:红鸦",
+      "gold": "人",
+      "old": "动物",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:红胡子雷蒙",
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:芜菁骑士",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:戴佛斯·席渥斯",
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:西姆祖玛",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:西格那格",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:赛斯拉·科荷兰",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:赫伦堡的鬼魂",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:艾莉亚·史塔克",
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:金色雄狮",
+      "gold": "非角色",
+      "old": "动物",
+      "new": "非角色",
+      "new_raw": "非角色",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:门之开启者",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:队长",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null,
+      "generic": false
+    },
+    {
+      "entity_id": "asoiaf:person:史塔克父子",
+      "gold": "非角色",
+      "old": "人",
+      "new": "非角色",
+      "new_raw": "非角色",
+      "merged_into": null,
+      "generic": false
+    }
+  ],
+  "review": "Claude 预标 + 用户核对（2026-11-11，改判 5 条：乳头岛、亚兰城、多恩领、盛夏群岛、赫伦堡由人改为非角色——地名转指领主统一判非角色）"
+}

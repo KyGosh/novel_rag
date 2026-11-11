@@ -25,9 +25,10 @@ LABEL_TO_TYPE = {v: k for k, v in ENTITY_LABELS.items()}
 ORG_CATEGORIES = ("家族", "军团", "宗教", "行会", "政权", "其他")
 EXTENSIONS = {"title": (TITLE,)}  # 扩展名 → 新增的实体类型
 # 人物类别：消歧之后判定。非角色（器物、钱币、道具、比喻）的簇连同其关系一起从图谱中去掉
-HUMAN, ANIMAL, NON_CHARACTER = "人", "动物", "非角色"
+# 称呼：指代另一个人的绰号、自称、代称，判定后做称呼归属（kg/epithet.py），归属不上的按"人"处理
+HUMAN, ANIMAL, NON_CHARACTER, EPITHET = "人", "动物", "非角色", "称呼"
 PERSON_CATEGORIES = (HUMAN, ANIMAL)
-CATEGORY_JUDGMENTS = (HUMAN, ANIMAL, NON_CHARACTER)
+CATEGORY_JUDGMENTS = (HUMAN, ANIMAL, NON_CHARACTER, EPITHET)
 
 
 @dataclass(frozen=True)

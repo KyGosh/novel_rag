@@ -283,6 +283,14 @@ class KGConfig(_Frozen):
     # 人物类别判定（P3.1）与常用词名字
     category_batch_size: int = 40  # 每次 LLM 调用判定的实体数
     category_max_descriptions: int = 6  # 每个实体交给判定的描述条数（按出现次数取最多的）
+    # 称呼归属（P3.1 第 7 项）
+    epithet_max_passages: int = 6  # 每个称呼交给 LLM 的段落数（按阅读顺序取最早的、不同 chunk）
+    epithet_window_chars: int = 150  # 段落窗口：称呼前后各取这么多字
+    epithet_max_candidates: int = 20  # 候选人物上限（段内出现的优先，其次同章按提及数）
+    epithet_min_support: float = 0.5  # 指向同一人的段数 / 判定段数的下限
+    # 泛称（可指不同的人）：link = 只按章挂靠提及、不作别名、没挂上的删掉；
+    # alias = 与专属称呼一样作别名（fd032ef1 的旧行为）
+    epithet_generic_mode: Literal["link", "alias"] = "link"
     weak_name_min_linked_ratio: float = 0.5  # 常用词写法被抽取为提及的次数 / 原文出现次数低于此值 → 弱名字
     # Neo4j 写入与查询
     neo4j_batch: int = 1000

@@ -39,12 +39,15 @@ def stratum(n: int) -> int:
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("action", choices=["export", "score"])
+    parser.add_argument("action", choices=["export", "score", "compare"])
     parser.add_argument("--kg", required=True, help="图谱版本")
+    parser.add_argument("--gold-kg", help="compare：金标所在的旧图谱版本")
     args = parser.parse_args()
 
     s = get_settings()
     kgdir = kg_root(s.paths.data_dir) / args.kg
+    if args.action == "compare":
+        return compare(s, kgdir, args.kg, args.gold_kg)
     cats = [json.loads(line) for line in (kgdir / "internal" / "categories.jsonl").open(encoding="utf-8")]
     work = s.paths.reports_dir / "kg_quality" / args.kg
     work.mkdir(parents=True, exist_ok=True)
@@ -141,6 +144,95 @@ def main() -> int:
     (res / "metrics.json").write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in out.items() if k not in ("git", "errors")}, ensure_ascii=False, indent=2))
     print(f"判错 {len(out['errors'])} 个；结果：{res}")
+    return 0
+
+
+def compare(s, kgdir, kg: str, gold_kg: str | None) -> int:
+    """用旧图谱的类别金标评新图谱（实体 ID 由消歧决定，类别判定前后不变）：
+    被称呼归属并进别人的实体，按目标实体的类别计；泛称的提及全部按章挂靠出去的，按挂靠目标计；
+    泛称因有证据指向不同的人而被删掉的，计为非角色（和非角色一样不在图谱里）；其余仍在图谱里的称呼按"人"计。
+    样本是按旧图谱的系统判定抽的，精确率 / 召回不再有意义，只报告混淆矩阵与各类错误数，并与旧系统判定对照。"""
+    if not gold_kg:
+        print("compare 需要 --gold-kg")
+        return 1
+    gold_dir = s.paths.reports_dir / "kg_quality" / gold_kg
+    gold = [json.loads(line) for line in (gold_dir / "category_gold.jsonl").open(encoding="utf-8")]
+    old = {
+        c["entity_id"]: c["category"]
+        for c in map(
+            json.loads, (kg_root(s.paths.data_dir) / gold_kg / "internal" / "categories.jsonl").open(encoding="utf-8")
+        )
+    }
+    new = {
+        c["entity_id"]: c["category"]
+        for c in map(json.loads, (kgdir / "internal" / "categories.jsonl").open(encoding="utf-8"))
+    }
+    ep_path = kgdir / "internal" / "epithets.jsonl"
+    merged, generic = {}, set()
+    present = {e["entity_id"] for e in map(json.loads, (kgdir / "entities.jsonl").open(encoding="utf-8"))}
+    if ep_path.is_file():
+        for a in map(json.loads, ep_path.open(encoding="utf-8")):
+            eid = a["entity_id" if "entity_id" in a else "epithet_id"]
+            if a["status"] == "merged":
+                merged[eid] = a["target_id"]
+            elif a.get("generic") and eid not in present:
+                if a.get("multi"):
+                    generic.add(eid)  # 有证据指向不同的人，剩余提及连同实体删掉
+                elif a.get("links"):
+                    merged[eid] = a["links"][0][2]  # 提及全部按章挂靠出去了，按挂靠目标计
+
+    def label(eid: str) -> str:
+        if eid in generic:
+            return "非角色"
+        if eid in merged:
+            eid = merged[eid]
+        c = new.get(eid, "缺失")
+        return HUMAN if c == "称呼" else c
+
+    conf_new, conf_old = Counter(), Counter()
+    changed = []
+    for g in gold:
+        eid = g["entity_id"]
+        n, o = label(eid), old[eid]
+        conf_new[(n, g["gold"])] += 1
+        conf_old[(o, g["gold"])] += 1
+        if (n == g["gold"]) != (o == g["gold"]):
+            changed.append(
+                {
+                    "entity_id": eid,
+                    "gold": g["gold"],
+                    "old": o,
+                    "new": n,
+                    "new_raw": new.get(eid),
+                    "merged_into": merged.get(eid),
+                    "generic": eid in generic,
+                }
+            )
+
+    def errs(conf: Counter) -> dict:
+        return {f"{p}->{g}": v for (p, g), v in sorted(conf.items()) if p != g}
+
+    out = {
+        "created": datetime.now().isoformat(timespec="seconds"),
+        "git": git_info(),
+        "kg_version": kg,
+        "gold_from": gold_kg,
+        "n": len(gold),
+        "errors_new": sum(v for (p, g), v in conf_new.items() if p != g),
+        "errors_old": sum(v for (p, g), v in conf_old.items() if p != g),
+        "error_types_new": errs(conf_new),
+        "error_types_old": errs(conf_old),
+        "epithets_merged_in_sample": sum(1 for g in gold if g["entity_id"] in merged),
+        "generic_dropped_in_sample": sum(1 for g in gold if g["entity_id"] in generic),
+        "changed": changed,
+    }
+    review = gold_dir / "category_review_status.txt"
+    out["review"] = review.read_text(encoding="utf-8").strip() if review.is_file() else "Claude 预标（待用户核对）"
+    res = s.paths.results_dir / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_kg_category_compare"
+    res.mkdir(parents=True)
+    (res / "metrics.json").write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({k: v for k, v in out.items() if k != "git"}, ensure_ascii=False, indent=2))
+    print(f"结果：{res}")
     return 0
 
 

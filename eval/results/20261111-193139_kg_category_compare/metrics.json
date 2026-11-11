@@ -1,0 +1,215 @@
+{
+  "created": "2026-11-11T19:31:39",
+  "git": {
+    "commit": "4029a5c9c9ebcb8cd46bbebf5b2885de9332c106",
+    "branch": "p3-kg",
+    "dirty": true
+  },
+  "kg_version": "597dcf82",
+  "gold_from": "7e9c8e49",
+  "n": 368,
+  "errors_new": 27,
+  "errors_old": 20,
+  "error_types_new": {
+    "人->非角色": 15,
+    "动物->人": 2,
+    "动物->非角色": 4,
+    "非角色->人": 5,
+    "非角色->动物": 1
+  },
+  "error_types_old": {
+    "人->非角色": 1,
+    "动物->人": 4,
+    "动物->非角色": 5,
+    "非角色->人": 9,
+    "非角色->动物": 1
+  },
+  "epithets_merged_in_sample": 15,
+  "changed": [
+    {
+      "entity_id": "asoiaf:person:三位叮当",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:亚兰城",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:诺勃特·凡斯"
+    },
+    {
+      "entity_id": "asoiaf:person:劳勃二世",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:乔佛里·拜拉席恩一世"
+    },
+    {
+      "entity_id": "asoiaf:person:卢小姐",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:双塔骑士",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:古怪的",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:科尔·肯宁"
+    },
+    {
+      "entity_id": "asoiaf:person:史塔克女孩",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:珊莎·史塔克"
+    },
+    {
+      "entity_id": "asoiaf:person:唐纳·希山",
+      "gold": "人",
+      "old": "动物",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:多恩领",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:夫妇",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:提利昂·兰尼斯特"
+    },
+    {
+      "entity_id": "asoiaf:person:恐怖堡领主",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:托因兄弟",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:琼恩·艾林的继承人",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:生父",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:提利昂·兰尼斯特"
+    },
+    {
+      "entity_id": "asoiaf:person:红鸦",
+      "gold": "人",
+      "old": "动物",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:红胡子雷蒙"
+    },
+    {
+      "entity_id": "asoiaf:person:绿胡子的人",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:泰洛西大君"
+    },
+    {
+      "entity_id": "asoiaf:person:赛斯拉·科荷兰",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "人",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:赫伦堡的鬼魂",
+      "gold": "人",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:艾莉亚·史塔克"
+    },
+    {
+      "entity_id": "asoiaf:person:队长",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:何塔"
+    },
+    {
+      "entity_id": "asoiaf:person:骡子",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "动物",
+      "new_raw": "动物",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:魔山的手下",
+      "gold": "非角色",
+      "old": "非角色",
+      "new": "人",
+      "new_raw": "称呼",
+      "merged_into": "asoiaf:person:格雷果·克里冈"
+    },
+    {
+      "entity_id": "asoiaf:person:北方女",
+      "gold": "人",
+      "old": "人",
+      "new": "非角色",
+      "new_raw": "非角色",
+      "merged_into": null
+    },
+    {
+      "entity_id": "asoiaf:person:大狗",
+      "gold": "人",
+      "old": "人",
+      "new": "非角色",
+      "new_raw": "非角色",
+      "merged_into": null
+    }
+  ],
+  "review": "Claude 预标 + 用户核对（2026-11-11，改判 5 条：乳头岛、亚兰城、多恩领、盛夏群岛、赫伦堡由人改为非角色——地名转指领主统一判非角色）"
+}
