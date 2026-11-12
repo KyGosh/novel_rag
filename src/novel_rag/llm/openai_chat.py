@@ -23,7 +23,7 @@ from tenacity import (
 )
 
 from novel_rag.config import LLMConfig, LLMTaskConfig
-from novel_rag.llm.base import ChatModel, ChatResult, Message, StructuredOutputError, TokenUsage
+from novel_rag.llm.base import ChatModel, ChatResult, Message, StructuredOutputError, TokenUsage, ToolCall, ToolSchema
 from novel_rag.llm.structured import (
     StructuredMode,
     parse_structured,
@@ -124,9 +124,24 @@ class OpenAICompatChatModel(ChatModel):
 
     # ---- 请求构造与响应解析 ----
 
-    def _request_kwargs(self, messages: Sequence[Message], schema: type[BaseModel] | None) -> dict[str, Any]:
+    @staticmethod
+    def tools_param(tools: Sequence[ToolSchema]) -> list[dict[str, Any]]:
+        """通用工具描述 → OpenAI function calling 格式。"""
+        return [
+            {
+                "type": "function",
+                "function": {"name": t["name"], "description": t.get("description", ""), "parameters": t["parameters"]},
+            }
+            for t in tools
+        ]
+
+    def _request_kwargs(
+        self, messages: Sequence[Message], schema: type[BaseModel] | None, tools: Sequence[ToolSchema] | None = None
+    ) -> dict[str, Any]:
         msgs = list(messages)
         kwargs: dict[str, Any] = {"model": self.model_name}
+        if tools:
+            kwargs["tools"] = self.tools_param(tools)
         if schema is not None:
             kwargs["response_format"] = response_format_for(schema, self.structured_mode)
             if self.structured_mode == "json_object":
@@ -141,12 +156,17 @@ class OpenAICompatChatModel(ChatModel):
         return kwargs
 
     @staticmethod
-    def _extract(resp: Any) -> tuple[str, TokenUsage, str]:
+    def _extract(resp: Any) -> tuple[str, TokenUsage, str, tuple[ToolCall, ...]]:
         # 只取最终回答；思考模型的 reasoning_content 不读取、不返回
-        text = resp.choices[0].message.content or ""
+        msg = resp.choices[0].message
+        text = msg.content or ""
         u = resp.usage
         usage = TokenUsage(u.prompt_tokens or 0, u.completion_tokens or 0) if u is not None else TokenUsage()
-        return text, usage, resp.model or ""
+        calls = tuple(
+            ToolCall.parse(c.id or f"call_{i}", c.function.name or "", c.function.arguments)
+            for i, c in enumerate(getattr(msg, "tool_calls", None) or [])
+        )
+        return text, usage, resp.model or "", calls
 
     def _retrying(self) -> dict[str, Any]:
         return {
@@ -157,7 +177,14 @@ class OpenAICompatChatModel(ChatModel):
         }
 
     def _finish(
-        self, text: str, usage: TokenUsage, model: str, t0: float, parsed: BaseModel | None, attempts: int
+        self,
+        text: str,
+        usage: TokenUsage,
+        model: str,
+        t0: float,
+        parsed: BaseModel | None,
+        attempts: int,
+        calls: tuple[ToolCall, ...] = (),
     ) -> ChatResult:
         result = ChatResult(
             text=text,
@@ -166,6 +193,7 @@ class OpenAICompatChatModel(ChatModel):
             latency_s=time.perf_counter() - t0,
             parsed=parsed,
             attempts=attempts,
+            tool_calls=calls,
         )
         self.tracker.record(
             UsageRecord(
@@ -188,17 +216,17 @@ class OpenAICompatChatModel(ChatModel):
                 self.limiter.wait_rate()
                 return self._client.chat.completions.create(**kwargs)
 
-    def chat(self, messages, *, schema=None, prompt_version=None) -> ChatResult:
+    def chat(self, messages, *, schema=None, prompt_version=None, tools=None, sample=0) -> ChatResult:
         t0 = time.perf_counter()
         msgs = list(messages)
         total = TokenUsage()
         attempts = self.structured_max_attempts if schema is not None else 1
         text, model = "", ""
         for i in range(1, attempts + 1):
-            text, usage, model = self._extract(self._call(self._request_kwargs(msgs, schema)))
+            text, usage, model, calls = self._extract(self._call(self._request_kwargs(msgs, schema, tools)))
             total += usage
-            if schema is None:
-                return self._finish(text, total, model, t0, None, i)
+            if schema is None or calls:  # 调用了工具时不做结构化解析
+                return self._finish(text, total, model, t0, None, i, calls)
             try:
                 parsed = parse_structured(text, schema)
             except ValidationError as e:
@@ -217,17 +245,17 @@ class OpenAICompatChatModel(ChatModel):
                     await self.limiter.await_rate()
                     return await self._async_client.chat.completions.create(**kwargs)
 
-    async def achat(self, messages, *, schema=None, prompt_version=None) -> ChatResult:
+    async def achat(self, messages, *, schema=None, prompt_version=None, tools=None, sample=0) -> ChatResult:
         t0 = time.perf_counter()
         msgs = list(messages)
         total = TokenUsage()
         attempts = self.structured_max_attempts if schema is not None else 1
         text, model = "", ""
         for i in range(1, attempts + 1):
-            text, usage, model = self._extract(await self._acall(self._request_kwargs(msgs, schema)))
+            text, usage, model, calls = self._extract(await self._acall(self._request_kwargs(msgs, schema, tools)))
             total += usage
-            if schema is None:
-                return self._finish(text, total, model, t0, None, i)
+            if schema is None or calls:  # 调用了工具时不做结构化解析
+                return self._finish(text, total, model, t0, None, i, calls)
             try:
                 parsed = parse_structured(text, schema)
             except ValidationError as e:

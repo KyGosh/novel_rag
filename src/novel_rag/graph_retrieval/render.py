@@ -10,6 +10,11 @@ from novel_rag.graph_retrieval.templates import QueryResult
 from novel_rag.kg.schema import ANIMAL, KIN_ROLES, PERSON, REL_BY_NAME
 
 TRUNC_NOTE = "……（结果过长，已截断）"
+SINGLE_NOTE = "，单条证据，建议回原文核实"  # P3：单证据关系的可信度低（完全支持约 37%）
+
+
+def n_ev(n: int) -> str:
+    return f"证据 {n} 条{SINGLE_NOTE if n == 1 else ''}"
 
 
 def relation_label(rel_type: str, role: str | None) -> str:
@@ -70,18 +75,18 @@ def render(result: QueryResult, where: Callable[[str], str], max_chars: int) -> 
         for x in r["relations"]:
             lines.append(
                 f"- {fact_text(r['name'], x['type'], x['role'], _other(x), x['outgoing'])}"
-                f"（证据 {x['n_evidence']} 条，ro {x['first_ro']}–{x['last_ro']}）证据：{_ev(x['evidence'], where)}"
+                f"（{n_ev(x['n_evidence'])}，ro {x['first_ro']}–{x['last_ro']}）证据：{_ev(x['evidence'], where)}"
             )
     elif op in ("neighbors",):
         for x in rows:
             lines.append(
                 f"- {fact_text('该实体', x['type'], x['role'], _other(x), x['outgoing'])} [{x['other_id']}]"
-                f"（证据 {x['n_evidence']} 条）证据：{_ev(x['evidence'], where)}"
+                f"（{n_ev(x['n_evidence'])}）证据：{_ev(x['evidence'], where)}"
             )
     elif op == "between":
         for x in rows:
             lines.append(
-                f"- {fact_text('A', x['type'], x['role'], 'B', x['a_to_b'])}（证据 {x['n_evidence']} 条，"
+                f"- {fact_text('A', x['type'], x['role'], 'B', x['a_to_b'])}（{n_ev(x['n_evidence'])}，"
                 f"ro {x['first_ro']}–{x['last_ro']}）证据：{_ev(x['evidence'], where)}"
             )
     elif op == "paths":
@@ -90,7 +95,7 @@ def render(result: QueryResult, where: Callable[[str], str], max_chars: int) -> 
             hops = [
                 f"{names.get(r['from'], r['from'])} —{relation_label(r['type'], r['role'])}→ "
                 f"{names.get(r['to'], r['to'])}"
-                f"（{_ev(r['evidence'], where)}）"
+                f"（{n_ev(r['n_evidence'])}：{_ev(r['evidence'], where)}）"
                 for r in p["rels"]
             ]
             lines.append(f"路径 {k}：" + " ／ ".join(hops))
@@ -113,7 +118,7 @@ def render(result: QueryResult, where: Callable[[str], str], max_chars: int) -> 
     elif op == "title_holders":
         for x in rows:
             lines.append(
-                f"- {x['holder']} [{x['holder_id']}]：ro {x['first_ro']}–{x['last_ro']}，证据 {x['n_evidence']} 条："
+                f"- {x['holder']} [{x['holder_id']}]：ro {x['first_ro']}–{x['last_ro']}，{n_ev(x['n_evidence'])}："
                 f"{_ev(x['evidence'], where)}"
             )
     text = f"[{op}]\n" + "\n".join(lines)

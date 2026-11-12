@@ -1,0 +1,15 @@
+{
+  "git": {
+    "commit": "61e80aa28cd69bec7f354772385163fe1a236dc0",
+    "branch": "p4-agent",
+    "dirty": true
+  },
+  "reranker": {
+    "model_name": "BAAI/bge-reranker-v2-m3",
+    "max_length": 1024,
+    "batch_size": 16,
+    "device": "cuda",
+    "fp16": true
+  },
+  "candidates": 40
+}

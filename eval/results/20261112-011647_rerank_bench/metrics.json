@@ -1,0 +1,22 @@
+{
+  "label": "wallpaper_engine_running",
+  "gpu": "5319 MiB, 98 %, 2805 MHz",
+  "results": {
+    "asoiaf_v0": {
+      "n": 40,
+      "rerank_ms_p50": 605.8,
+      "rerank_ms_p95": 709.9,
+      "question_chars_mean": 32.8,
+      "pair_tokens_mean": 16996.7,
+      "ms_per_1k_tokens": 35.49
+    },
+    "asoiaf_v1": {
+      "n": 40,
+      "rerank_ms_p50": 562.4,
+      "rerank_ms_p95": 650.6,
+      "question_chars_mean": 30.9,
+      "pair_tokens_mean": 17490.5,
+      "ms_per_1k_tokens": 32.68
+    }
+  }
+}

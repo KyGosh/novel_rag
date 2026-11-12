@@ -1,0 +1,21 @@
+{
+  "git": {
+    "commit": "61e80aa28cd69bec7f354772385163fe1a236dc0",
+    "branch": "p4-agent",
+    "dirty": true
+  },
+  "key": [
+    "eval/results/20261112-004032_p4_closed_dev",
+    "eval/results/20261112-004212_p4_rag_dev",
+    "eval/results/20261112-004438_p4_graphrag_dev",
+    "eval/results/20261112-004714_p4_smoke_a1"
+  ],
+  "judge": {
+    "model": "workbuddy/deepseek-v4.1-flash",
+    "temperature": 0.0,
+    "max_tokens": null,
+    "extra_body": {
+      "reasoning_effort": "none"
+    }
+  }
+}

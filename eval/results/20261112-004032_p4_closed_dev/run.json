@@ -1,0 +1,416 @@
+{
+  "name": "p4_closed_dev",
+  "created": "2026-11-12T00:41:45",
+  "git": {
+    "commit": "df8bb4b9ebc8e36872cc11776633c8c49a9ad2ff",
+    "branch": "p4-agent",
+    "dirty": false
+  },
+  "dataset": {
+    "name": "asoiaf_v1",
+    "split": "dev",
+    "subset": null,
+    "n_items": 141,
+    "fingerprint": "10539e1b6b3980f1a9811dfe4fbf9da2867688c8eb0ec6b6312c403c2fc43118",
+    "ids": null
+  },
+  "system": {
+    "name": "closed",
+    "answer_model": "workbuddy/deepseek-v4.1-flash",
+    "prompt": "qa_answer"
+  },
+  "sample": 0,
+  "concurrency": 4,
+  "llm_cache": true,
+  "judge": {
+    "task": "answer_judge",
+    "model": "workbuddy/deepseek-v4.1-flash"
+  },
+  "scope": [
+    "asoiaf-1",
+    "asoiaf-2",
+    "asoiaf-3",
+    "asoiaf-4",
+    "asoiaf-5"
+  ],
+  "chunk_version": "0c94b7e4",
+  "spoiler_filter": true,
+  "trace_dir": "data\\traces\\20261112-004032_p4_closed_dev",
+  "config": {
+    "es": {
+      "url": "http://localhost:9200",
+      "request_timeout": 30.0
+    },
+    "milvus": {
+      "uri": "http://localhost:19530",
+      "token": "",
+      "db_name": "default"
+    },
+    "neo4j": {
+      "uri": "bolt://localhost:17687",
+      "user": "neo4j",
+      "password": "**********",
+      "database": "neo4j"
+    },
+    "llm": {
+      "base_url": "http://127.0.0.1:3425/v1",
+      "api_key": "**********",
+      "max_concurrency": 4,
+      "max_rpm": null,
+      "timeout": 120.0,
+      "max_retries": 5,
+      "structured_mode": "json_object",
+      "structured_max_attempts": 3,
+      "cache_enabled": true,
+      "tasks": {
+        "extraction": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "summary": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "disambiguation": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "generation": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "judge": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "smoke": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": 256,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "agent": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "agent_thinking": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {}
+        },
+        "reflect": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "answer": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": null,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        },
+        "answer_judge": {
+          "model": "workbuddy/deepseek-v4.1-flash",
+          "temperature": 0.0,
+          "max_tokens": null,
+          "extra_body": {
+            "reasoning_effort": "none"
+          }
+        }
+      }
+    },
+    "embedding": {
+      "model_name": "BAAI/bge-m3",
+      "dim": 1024,
+      "batch_size": 16,
+      "max_length": 1024,
+      "device": "cuda",
+      "fp16": true
+    },
+    "reranker": {
+      "model_name": "BAAI/bge-reranker-v2-m3",
+      "max_length": 1024,
+      "batch_size": 16,
+      "device": "cuda",
+      "fp16": true
+    },
+    "retrieval": {
+      "routes": [
+        "bm25",
+        "vector"
+      ],
+      "bm25_top_k": 50,
+      "vector_top_k": 50,
+      "rrf_k": 60,
+      "fusion_top_k": 40,
+      "rerank": true,
+      "rerank_candidates": 40,
+      "rerank_top_k": 8,
+      "expand_window": 0,
+      "context_token_budget": 4000,
+      "bm25_scheme": "ik",
+      "bm25_field_boosts": {
+        "text": 1.0,
+        "text.bigram": 1.0
+      },
+      "es_analysis_version": "es2",
+      "summary_locate_top_k": 50,
+      "graph_top_k": 50,
+      "es_bulk_batch": 500,
+      "hnsw_m": 16,
+      "hnsw_ef_construction": 200,
+      "hnsw_ef": 128,
+      "metric_type": "COSINE",
+      "embed_text_template": "raw",
+      "milvus_upsert_batch": 256
+    },
+    "chunk": {
+      "target_chars": 500,
+      "max_chars": 800,
+      "min_chars": 150,
+      "overlap_chars": 90,
+      "long_quote_chars": 200,
+      "sentence_hard_max": 300,
+      "query_max_tokens": 64
+    },
+    "eval": {
+      "relevance_min_ratio": 0.5,
+      "relevance_min_chars": 50,
+      "ks": [
+        5,
+        10,
+        20
+      ],
+      "generate_top_k": 6,
+      "token_budgets": [
+        2000,
+        4000,
+        8000
+      ],
+      "context_pool": 40,
+      "bootstrap_samples": 2000,
+      "bootstrap_seed": 20261106,
+      "ci_level": 0.95
+    },
+    "ingest": {
+      "max_archive_files": 5000,
+      "max_uncompressed_bytes": 536870912,
+      "max_member_bytes": 67108864,
+      "pov_title_max_len": 6,
+      "pov_min_occurrences": 3,
+      "txt_title_max_len": 15,
+      "blank_section_max_chars": 10,
+      "text_section_types": [
+        "narrative",
+        "appendix"
+      ],
+      "enabled_volumes": [
+        1
+      ],
+      "qmark_punct_ratio": 0.2,
+      "keywords": {
+        "prologue": [
+          "序幕",
+          "序章",
+          "楔子",
+          "引子",
+          "prologue"
+        ],
+        "epilogue": [
+          "终章",
+          "尾声",
+          "epilogue"
+        ],
+        "appendix": [
+          "附录",
+          "appendix"
+        ],
+        "front_matter": [
+          "出版说明",
+          "作者简介",
+          "作者介绍",
+          "关于作者",
+          "内容简介",
+          "译者序",
+          "译序",
+          "前言",
+          "序言",
+          "目录",
+          "版权",
+          "preface",
+          "foreword",
+          "contents",
+          "copyright"
+        ],
+        "back_matter": [
+          "后记",
+          "译后记",
+          "致谢",
+          "鸣谢",
+          "afterword",
+          "acknowledg"
+        ],
+        "dedication": [
+          "献给",
+          "谨以此书",
+          "献辞",
+          "dedicated to",
+          "dedication"
+        ]
+      },
+      "qc_sample_size": 8,
+      "qc_qmark_sample_size": 20
+    },
+    "evalgen": {
+      "seed": 20261025,
+      "window_min_chars": 600,
+      "window_max_chars": 900,
+      "include_appendix": false,
+      "combo_counts": {
+        "relation": 60,
+        "multihop": 70,
+        "plot": 60
+      },
+      "plot_min_chapter_gap": 5,
+      "plot_windows": 3,
+      "max_window_uses": 3,
+      "quote_min_chars": 6,
+      "quote_max_chars": 200,
+      "fuzzy_threshold": 90.0,
+      "copy_lcs_chars": 8,
+      "dup_jaccard": 0.8,
+      "answer_max_chars": 40,
+      "question_max_chars": 80,
+      "per_type_target": 30,
+      "copyright_max_substring": 20,
+      "v1_fact_windows": 80,
+      "v1_combo_counts": {
+        "relation": 130,
+        "multihop": 130,
+        "plot": 120
+      },
+      "v1_targets": {
+        "fact": 60,
+        "relation": 100,
+        "multihop": 100,
+        "plot": 100
+      },
+      "cross_volume_ratio": 0.3
+    },
+    "summary": {
+      "jobs_in_flight": 16,
+      "target_min_chars": 300,
+      "target_max_chars": 500,
+      "bm25_top_k": 30,
+      "vector_top_k": 30,
+      "rrf_k": 60,
+      "locate_top_chapters": 5,
+      "summary_version": null
+    },
+    "kg": {
+      "jobs_in_flight": 32,
+      "context_chars": 200,
+      "evidence_fuzzy_threshold": 90.0,
+      "split_min_mentions": 6,
+      "split_max_descriptions": 40,
+      "candidate_top_k": 5,
+      "candidate_min_sim": 0.8,
+      "auto_merge_sim": 0.97,
+      "alias_merge_min_support": 0.1,
+      "short_link_min_ratio": 0.05,
+      "judge_max_pairs": 3000,
+      "judge_evidence_quotes": 3,
+      "min_entity_mentions": 1,
+      "category_batch_size": 40,
+      "category_max_descriptions": 6,
+      "epithet_max_passages": 6,
+      "epithet_window_chars": 150,
+      "epithet_max_candidates": 20,
+      "epithet_min_support": 0.5,
+      "epithet_generic_mode": "link",
+      "weak_name_min_linked_ratio": 0.5,
+      "neo4j_batch": 1000,
+      "query_timeout_s": 5.0,
+      "query_max_limit": 50,
+      "default_limit": 20,
+      "path_max_hops": 3,
+      "route_max_tier": 1,
+      "route_entity_types": null,
+      "route_path_node_types": null,
+      "route_path_exclude_node_types": null,
+      "route_min_entity_mentions": 1,
+      "output_max_chars": 4000
+    },
+    "tools": {
+      "search_top_k": 5,
+      "search_max_top_k": 8,
+      "search_max_chars": 4500,
+      "read_max_window": 3,
+      "read_max_chars": 4000,
+      "summary_search_top_k": 5,
+      "summary_snippet_chars": 160,
+      "summary_search_max_chars": 2000,
+      "read_summary_max_chars": 3000,
+      "entity_max_candidates": 5,
+      "entity_filter_max_chunks": 5000,
+      "graph_max_chars": 3000,
+      "graph_default_limit": 15,
+      "max_retries": 2,
+      "retry_backoff_s": 0.5
+    },
+    "agent": {
+      "max_rounds": 6,
+      "max_tool_calls": 12,
+      "max_tokens": 40000,
+      "max_calls_per_round": 4,
+      "max_error_rounds": 3,
+      "thinking": false,
+      "observation_max_chars": 12000,
+      "max_notes": 30
+    },
+    "answer": {
+      "context_token_budget": 4000,
+      "fixed_top_k": 8,
+      "abstain_text": "原文未提及",
+      "rule_min_chars": 2
+    },
+    "paths": {
+      "data_dir": "D:\\Project\\novel_rag\\data",
+      "cache_dir": "D:\\Project\\novel_rag\\data\\cache",
+      "results_dir": "D:\\Project\\novel_rag\\eval\\results",
+      "models_dir": "D:\\Project\\novel_rag\\models"
+    }
+  }
+}

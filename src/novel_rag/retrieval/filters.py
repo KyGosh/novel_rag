@@ -15,12 +15,17 @@ class SearchFilter:
     chunk_types: tuple[str, ...] | None = None
     # 只在这些章节内检索（reading_order 全系列唯一，即章节集合）；与 max_reading_order 同时生效
     reading_orders: tuple[int, ...] | None = None
+    # 只在这些 chunk 内检索（P4 原文检索工具的"限定提到某实体的段落"）；与其他条件同时生效
+    chunk_ids: tuple[str, ...] | None = None
 
     def with_max_reading_order(self, value: int | None) -> SearchFilter:
         return replace(self, max_reading_order=value)
 
     def with_reading_orders(self, values: tuple[int, ...] | None) -> SearchFilter:
         return replace(self, reading_orders=None if values is None else tuple(sorted({int(v) for v in values})))
+
+    def with_chunk_ids(self, values: tuple[str, ...] | None) -> SearchFilter:
+        return replace(self, chunk_ids=None if values is None else tuple(sorted(set(values))))
 
     def to_milvus_expr(self) -> str:
         """Milvus 标量过滤表达式；没有任何条件时返回空字符串。"""
@@ -35,6 +40,8 @@ class SearchFilter:
             parts.append(f"chunk_type in {json.dumps(list(self.chunk_types), ensure_ascii=False)}")
         if self.reading_orders is not None:
             parts.append(f"reading_order in {json.dumps([int(x) for x in self.reading_orders])}")
+        if self.chunk_ids is not None:
+            parts.append(f"chunk_id in {json.dumps(list(self.chunk_ids), ensure_ascii=False)}")
         return " and ".join(parts)
 
     def to_es_filter(self) -> list[dict]:
@@ -50,6 +57,8 @@ class SearchFilter:
             clauses.append({"terms": {"chunk_type": list(self.chunk_types)}})
         if self.reading_orders is not None:
             clauses.append({"terms": {"reading_order": [int(x) for x in self.reading_orders]}})
+        if self.chunk_ids is not None:
+            clauses.append({"terms": {"chunk_id": list(self.chunk_ids)}})
         return clauses
 
     def accepts(self, fields: dict) -> bool:
@@ -61,5 +70,7 @@ class SearchFilter:
         if self.section_types is not None and fields.get("section_type") not in self.section_types:
             return False
         if self.reading_orders is not None and fields.get("reading_order") not in self.reading_orders:
+            return False
+        if self.chunk_ids is not None and fields.get("chunk_id") not in self.chunk_ids:
             return False
         return not (self.chunk_types is not None and fields.get("chunk_type") not in self.chunk_types)
