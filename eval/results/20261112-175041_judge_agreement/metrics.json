@@ -1,0 +1,81 @@
+{
+  "review_file": "eval\\judge_review\\judge_v1_sample.csv",
+  "n": 50,
+  "human_changed_prelabels": 0,
+  "prelabel_vs_human": {
+    "agreement": 1.0,
+    "kappa": 1.0
+  },
+  "overall": {
+    "n": 50,
+    "agreement": 0.94,
+    "kappa": 0.9103,
+    "agreement_binary": 0.96,
+    "kappa_binary": 0.9188
+  },
+  "judge_only": {
+    "n": 41,
+    "agreement": 0.9268,
+    "kappa": 0.8844,
+    "agreement_binary": 0.9512,
+    "kappa_binary": 0.8995
+  },
+  "by_type": {
+    "fact": {
+      "n": 11,
+      "agreement": 1.0,
+      "kappa": 1.0,
+      "agreement_binary": 1.0,
+      "kappa_binary": 1.0
+    },
+    "multihop": {
+      "n": 9,
+      "agreement": 1.0,
+      "kappa": 1.0,
+      "agreement_binary": 1.0,
+      "kappa_binary": 1.0
+    },
+    "plot": {
+      "n": 12,
+      "agreement": 0.75,
+      "kappa": 0.625,
+      "agreement_binary": 0.8333,
+      "kappa_binary": 0.625
+    },
+    "relation": {
+      "n": 9,
+      "agreement": 1.0,
+      "kappa": 1.0,
+      "agreement_binary": 1.0,
+      "kappa_binary": 1.0
+    }
+  },
+  "confusion_judge_only": {
+    "wrong→人工partial": 1,
+    "wrong→人工wrong": 16,
+    "correct→人工correct": 16,
+    "partial→人工partial": 6,
+    "partial→人工correct": 1,
+    "correct→人工partial": 1
+  },
+  "disagreements": [
+    {
+      "key": "graphrag:plot-6591b923",
+      "system": "wrong",
+      "human": "partial",
+      "by": "judge"
+    },
+    {
+      "key": "closed:plot-0178cbde",
+      "system": "partial",
+      "human": "correct",
+      "by": "judge"
+    },
+    {
+      "key": "rag:plot-666aad95",
+      "system": "correct",
+      "human": "partial",
+      "by": "judge"
+    }
+  ]
+}

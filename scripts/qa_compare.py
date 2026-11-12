@@ -58,6 +58,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run", action="append", required=True, help="名称=结果目录")
     ap.add_argument("--latency", action="append", default=[], help="名称=延迟运行的结果目录")
+    ap.add_argument("--judge-agreement", help="scripts/judge_agreement.py score 的结果目录")
     ap.add_argument("--reference", default="rag")
     ap.add_argument("--closed", default="closed")
     ap.add_argument("--agents", default="agent,agent_s1", help="Agent 的两次运行（逗号分隔）")
@@ -286,6 +287,26 @@ def main() -> int:
                 f"{fmt(lat['graph']['p50'], 0)} | {fmt(lat['read']['p50'], 0)} |"
             )
         md.append("")
+
+    # ---- 10. judge 一致率
+    if args.judge_agreement:
+        ja = json.loads((Path(args.judge_agreement) / "metrics.json").read_text(encoding="utf-8"))
+        out["judge_agreement"] = {k: v for k, v in ja.items() if k != "disagreements"}
+        md += [
+            f"## 10. judge 与人工的一致率（`{Path(args.judge_agreement).name}`，{ja['n']} 条分层抽样，"
+            f"Claude 预标、用户核对，用户改动 {ja['human_changed_prelabels']} 条）",
+            "",
+            "| 范围 | 条数 | 一致率（四类） | κ | 一致率（对 / 不对） | κ |",
+            "|---|---|---|---|---|---|",
+        ]
+        groups = [("全部（规则 + judge + 弃答）", ja["overall"]), ("只看 judge 判的", ja["judge_only"])]
+        groups += [(f"judge · {GNAME.get(t, t)}", v) for t, v in ja["by_type"].items()]
+        for label, v in groups:
+            md.append(
+                f"| {label} | {v['n']} | {v['agreement']:.3f} | {v['kappa']:.3f} | "
+                f"{v['agreement_binary']:.3f} | {v['kappa_binary']:.3f} |"
+            )
+        md += ["", f"judge 判定 → 人工：{ja['confusion_judge_only']}", ""]
 
     path = s.paths.results_dir / f"{args.out}.md"
     path.write_text("\n".join(md) + "\n", encoding="utf-8")

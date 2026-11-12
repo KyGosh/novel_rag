@@ -128,7 +128,7 @@ def cohen_kappa(a: list[str], b: list[str]) -> float:
 
 def cmd_score(args: argparse.Namespace) -> int:
     s = get_settings()
-    review = Path(args.review)
+    review = Path(args.review).resolve()
     key = json.loads(review.with_name(review.name.replace("_sample.csv", "_key.json")).read_text(encoding="utf-8"))
     rows = list(csv.DictReader(review.open(encoding="utf-8-sig")))
     human, system, by, types = [], [], [], []
@@ -165,8 +165,10 @@ def cmd_score(args: argparse.Namespace) -> int:
         "review_file": str(review.relative_to(PROJECT_ROOT)),
         "n": len(rows),
         "human_changed_prelabels": changed,
-        "prelabel_vs_human": agree([i for i in allidx])
-        | {"agreement": round(sum(p == h for p, h in zip(pre, human, strict=True)) / len(rows), 4)},
+        "prelabel_vs_human": {
+            "agreement": round(sum(p == h for p, h in zip(pre, human, strict=True)) / len(rows), 4),
+            "kappa": round(cohen_kappa(pre, human), 4),
+        },
         "overall": agree(allidx),
         "judge_only": agree(judged),
         "by_type": {t: agree([i for i in judged if types[i] == t]) for t in sorted(set(types))},

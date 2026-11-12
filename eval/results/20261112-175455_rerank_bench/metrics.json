@@ -1,0 +1,22 @@
+{
+  "label": "gpu_freed",
+  "gpu": "4314 MiB, 100 %, 2790 MHz",
+  "results": {
+    "asoiaf_v0": {
+      "n": 40,
+      "rerank_ms_p50": 573.7,
+      "rerank_ms_p95": 646.7,
+      "question_chars_mean": 32.8,
+      "pair_tokens_mean": 16996.7,
+      "ms_per_1k_tokens": 33.27
+    },
+    "asoiaf_v1": {
+      "n": 40,
+      "rerank_ms_p50": 569.8,
+      "rerank_ms_p95": 649.3,
+      "question_chars_mean": 30.9,
+      "pair_tokens_mean": 17490.5,
+      "ms_per_1k_tokens": 32.93
+    }
+  }
+}
