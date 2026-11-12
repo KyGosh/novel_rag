@@ -836,5 +836,152 @@
         "graph_query": 6
       }
     }
+  },
+  "latency": {
+    "closed": {
+      "n": 28,
+      "total": {
+        "p50": 1677.55,
+        "p95": 1927.985
+      },
+      "llm": {
+        "p50": 1677.55,
+        "p95": 1927.985
+      },
+      "retrieval": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "rerank": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "graph": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "read": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "dir": "eval/results/20261112-180540_p4_lat2_closed"
+    },
+    "rag": {
+      "n": 28,
+      "total": {
+        "p50": 2693.7,
+        "p95": 3526.3849999999998
+      },
+      "llm": {
+        "p50": 1896.4499999999998,
+        "p95": 2468.81
+      },
+      "retrieval": {
+        "p50": 848.3,
+        "p95": 934.53
+      },
+      "rerank": {
+        "p50": 757.85,
+        "p95": 859.49
+      },
+      "graph": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "read": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "dir": "eval/results/20261112-180717_p4_lat2_rag"
+    },
+    "agent": {
+      "n": 28,
+      "total": {
+        "p50": 16576.1,
+        "p95": 28706.304999999997
+      },
+      "llm": {
+        "p50": 14926.1,
+        "p95": 24221.28
+      },
+      "retrieval": {
+        "p50": 1502.1999999999998,
+        "p95": 3692.8949999999986
+      },
+      "rerank": {
+        "p50": 1201.9499999999998,
+        "p95": 3106.6249999999977
+      },
+      "graph": {
+        "p50": 57.3,
+        "p95": 477.9699999999997
+      },
+      "read": {
+        "p50": 0.0,
+        "p95": 0.2
+      },
+      "dir": "eval/results/20261112-180928_p4_lat2_agent"
+    }
+  },
+  "judge_agreement": {
+    "review_file": "eval\\judge_review\\judge_v1_sample.csv",
+    "n": 50,
+    "human_changed_prelabels": 0,
+    "prelabel_vs_human": {
+      "agreement": 1.0,
+      "kappa": 1.0
+    },
+    "overall": {
+      "n": 50,
+      "agreement": 0.94,
+      "kappa": 0.9103,
+      "agreement_binary": 0.96,
+      "kappa_binary": 0.9188
+    },
+    "judge_only": {
+      "n": 41,
+      "agreement": 0.9268,
+      "kappa": 0.8844,
+      "agreement_binary": 0.9512,
+      "kappa_binary": 0.8995
+    },
+    "by_type": {
+      "fact": {
+        "n": 11,
+        "agreement": 1.0,
+        "kappa": 1.0,
+        "agreement_binary": 1.0,
+        "kappa_binary": 1.0
+      },
+      "multihop": {
+        "n": 9,
+        "agreement": 1.0,
+        "kappa": 1.0,
+        "agreement_binary": 1.0,
+        "kappa_binary": 1.0
+      },
+      "plot": {
+        "n": 12,
+        "agreement": 0.75,
+        "kappa": 0.625,
+        "agreement_binary": 0.8333,
+        "kappa_binary": 0.625
+      },
+      "relation": {
+        "n": 9,
+        "agreement": 1.0,
+        "kappa": 1.0,
+        "agreement_binary": 1.0,
+        "kappa_binary": 1.0
+      }
+    },
+    "confusion_judge_only": {
+      "wrong→人工partial": 1,
+      "wrong→人工wrong": 16,
+      "correct→人工correct": 16,
+      "partial→人工partial": 6,
+      "partial→人工correct": 1,
+      "correct→人工partial": 1
+    }
   }
 }
