@@ -1,0 +1,558 @@
+{
+  "runs": {
+    "closed": "eval\\results\\20261113-193318_p5_v0_closed",
+    "rag": "eval\\results\\20261113-193458_p5_v0_rag",
+    "agent": "eval\\results\\20261113-193658_p5_v0_agent"
+  },
+  "n": 120,
+  "commits": {
+    "closed": "4b884b98fe",
+    "rag": "4b884b98fe",
+    "agent": "4b884b98fe"
+  },
+  "split": "all",
+  "accuracy": {
+    "closed": {
+      "fact": {
+        "acc": 0.4666666666666667,
+        "ci": [
+          0.3,
+          0.6333333333333333
+        ],
+        "partial": 0.0,
+        "abstain": 0.3
+      },
+      "relation": {
+        "acc": 0.3333333333333333,
+        "ci": [
+          0.16666666666666666,
+          0.5
+        ],
+        "partial": 0.13333333333333333,
+        "abstain": 0.3
+      },
+      "multihop": {
+        "acc": 0.13333333333333333,
+        "ci": [
+          0.03333333333333333,
+          0.26666666666666666
+        ],
+        "partial": 0.03333333333333333,
+        "abstain": 0.6333333333333333
+      },
+      "plot": {
+        "acc": 0.06666666666666667,
+        "ci": [
+          0.0,
+          0.16666666666666666
+        ],
+        "partial": 0.36666666666666664,
+        "abstain": 0.2
+      },
+      "overall": {
+        "acc": 0.25,
+        "ci": [
+          0.175,
+          0.3252083333333322
+        ],
+        "partial": 0.13333333333333333,
+        "abstain": 0.35833333333333334
+      }
+    },
+    "rag": {
+      "fact": {
+        "acc": 0.9333333333333333,
+        "ci": [
+          0.8333333333333334,
+          1.0
+        ],
+        "partial": 0.06666666666666667,
+        "abstain": 0.0
+      },
+      "relation": {
+        "acc": 0.8333333333333334,
+        "ci": [
+          0.7,
+          0.9666666666666667
+        ],
+        "partial": 0.1,
+        "abstain": 0.0
+      },
+      "multihop": {
+        "acc": 0.7,
+        "ci": [
+          0.5333333333333333,
+          0.8666666666666667
+        ],
+        "partial": 0.0,
+        "abstain": 0.16666666666666666
+      },
+      "plot": {
+        "acc": 0.26666666666666666,
+        "ci": [
+          0.1,
+          0.43333333333333335
+        ],
+        "partial": 0.36666666666666664,
+        "abstain": 0.06666666666666667
+      },
+      "overall": {
+        "acc": 0.6833333333333333,
+        "ci": [
+          0.6,
+          0.7666666666666667
+        ],
+        "partial": 0.13333333333333333,
+        "abstain": 0.058333333333333334
+      }
+    },
+    "agent": {
+      "fact": {
+        "acc": 0.9,
+        "ci": [
+          0.7666666666666667,
+          1.0
+        ],
+        "partial": 0.1,
+        "abstain": 0.0
+      },
+      "relation": {
+        "acc": 0.8,
+        "ci": [
+          0.6666666666666666,
+          0.9333333333333333
+        ],
+        "partial": 0.1,
+        "abstain": 0.0
+      },
+      "multihop": {
+        "acc": 0.8333333333333334,
+        "ci": [
+          0.699166666666668,
+          0.9333333333333333
+        ],
+        "partial": 0.03333333333333333,
+        "abstain": 0.06666666666666667
+      },
+      "plot": {
+        "acc": 0.43333333333333335,
+        "ci": [
+          0.26666666666666666,
+          0.6
+        ],
+        "partial": 0.36666666666666664,
+        "abstain": 0.0
+      },
+      "overall": {
+        "acc": 0.7416666666666667,
+        "ci": [
+          0.6583333333333333,
+          0.8166666666666667
+        ],
+        "partial": 0.15,
+        "abstain": 0.016666666666666666
+      }
+    }
+  },
+  "accuracy_lenient": {
+    "closed": {
+      "fact": 0.4666666666666667,
+      "relation": 0.4666666666666667,
+      "multihop": 0.16666666666666666,
+      "plot": 0.43333333333333335,
+      "overall": 0.38333333333333336
+    },
+    "rag": {
+      "fact": 1.0,
+      "relation": 0.9333333333333333,
+      "multihop": 0.7,
+      "plot": 0.6333333333333333,
+      "overall": 0.8166666666666667
+    },
+    "agent": {
+      "fact": 1.0,
+      "relation": 0.9,
+      "multihop": 0.8666666666666667,
+      "plot": 0.8,
+      "overall": 0.8916666666666667
+    }
+  },
+  "paired_vs_ref": {
+    "closed": {
+      "fact": {
+        "diff": -0.4666666666666667,
+        "lo": -0.6333333333333333,
+        "hi": -0.3,
+        "p_le0": 1.0
+      },
+      "relation": {
+        "diff": -0.5,
+        "lo": -0.6666666666666666,
+        "hi": -0.3333333333333333,
+        "p_le0": 1.0
+      },
+      "multihop": {
+        "diff": -0.5666666666666667,
+        "lo": -0.7666666666666667,
+        "hi": -0.36666666666666664,
+        "p_le0": 1.0
+      },
+      "plot": {
+        "diff": -0.2,
+        "lo": -0.36666666666666664,
+        "hi": -0.03333333333333333,
+        "p_le0": 0.996
+      },
+      "overall": {
+        "diff": -0.43333333333333335,
+        "lo": -0.525,
+        "hi": -0.3416666666666667,
+        "p_le0": 1.0
+      }
+    },
+    "agent": {
+      "fact": {
+        "diff": -0.03333333333333333,
+        "lo": -0.1,
+        "hi": 0.0,
+        "p_le0": 1.0
+      },
+      "relation": {
+        "diff": -0.03333333333333333,
+        "lo": -0.13333333333333333,
+        "hi": 0.06666666666666667,
+        "p_le0": 0.8175
+      },
+      "multihop": {
+        "diff": 0.13333333333333333,
+        "lo": 0.0,
+        "hi": 0.3,
+        "p_le0": 0.0585
+      },
+      "plot": {
+        "diff": 0.16666666666666666,
+        "lo": 0.0,
+        "hi": 0.3333333333333333,
+        "p_le0": 0.0325
+      },
+      "overall": {
+        "diff": 0.058333333333333334,
+        "lo": -0.008333333333333333,
+        "hi": 0.125,
+        "p_le0": 0.055
+      }
+    }
+  },
+  "closed_subsets": {
+    "closed": {
+      "closed_correct": 1.0,
+      "closed_wrong": 0.0,
+      "closed_wrong_hard": 0.0,
+      "n": [
+        30,
+        90,
+        54
+      ]
+    },
+    "rag": {
+      "closed_correct": 0.9333333333333333,
+      "closed_wrong": 0.6,
+      "closed_wrong_hard": 0.46296296296296297,
+      "n": [
+        30,
+        90,
+        54
+      ]
+    },
+    "agent": {
+      "closed_correct": 0.9666666666666667,
+      "closed_wrong": 0.6666666666666666,
+      "closed_wrong_hard": 0.5925925925925926,
+      "n": [
+        30,
+        90,
+        54
+      ]
+    }
+  },
+  "evidence": {
+    "closed": {
+      "overall": {
+        "ctx_recall": null,
+        "process_cov": null,
+        "note_recall": null,
+        "cite_recall": null,
+        "cite_precision": null,
+        "recall@5": null,
+        "recall@20": null,
+        "mrr": null,
+        "cov@4000": null
+      },
+      "multihop": {
+        "ctx_recall": null,
+        "process_cov": null,
+        "note_recall": null,
+        "cite_recall": null,
+        "cite_precision": null,
+        "recall@5": null,
+        "recall@20": null,
+        "mrr": null,
+        "cov@4000": null
+      },
+      "plot": {
+        "ctx_recall": null,
+        "process_cov": null,
+        "note_recall": null,
+        "cite_recall": null,
+        "cite_precision": null,
+        "recall@5": null,
+        "recall@20": null,
+        "mrr": null,
+        "cov@4000": null
+      }
+    },
+    "rag": {
+      "overall": {
+        "ctx_recall": 0.7194444444444444,
+        "process_cov": 0.7194444444444444,
+        "note_recall": null,
+        "cite_recall": 0.5791666666666667,
+        "cite_precision": 0.5883480825958702,
+        "recall@5": 0.6513888888888889,
+        "recall@20": 0.8215277777777777,
+        "mrr": 0.6627523591174906,
+        "cov@4000": 0.7347222222222222
+      },
+      "multihop": {
+        "ctx_recall": 0.7166666666666667,
+        "process_cov": 0.7166666666666667,
+        "note_recall": null,
+        "cite_recall": 0.37222222222222223,
+        "cite_precision": 0.5733333333333334,
+        "recall@5": 0.6666666666666666,
+        "recall@20": 0.7833333333333333,
+        "mrr": 0.7273015873015873,
+        "cov@4000": 0.7166666666666667
+      },
+      "plot": {
+        "ctx_recall": 0.35555555555555557,
+        "process_cov": 0.35555555555555557,
+        "note_recall": null,
+        "cite_recall": 0.28888888888888886,
+        "cite_precision": 0.2791666666666667,
+        "recall@5": 0.23333333333333334,
+        "recall@20": 0.6138888888888889,
+        "mrr": 0.3415120819726083,
+        "cov@4000": 0.3833333333333333
+      }
+    },
+    "agent": {
+      "overall": {
+        "ctx_recall": 0.7388888888888889,
+        "process_cov": 0.8027777777777778,
+        "note_recall": 0.7541666666666667,
+        "cite_recall": 0.6625,
+        "cite_precision": 0.5925141242937854,
+        "recall@5": null,
+        "recall@20": null,
+        "mrr": null,
+        "cov@4000": null
+      },
+      "multihop": {
+        "ctx_recall": 0.8,
+        "process_cov": 0.8833333333333333,
+        "note_recall": 0.8,
+        "cite_recall": 0.6166666666666667,
+        "cite_precision": 0.7559523809523809,
+        "recall@5": null,
+        "recall@20": null,
+        "mrr": null,
+        "cov@4000": null
+      },
+      "plot": {
+        "ctx_recall": 0.45,
+        "process_cov": 0.5555555555555556,
+        "note_recall": 0.5111111111111111,
+        "cite_recall": 0.3277777777777778,
+        "cite_precision": 0.2627777777777778,
+        "recall@5": null,
+        "recall@20": null,
+        "mrr": null,
+        "cov@4000": null
+      }
+    }
+  },
+  "cost": {
+    "closed": {
+      "llm_calls": 1.0,
+      "tool_calls": 0.0,
+      "tokens": 333.56666666666666,
+      "termination": {
+        "answered": 120
+      }
+    },
+    "rag": {
+      "llm_calls": 1.0,
+      "tool_calls": 1.0,
+      "tokens": 3413.575,
+      "termination": {
+        "answered": 120
+      }
+    },
+    "agent": {
+      "llm_calls": 7.716666666666667,
+      "tool_calls": 5.391666666666667,
+      "tokens": 22032.258333333335,
+      "termination": {
+        "finish": 99,
+        "limit_tokens": 14,
+        "limit_rounds": 1,
+        "finish_implicit": 1,
+        "limit_tool_calls": 5
+      }
+    }
+  },
+  "failures": {
+    "overall": {
+      "noted_but_wrong": 8,
+      "entity_ambiguous": 4,
+      "_failed": 31,
+      "hit_limit": 15,
+      "retrieval_partial": 10,
+      "premature_finish": 9,
+      "found_not_noted": 8,
+      "abstained": 2,
+      "correct_bad_citation": 7,
+      "bridge_missing": 1,
+      "retrieval_miss": 4,
+      "looping": 2
+    },
+    "by_type": {
+      "fact": {
+        "noted_but_wrong": 3,
+        "entity_ambiguous": 2,
+        "_failed": 3
+      },
+      "multihop": {
+        "noted_but_wrong": 1,
+        "hit_limit": 2,
+        "_failed": 5,
+        "retrieval_partial": 2,
+        "premature_finish": 3,
+        "found_not_noted": 1,
+        "abstained": 2,
+        "correct_bad_citation": 1,
+        "bridge_missing": 1,
+        "entity_ambiguous": 1
+      },
+      "plot": {
+        "retrieval_partial": 6,
+        "hit_limit": 11,
+        "_failed": 17,
+        "correct_bad_citation": 2,
+        "found_not_noted": 6,
+        "premature_finish": 5,
+        "noted_but_wrong": 1,
+        "retrieval_miss": 4,
+        "looping": 2,
+        "entity_ambiguous": 1
+      },
+      "relation": {
+        "correct_bad_citation": 4,
+        "noted_but_wrong": 3,
+        "_failed": 6,
+        "retrieval_partial": 2,
+        "hit_limit": 2,
+        "found_not_noted": 1,
+        "premature_finish": 1
+      }
+    }
+  },
+  "tool_usage": {
+    "n_questions": 120,
+    "calls": {
+      "find_entity": 127,
+      "search_text": 255,
+      "read_text": 126,
+      "search_summaries": 61,
+      "read_summary": 48,
+      "graph_query": 30
+    },
+    "calls_per_question": {
+      "find_entity": 1.058,
+      "search_text": 2.125,
+      "read_text": 1.05,
+      "search_summaries": 0.508,
+      "read_summary": 0.4,
+      "graph_query": 0.25
+    },
+    "questions_using": {
+      "find_entity": 0.608,
+      "search_text": 0.975,
+      "read_text": 0.567,
+      "search_summaries": 0.375,
+      "read_summary": 0.175,
+      "graph_query": 0.158
+    },
+    "errors": {
+      "find_entity": 3,
+      "read_text": 1,
+      "graph_query": 5
+    },
+    "calls_by_type": {
+      "fact": {
+        "find_entity": 25,
+        "search_text": 45,
+        "read_text": 23,
+        "search_summaries": 7,
+        "read_summary": 1
+      },
+      "multihop": {
+        "find_entity": 24,
+        "search_text": 70,
+        "search_summaries": 12,
+        "read_text": 32,
+        "read_summary": 5
+      },
+      "plot": {
+        "find_entity": 38,
+        "search_text": 87,
+        "read_text": 38,
+        "search_summaries": 32,
+        "read_summary": 34,
+        "graph_query": 16
+      },
+      "relation": {
+        "find_entity": 40,
+        "graph_query": 14,
+        "search_text": 53,
+        "read_text": 33,
+        "search_summaries": 10,
+        "read_summary": 8
+      }
+    },
+    "correct_cited_gold_source": {
+      "search_text": 90,
+      "read_summary": 7,
+      "graph_query": 5
+    },
+    "correct_cited_gold_source_by_type": {
+      "fact": {
+        "search_text": 28
+      },
+      "multihop": {
+        "search_text": 33,
+        "read_summary": 2
+      },
+      "plot": {
+        "search_text": 10,
+        "read_summary": 5,
+        "graph_query": 2
+      },
+      "relation": {
+        "graph_query": 3,
+        "search_text": 19
+      }
+    }
+  }
+}

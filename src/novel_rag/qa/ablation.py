@@ -92,7 +92,9 @@ def build_table(spec: dict[str, Any], results_dir: Path, cfg: dict[str, Any]) ->
 
     default = get(spec["default"]["runs"])
     ids0 = {r["id"] for r in default[0]["rows"]}
-    table: dict[str, Any] = {"title": spec.get("title", ""), "notes": spec.get("notes", []), "eval": cfg}
+    table: dict[str, Any] = {"title": spec.get("title", ""), "notes": spec.get("notes", []), "eval": cfg,
+                             "conclusions_title": spec.get("conclusions_title"),
+                             "conclusions": spec.get("conclusions", [])}  # fmt: skip
     table["default"] = {"label": spec["default"]["label"], **summarize_variant(default, cfg)}
     # 噪声参照：默认配置的各次采样两两之间的差值
     noise = []
@@ -207,4 +209,7 @@ def render_markdown(table: dict[str, Any]) -> str:
     for r in all_rows:
         L.append(f"| {r['label']} | " + "<br>".join(f"`{d}`" for d in r["dirs"]) + " | " + "<br>".join(r["commits"])
                  + " | " + "<br>".join(r["dates"]) + " | " + " / ".join(f"{a:.3f}" for a in r["sample_acc"]) + " |")  # fmt: skip
+    if table.get("conclusions"):  # 人写的结论与决定（规格文件里给出），数字以上面各节为准
+        L += ["", f"## 7. {table.get('conclusions_title') or '结论与决定'}", ""]
+        L += [f"- {c}" for c in table["conclusions"]]
     return "\n".join(L) + "\n"

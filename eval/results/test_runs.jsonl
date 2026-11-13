@@ -1,0 +1,3 @@
+{"dir": "20261113-193318_p5_v0_closed", "created": "2026-11-13T19:34:31", "system": "closed", "sample": 0, "dataset": "asoiaf_v0", "split": "all", "commit": "4b884b98fe0cdafdd04bd92173bff85be826d8e4", "dirty": false, "n_items": 120, "acc": 0.25}
+{"dir": "20261113-193458_p5_v0_rag", "created": "2026-11-13T19:36:29", "system": "rag", "sample": 0, "dataset": "asoiaf_v0", "split": "all", "commit": "4b884b98fe0cdafdd04bd92173bff85be826d8e4", "dirty": false, "n_items": 120, "acc": 0.6833}
+{"dir": "20261113-193658_p5_v0_agent", "created": "2026-11-13T19:45:18", "system": "agent", "sample": 0, "dataset": "asoiaf_v0", "split": "all", "commit": "4b884b98fe0cdafdd04bd92173bff85be826d8e4", "dirty": false, "n_items": 120, "acc": 0.7417}

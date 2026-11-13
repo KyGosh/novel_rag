@@ -1,0 +1,410 @@
+{
+  "overall": {
+    "n": 141,
+    "acc": 0.8723,
+    "partial": 0.0709,
+    "acc_lenient": 0.9433,
+    "abstain": 0.0142,
+    "process_cov": 0.8901,
+    "note_recall": 0.8345,
+    "cite_recall": 0.7553,
+    "ctx_recall": 0.831,
+    "cite_precision": 0.6444,
+    "cite_precision__n": 139,
+    "llm_calls": 6.8582,
+    "tool_calls": 3.9716,
+    "tokens": 17953.5106,
+    "ci": {
+      "acc": [
+        0.8156,
+        0.922
+      ],
+      "partial": [
+        0.0355,
+        0.1137
+      ],
+      "acc_lenient": [
+        0.9007,
+        0.9787
+      ],
+      "abstain": [
+        0.0,
+        0.0355
+      ],
+      "process_cov": [
+        0.8475,
+        0.9291
+      ],
+      "note_recall": [
+        0.7849,
+        0.8818
+      ],
+      "cite_recall": [
+        0.6986,
+        0.8121
+      ],
+      "ctx_recall": [
+        0.7813,
+        0.8783
+      ],
+      "cite_precision": [
+        0.5855,
+        0.7023
+      ],
+      "llm_calls": [
+        6.4823,
+        7.2837
+      ],
+      "tool_calls": [
+        3.539,
+        4.4683
+      ],
+      "tokens": [
+        16501.3637,
+        19619.355
+      ]
+    },
+    "termination": {
+      "finish": 123,
+      "limit_tool_calls": 1,
+      "limit_tokens": 16,
+      "finish_implicit": 1
+    },
+    "labels": {
+      "correct": 123,
+      "wrong": 6,
+      "abstain": 2,
+      "partial": 10
+    },
+    "scored_by": {
+      "rule": 89,
+      "judge": 50,
+      "abstain": 2
+    },
+    "invalid_citations": 0
+  },
+  "by_type": {
+    "fact": {
+      "n": 30,
+      "acc": 1.0,
+      "partial": 0.0,
+      "acc_lenient": 1.0,
+      "abstain": 0.0,
+      "process_cov": 0.9667,
+      "note_recall": 0.9667,
+      "cite_recall": 0.9667,
+      "ctx_recall": 0.9667,
+      "cite_precision": 0.7761,
+      "llm_calls": 5.6,
+      "tool_calls": 2.3667,
+      "tokens": 11996.2333,
+      "ci": {
+        "acc": [
+          1.0,
+          1.0
+        ],
+        "partial": [
+          0.0,
+          0.0
+        ],
+        "acc_lenient": [
+          1.0,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.0
+        ],
+        "process_cov": [
+          0.9,
+          1.0
+        ],
+        "note_recall": [
+          0.9,
+          1.0
+        ],
+        "cite_recall": [
+          0.9,
+          1.0
+        ],
+        "ctx_recall": [
+          0.9,
+          1.0
+        ],
+        "cite_precision": [
+          0.6561,
+          0.8833
+        ],
+        "llm_calls": [
+          5.2667,
+          5.9333
+        ],
+        "tool_calls": [
+          2.1333,
+          2.6333
+        ],
+        "tokens": [
+          11044.8908,
+          13016.705
+        ]
+      },
+      "termination": {
+        "finish": 30
+      },
+      "labels": {
+        "correct": 30
+      },
+      "scored_by": {
+        "rule": 27,
+        "judge": 3
+      },
+      "invalid_citations": 0
+    },
+    "relation": {
+      "n": 33,
+      "acc": 0.9394,
+      "partial": 0.0,
+      "acc_lenient": 0.9394,
+      "abstain": 0.0,
+      "process_cov": 1.0,
+      "note_recall": 0.9394,
+      "cite_recall": 0.9394,
+      "ctx_recall": 0.9394,
+      "cite_precision": 0.6692,
+      "llm_calls": 5.9394,
+      "tool_calls": 3.0909,
+      "tokens": 14956.3939,
+      "ci": {
+        "acc": [
+          0.8485,
+          1.0
+        ],
+        "partial": [
+          0.0,
+          0.0
+        ],
+        "acc_lenient": [
+          0.8485,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.0
+        ],
+        "process_cov": [
+          1.0,
+          1.0
+        ],
+        "note_recall": [
+          0.8485,
+          1.0
+        ],
+        "cite_recall": [
+          0.8485,
+          1.0
+        ],
+        "ctx_recall": [
+          0.8485,
+          1.0
+        ],
+        "cite_precision": [
+          0.5555,
+          0.7753
+        ],
+        "llm_calls": [
+          5.3636,
+          6.6667
+        ],
+        "tool_calls": [
+          2.3636,
+          4.0303
+        ],
+        "tokens": [
+          12638.1076,
+          17936.5902
+        ]
+      },
+      "termination": {
+        "finish": 31,
+        "limit_tool_calls": 1,
+        "limit_tokens": 1
+      },
+      "labels": {
+        "correct": 31,
+        "wrong": 2
+      },
+      "scored_by": {
+        "rule": 27,
+        "judge": 6
+      },
+      "invalid_citations": 0
+    },
+    "multihop": {
+      "n": 44,
+      "acc": 0.9318,
+      "partial": 0.0,
+      "acc_lenient": 0.9318,
+      "abstain": 0.0455,
+      "process_cov": 0.8447,
+      "note_recall": 0.7727,
+      "cite_recall": 0.5492,
+      "ctx_recall": 0.7727,
+      "cite_precision": 0.6369,
+      "cite_precision__n": 42,
+      "llm_calls": 7.3182,
+      "tool_calls": 4.3864,
+      "tokens": 19812.2727,
+      "ci": {
+        "acc": [
+          0.8409,
+          1.0
+        ],
+        "partial": [
+          0.0,
+          0.0
+        ],
+        "acc_lenient": [
+          0.8409,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.1136
+        ],
+        "process_cov": [
+          0.7652,
+          0.9167
+        ],
+        "note_recall": [
+          0.6932,
+          0.8485
+        ],
+        "cite_recall": [
+          0.447,
+          0.6439
+        ],
+        "ctx_recall": [
+          0.6932,
+          0.8485
+        ],
+        "cite_precision": [
+          0.5218,
+          0.7421
+        ],
+        "llm_calls": [
+          6.6591,
+          8.0227
+        ],
+        "tool_calls": [
+          3.6364,
+          5.2278
+        ],
+        "tokens": [
+          17242.0568,
+          22561.1665
+        ]
+      },
+      "termination": {
+        "finish": 38,
+        "limit_tokens": 6
+      },
+      "labels": {
+        "correct": 41,
+        "wrong": 1,
+        "abstain": 2
+      },
+      "scored_by": {
+        "judge": 10,
+        "rule": 32,
+        "abstain": 2
+      },
+      "invalid_citations": 0
+    },
+    "plot": {
+      "n": 34,
+      "acc": 0.6176,
+      "partial": 0.2941,
+      "acc_lenient": 0.9118,
+      "abstain": 0.0,
+      "process_cov": 0.7745,
+      "note_recall": 0.6961,
+      "cite_recall": 0.6569,
+      "ctx_recall": 0.6814,
+      "cite_precision": 0.5132,
+      "llm_calls": 8.2647,
+      "tool_calls": 5.7059,
+      "tokens": 23713.4412,
+      "ci": {
+        "acc": [
+          0.4412,
+          0.7647
+        ],
+        "partial": [
+          0.1471,
+          0.4412
+        ],
+        "acc_lenient": [
+          0.7941,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.0
+        ],
+        "process_cov": [
+          0.6618,
+          0.8775
+        ],
+        "note_recall": [
+          0.5735,
+          0.8039
+        ],
+        "cite_recall": [
+          0.5294,
+          0.7745
+        ],
+        "ctx_recall": [
+          0.5637,
+          0.7892
+        ],
+        "cite_precision": [
+          0.397,
+          0.625
+        ],
+        "llm_calls": [
+          7.4118,
+          9.1765
+        ],
+        "tool_calls": [
+          4.7059,
+          6.7941
+        ],
+        "tokens": [
+          20377.4721,
+          27434.6618
+        ]
+      },
+      "termination": {
+        "finish": 24,
+        "limit_tokens": 9,
+        "finish_implicit": 1
+      },
+      "labels": {
+        "correct": 21,
+        "partial": 10,
+        "wrong": 3
+      },
+      "scored_by": {
+        "rule": 3,
+        "judge": 31
+      },
+      "invalid_citations": 0
+    }
+  },
+  "latency_ms": {
+    "p50": 24649.5,
+    "p95": 50110.5
+  },
+  "errors": 0,
+  "ci_level": 0.95
+}
