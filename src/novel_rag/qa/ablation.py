@@ -160,7 +160,7 @@ def render_markdown(table: dict[str, Any]) -> str:
           "| 组 | 变体 | " + " | ".join(GNAME[g] for g in GROUPS) + " |", "|---" * (len(GROUPS) + 2) + "|"]  # fmt: skip
     for n in table["noise"]:
         L.append(
-            f"| 噪声参照 | 默认配置：`{n['pair'][1].split('_', 1)[1]}` − `{n['pair'][0].split('_', 1)[1]}` | "
+            f"| 噪声参照 | 默认配置：`{n['pair'][1].split('_', 1)[-1]}` − `{n['pair'][0].split('_', 1)[-1]}` | "
             + " | ".join(_d(n["diff"][g]) for g in GROUPS)
             + " |"
         )
