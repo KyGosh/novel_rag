@@ -144,7 +144,7 @@ def render_markdown(table: dict[str, Any]) -> str:
     L += [
         f"- 方括号为 {level}% bootstrap 置信区间（按题重采样 {table['eval']['bootstrap_samples']} 次）。同一变体有多次采样时，"
         "每题先对各次采样取平均（一题的准确率可以是 0.5），再对题目求均值。",
-        "- 差值 = 变体 − 默认配置（默认配置取两次运行的按题平均），同一批题配对；↑/↓ 表示区间不含 0。",
+        "- 差值 = 变体 − 默认配置（默认配置取各次运行的按题平均），同一批题配对；↑/↓ 表示区间不含 0。",
         "",
         "## 1. 答案准确率（correct 比例）",
         "",
@@ -160,7 +160,9 @@ def render_markdown(table: dict[str, Any]) -> str:
           "| 组 | 变体 | " + " | ".join(GNAME[g] for g in GROUPS) + " |", "|---" * (len(GROUPS) + 2) + "|"]  # fmt: skip
     for n in table["noise"]:
         L.append(
-            "| 噪声参照 | 默认配置：第二次运行 − 第一次运行 | " + " | ".join(_d(n["diff"][g]) for g in GROUPS) + " |"
+            f"| 噪声参照 | 默认配置：`{n['pair'][1].split('_', 1)[1]}` − `{n['pair'][0].split('_', 1)[1]}` | "
+            + " | ".join(_d(n["diff"][g]) for g in GROUPS)
+            + " |"
         )
     for r in table["rows"]:
         L.append(f"| {r['group']} | {r['label']} | " + " | ".join(_d(r["diff"][g]) for g in GROUPS) + " |")
