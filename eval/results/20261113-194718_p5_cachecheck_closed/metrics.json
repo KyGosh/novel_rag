@@ -1,0 +1,285 @@
+{
+  "overall": {
+    "n": 141,
+    "acc": 0.2199,
+    "partial": 0.0922,
+    "acc_lenient": 0.3121,
+    "abstain": 0.461,
+    "llm_calls": 1.0,
+    "tool_calls": 0.0,
+    "tokens": 333.4965,
+    "ci": {
+      "acc": [
+        0.156,
+        0.2908
+      ],
+      "partial": [
+        0.0496,
+        0.1418
+      ],
+      "acc_lenient": [
+        0.234,
+        0.3901
+      ],
+      "abstain": [
+        0.3759,
+        0.5461
+      ],
+      "llm_calls": [
+        1.0,
+        1.0
+      ],
+      "tool_calls": [
+        0.0,
+        0.0
+      ],
+      "tokens": [
+        330.9218,
+        336.0645
+      ]
+    },
+    "termination": {
+      "answered": 141
+    },
+    "labels": {
+      "abstain": 65,
+      "partial": 13,
+      "wrong": 32,
+      "correct": 31
+    },
+    "scored_by": {
+      "abstain": 65,
+      "judge": 55,
+      "rule": 21
+    },
+    "invalid_citations": 0
+  },
+  "by_type": {
+    "fact": {
+      "n": 30,
+      "acc": 0.2333,
+      "partial": 0.0333,
+      "acc_lenient": 0.2667,
+      "abstain": 0.5,
+      "llm_calls": 1.0,
+      "tool_calls": 0.0,
+      "tokens": 330.1667,
+      "ci": {
+        "acc": [
+          0.1,
+          0.3667
+        ],
+        "partial": [
+          0.0,
+          0.1
+        ],
+        "acc_lenient": [
+          0.1333,
+          0.4333
+        ],
+        "abstain": [
+          0.3333,
+          0.6667
+        ],
+        "llm_calls": [
+          1.0,
+          1.0
+        ],
+        "tool_calls": [
+          0.0,
+          0.0
+        ],
+        "tokens": [
+          325.7333,
+          334.4683
+        ]
+      },
+      "termination": {
+        "answered": 30
+      },
+      "labels": {
+        "abstain": 15,
+        "partial": 1,
+        "wrong": 7,
+        "correct": 7
+      },
+      "scored_by": {
+        "abstain": 15,
+        "judge": 10,
+        "rule": 5
+      },
+      "invalid_citations": 0
+    },
+    "relation": {
+      "n": 33,
+      "acc": 0.3333,
+      "partial": 0.0303,
+      "acc_lenient": 0.3636,
+      "abstain": 0.3939,
+      "llm_calls": 1.0,
+      "tool_calls": 0.0,
+      "tokens": 323.6061,
+      "ci": {
+        "acc": [
+          0.1818,
+          0.4848
+        ],
+        "partial": [
+          0.0,
+          0.0909
+        ],
+        "acc_lenient": [
+          0.2121,
+          0.5455
+        ],
+        "abstain": [
+          0.2424,
+          0.5758
+        ],
+        "llm_calls": [
+          1.0,
+          1.0
+        ],
+        "tool_calls": [
+          0.0,
+          0.0
+        ],
+        "tokens": [
+          319.4242,
+          327.697
+        ]
+      },
+      "termination": {
+        "answered": 33
+      },
+      "labels": {
+        "wrong": 8,
+        "correct": 11,
+        "abstain": 13,
+        "partial": 1
+      },
+      "scored_by": {
+        "judge": 11,
+        "rule": 9,
+        "abstain": 13
+      },
+      "invalid_citations": 0
+    },
+    "multihop": {
+      "n": 44,
+      "acc": 0.1591,
+      "partial": 0.0227,
+      "acc_lenient": 0.1818,
+      "abstain": 0.6136,
+      "llm_calls": 1.0,
+      "tool_calls": 0.0,
+      "tokens": 335.7727,
+      "ci": {
+        "acc": [
+          0.0682,
+          0.2727
+        ],
+        "partial": [
+          0.0,
+          0.0682
+        ],
+        "acc_lenient": [
+          0.0682,
+          0.2955
+        ],
+        "abstain": [
+          0.4773,
+          0.75
+        ],
+        "llm_calls": [
+          1.0,
+          1.0
+        ],
+        "tool_calls": [
+          0.0,
+          0.0
+        ],
+        "tokens": [
+          331.6364,
+          340.5466
+        ]
+      },
+      "termination": {
+        "answered": 44
+      },
+      "labels": {
+        "correct": 7,
+        "abstain": 27,
+        "wrong": 9,
+        "partial": 1
+      },
+      "scored_by": {
+        "judge": 12,
+        "abstain": 27,
+        "rule": 5
+      },
+      "invalid_citations": 0
+    },
+    "plot": {
+      "n": 34,
+      "acc": 0.1765,
+      "partial": 0.2941,
+      "acc_lenient": 0.4706,
+      "abstain": 0.2941,
+      "llm_calls": 1.0,
+      "tool_calls": 0.0,
+      "tokens": 343.0882,
+      "ci": {
+        "acc": [
+          0.0588,
+          0.3235
+        ],
+        "partial": [
+          0.1471,
+          0.4412
+        ],
+        "acc_lenient": [
+          0.2941,
+          0.6471
+        ],
+        "abstain": [
+          0.1471,
+          0.4706
+        ],
+        "llm_calls": [
+          1.0,
+          1.0
+        ],
+        "tool_calls": [
+          0.0,
+          0.0
+        ],
+        "tokens": [
+          337.2051,
+          348.9426
+        ]
+      },
+      "termination": {
+        "answered": 34
+      },
+      "labels": {
+        "correct": 6,
+        "partial": 10,
+        "abstain": 10,
+        "wrong": 8
+      },
+      "scored_by": {
+        "rule": 2,
+        "judge": 22,
+        "abstain": 10
+      },
+      "invalid_citations": 0
+    }
+  },
+  "latency_ms": {
+    "p50": 6.2,
+    "p95": 9.0
+  },
+  "errors": 0,
+  "ci_level": 0.95
+}
