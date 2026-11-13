@@ -53,6 +53,29 @@ def _graph(b: ToolBackends) -> Any:
     return b.graph
 
 
+def _in_scope(g: Any, entity_id: str, ctx: ToolContext) -> None:
+    """图谱范围限定（运行环境注入）：实体类型不在范围内时按"找不到"处理，不向模型暴露范围之外的实体。"""
+    scope = ctx.graph_entity_types
+    if not scope:
+        return
+    t = g.entity_type(entity_id, ctx.max_reading_order)
+    if t is not None and t not in scope:
+        raise ToolNotFound(f"图谱里没有实体 {entity_id}（当前图谱只包含 {'、'.join(scope)} 类实体）")
+
+
+def _scope_rows(op: str, rows: list[dict[str, Any]], scope: tuple[str, ...]) -> list[dict[str, Any]]:
+    """把查询结果裁剪到范围内的实体类型（neighbors / paths 已在查询参数里限定，这里处理其余操作）。"""
+    if op == "profile":
+        for r in rows:
+            r["relations"] = [x for x in r.get("relations", []) if x.get("other_type") in scope]
+            r["groups"] = [x["other"] for x in r["relations"] if x["type"] == "MEMBER_OF" and x["outgoing"]]
+        return rows
+    if op == "timeline":  # 事件节点不在范围内时不列事件，只留范围内实体之间的关系
+        return [x for x in rows if (x.get("kind") == "event" and EVENT in scope)
+                or (x.get("kind") == "relation" and x.get("other_type") in scope)]  # fmt: skip
+    return rows
+
+
 class FindEntityArgs(_Args):
     name: str = Field(min_length=1, max_length=40, description="人名、地名、组织名、头衔或别名")
 
@@ -69,6 +92,10 @@ def find_entity(args: FindEntityArgs, ctx: ToolContext, b: ToolBackends) -> Tool
 
     cfg = get_settings().tools
     res = _graph(b).resolve(args.name, ctx.max_reading_order, limit=cfg.entity_max_candidates)
+    if scope := ctx.graph_entity_types:
+        res.rows = [r for r in res.rows if r["type"] in scope]
+        for r in res.rows:
+            r["facts"] = [f for f in r.get("facts", []) if f.get("other_type") in scope]
     if not res.rows:
         raise ToolNotFound(f"图谱里没有找到“{args.name}”（在当前阅读进度内）；可以换个写法，或直接用 search_text")
     text = render(res, b.where_chunk, cfg.graph_max_chars)
@@ -127,17 +154,27 @@ def graph_query(args: GraphQueryArgs, ctx: ToolContext, b: ToolBackends) -> Tool
         raise ToolInputError(f"{args.op} 需要 other（另一个实体 ID）")
     if args.other_types and (bad := [t for t in args.other_types if t not in _ENTITY_TYPES]):
         raise ToolInputError(f"未知的实体类型 {bad}；可选：{', '.join(_ENTITY_TYPES)}")
+    scope = ctx.graph_entity_types
+    other_types = args.other_types
+    if scope:
+        other_types = [t for t in (args.other_types or scope) if t in scope]
+        if not other_types:
+            raise ToolNotFound(f"[{args.op}] 没有找到（当前图谱只包含 {'、'.join(scope)} 类实体）")
     try:
+        _in_scope(g, args.entity, ctx)
+        if args.other:
+            _in_scope(g, args.other, ctx)
         if args.op == "profile":
             res = g.profile(args.entity, ro, limit=lim)
         elif args.op == "between":
             res = g.between(args.entity, args.other, ro, limit=lim)
         elif args.op == "paths":
             res = g.paths(
-                args.entity, args.other, ro, max_hops=args.max_hops, types=args.relation_types, limit=min(lim, 5)
-            )
+                args.entity, args.other, ro, max_hops=args.max_hops, types=args.relation_types,
+                node_types=scope, limit=min(lim, 5),
+            )  # fmt: skip
         elif args.op == "neighbors":
-            res = g.neighbors(args.entity, ro, types=args.relation_types, other_types=args.other_types, limit=lim)
+            res = g.neighbors(args.entity, ro, types=args.relation_types, other_types=other_types, limit=lim)
         elif args.op == "timeline":
             res = g.timeline(args.entity, ro, limit=lim)
         elif args.op == "title_holders":
@@ -146,6 +183,8 @@ def graph_query(args: GraphQueryArgs, ctx: ToolContext, b: ToolBackends) -> Tool
             res = g.mentions(args.entity, ro, limit=lim)
     except QueryError as e:
         raise ToolInputError(str(e)) from e
+    if scope:
+        res.rows = _scope_rows(args.op, res.rows, scope)
     if not res.rows:
         raise ToolNotFound(f"[{args.op}] 没有找到（实体 ID 不存在、超出阅读进度，或两者之间没有记录的关系）")
     text, cut = truncate(render(res, b.where_chunk, cfg.graph_max_chars), cfg.graph_max_chars)

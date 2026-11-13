@@ -62,7 +62,9 @@ class AgentSystem:
         t0 = time.perf_counter()
         deps = AgentDeps(
             toolbox=self.tb, agent_chat=self.agent_chat, reflect_chat=self.reflect_chat, cfg=self.s.agent,
-            ctx=ToolContext(max_reading_order=item.max_reading_order, book_ids=self.scope), volumes=self.volumes,
+            ctx=ToolContext(max_reading_order=item.max_reading_order, book_ids=self.scope,
+                            graph_entity_types=self.s.tools.graph_scope_entity_types),
+            volumes=self.volumes,
             sample=sample,
         )  # fmt: skip
         state = run_agent(item.question, deps)
@@ -159,8 +161,12 @@ class AgentSystem:
             "limits": {"max_rounds": a.max_rounds, "max_tool_calls": a.max_tool_calls, "max_tokens": a.max_tokens,
                        "max_calls_per_round": a.max_calls_per_round, "max_error_rounds": a.max_error_rounds},
             "thinking": a.thinking,
+            "act_memory": a.act_memory,
+            "graph_scope": list(self.s.tools.graph_scope_entity_types or []) or None,
             "models": {"agent": self.agent_chat.model_name, "reflect": self.reflect_chat.model_name,
                        "answer": self.answer_chat.model_name},
-            "prompts": [load_prompt(n).version_id for n in ("agent_plan", "agent_act", "agent_reflect", "qa_answer")],
+            "prompts": [load_prompt(n).version_id for n in (
+                "agent_plan", "agent_act_raw" if a.act_memory == "raw" else "agent_act", "agent_reflect", "qa_answer",
+            )],  # fmt: skip
             "retriever": self.tb.backends.retriever.describe() if self.tb.backends.retriever else None,
         }  # fmt: skip

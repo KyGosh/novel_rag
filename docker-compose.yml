@@ -23,7 +23,7 @@ services:
       - es-data:/usr/share/elasticsearch/data
       - ./docker/elasticsearch/ik-dict:/usr/share/elasticsearch/config/analysis-ik/custom
     ports:
-      - "9200:9200"
+      - "19200:9200"  # 宿主机端口避开 Windows 动态端口段（1024–15000，WinNAT 每次开机随机保留其中若干段）
     healthcheck:
       test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1"]
       interval: 15s
@@ -102,7 +102,7 @@ services:
       - milvus-data:/var/lib/milvus
     ports:
       - "19530:19530"
-      - "9091:9091"
+      - "19091:9091"  # 同上
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
       interval: 30s

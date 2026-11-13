@@ -27,6 +27,7 @@ class ToolContext:
 
     max_reading_order: int | None
     book_ids: tuple[str, ...]
+    graph_entity_types: tuple[str, ...] | None = None  # 图谱范围：只暴露这些类型的实体（None = 全量）
 
 
 @dataclass

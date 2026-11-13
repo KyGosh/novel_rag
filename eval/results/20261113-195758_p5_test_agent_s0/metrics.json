@@ -1,0 +1,420 @@
+{
+  "overall": {
+    "n": 141,
+    "acc": 0.844,
+    "partial": 0.0638,
+    "acc_lenient": 0.9078,
+    "abstain": 0.0213,
+    "process_cov": 0.7878,
+    "note_recall": 0.7358,
+    "cite_recall": 0.6826,
+    "ctx_recall": 0.7358,
+    "cite_precision": 0.5984,
+    "cite_precision__n": 138,
+    "llm_calls": 7.4965,
+    "tool_calls": 5.0567,
+    "tokens": 20737.0213,
+    "ci": {
+      "acc": [
+        0.7801,
+        0.9007
+      ],
+      "partial": [
+        0.0284,
+        0.1064
+      ],
+      "acc_lenient": [
+        0.8582,
+        0.9504
+      ],
+      "abstain": [
+        0.0,
+        0.0496
+      ],
+      "process_cov": [
+        0.7293,
+        0.8416
+      ],
+      "note_recall": [
+        0.6732,
+        0.7943
+      ],
+      "cite_recall": [
+        0.6206,
+        0.7441
+      ],
+      "ctx_recall": [
+        0.6732,
+        0.7943
+      ],
+      "cite_precision": [
+        0.5378,
+        0.6605
+      ],
+      "llm_calls": [
+        7.156,
+        7.8512
+      ],
+      "tool_calls": [
+        4.6383,
+        5.4966
+      ],
+      "tokens": [
+        19347.0816,
+        22209.6351
+      ]
+    },
+    "termination": {
+      "finish": 122,
+      "limit_tokens": 15,
+      "finish_implicit": 1,
+      "limit_tool_calls": 3
+    },
+    "labels": {
+      "correct": 119,
+      "abstain": 3,
+      "wrong": 10,
+      "partial": 9
+    },
+    "scored_by": {
+      "rule": 81,
+      "abstain": 3,
+      "judge": 57
+    },
+    "invalid_citations": 0
+  },
+  "by_type": {
+    "fact": {
+      "n": 30,
+      "acc": 0.9333,
+      "partial": 0.0,
+      "acc_lenient": 0.9333,
+      "abstain": 0.0333,
+      "process_cov": 0.95,
+      "note_recall": 0.9,
+      "cite_recall": 0.9,
+      "ctx_recall": 0.9,
+      "cite_precision": 0.7471,
+      "cite_precision__n": 29,
+      "llm_calls": 6.6333,
+      "tool_calls": 3.7667,
+      "tokens": 17030.8333,
+      "ci": {
+        "acc": [
+          0.8333,
+          1.0
+        ],
+        "partial": [
+          0.0,
+          0.0
+        ],
+        "acc_lenient": [
+          0.8333,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.1
+        ],
+        "process_cov": [
+          0.8667,
+          1.0
+        ],
+        "note_recall": [
+          0.8,
+          0.9833
+        ],
+        "cite_recall": [
+          0.8,
+          0.9833
+        ],
+        "ctx_recall": [
+          0.8,
+          0.9833
+        ],
+        "cite_precision": [
+          0.6322,
+          0.8506
+        ],
+        "llm_calls": [
+          5.9333,
+          7.4
+        ],
+        "tool_calls": [
+          2.9667,
+          4.6667
+        ],
+        "tokens": [
+          14422.2108,
+          20089.4892
+        ]
+      },
+      "termination": {
+        "finish": 27,
+        "limit_tokens": 3
+      },
+      "labels": {
+        "correct": 28,
+        "abstain": 1,
+        "wrong": 1
+      },
+      "scored_by": {
+        "rule": 25,
+        "abstain": 1,
+        "judge": 4
+      },
+      "invalid_citations": 0
+    },
+    "relation": {
+      "n": 33,
+      "acc": 0.9091,
+      "partial": 0.0303,
+      "acc_lenient": 0.9394,
+      "abstain": 0.0303,
+      "process_cov": 0.803,
+      "note_recall": 0.7576,
+      "cite_recall": 0.7576,
+      "ctx_recall": 0.7576,
+      "cite_precision": 0.5208,
+      "cite_precision__n": 32,
+      "llm_calls": 7.8182,
+      "tool_calls": 5.3636,
+      "tokens": 20253.9697,
+      "ci": {
+        "acc": [
+          0.8174,
+          1.0
+        ],
+        "partial": [
+          0.0,
+          0.0909
+        ],
+        "acc_lenient": [
+          0.8485,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.0909
+        ],
+        "process_cov": [
+          0.6667,
+          0.9394
+        ],
+        "note_recall": [
+          0.6061,
+          0.9091
+        ],
+        "cite_recall": [
+          0.6061,
+          0.9091
+        ],
+        "ctx_recall": [
+          0.6061,
+          0.9091
+        ],
+        "cite_precision": [
+          0.3906,
+          0.6564
+        ],
+        "llm_calls": [
+          7.1212,
+          8.5455
+        ],
+        "tool_calls": [
+          4.4848,
+          6.2727
+        ],
+        "tokens": [
+          17519.9341,
+          23235.0659
+        ]
+      },
+      "termination": {
+        "limit_tokens": 3,
+        "finish": 30
+      },
+      "labels": {
+        "correct": 30,
+        "partial": 1,
+        "abstain": 1,
+        "wrong": 1
+      },
+      "scored_by": {
+        "rule": 21,
+        "judge": 11,
+        "abstain": 1
+      },
+      "invalid_citations": 0
+    },
+    "multihop": {
+      "n": 44,
+      "acc": 0.8636,
+      "partial": 0.0682,
+      "acc_lenient": 0.9318,
+      "abstain": 0.0227,
+      "process_cov": 0.7102,
+      "note_recall": 0.6572,
+      "cite_recall": 0.517,
+      "ctx_recall": 0.6572,
+      "cite_precision": 0.5946,
+      "cite_precision__n": 43,
+      "llm_calls": 7.3636,
+      "tool_calls": 4.8864,
+      "tokens": 20868.8182,
+      "ci": {
+        "acc": [
+          0.75,
+          0.9545
+        ],
+        "partial": [
+          0.0,
+          0.1591
+        ],
+        "acc_lenient": [
+          0.8409,
+          1.0
+        ],
+        "abstain": [
+          0.0,
+          0.0682
+        ],
+        "process_cov": [
+          0.608,
+          0.8068
+        ],
+        "note_recall": [
+          0.5568,
+          0.7538
+        ],
+        "cite_recall": [
+          0.4148,
+          0.6195
+        ],
+        "ctx_recall": [
+          0.5568,
+          0.7538
+        ],
+        "cite_precision": [
+          0.4767,
+          0.6992
+        ],
+        "llm_calls": [
+          6.7949,
+          8.0
+        ],
+        "tool_calls": [
+          4.2273,
+          5.6136
+        ],
+        "tokens": [
+          18442.3966,
+          23477.9284
+        ]
+      },
+      "termination": {
+        "finish": 38,
+        "limit_tokens": 5,
+        "finish_implicit": 1
+      },
+      "labels": {
+        "correct": 38,
+        "wrong": 2,
+        "partial": 3,
+        "abstain": 1
+      },
+      "scored_by": {
+        "rule": 31,
+        "judge": 12,
+        "abstain": 1
+      },
+      "invalid_citations": 0
+    },
+    "plot": {
+      "n": 34,
+      "acc": 0.6765,
+      "partial": 0.1471,
+      "acc_lenient": 0.8235,
+      "abstain": 0.0,
+      "process_cov": 0.7304,
+      "note_recall": 0.6716,
+      "cite_recall": 0.6324,
+      "ctx_recall": 0.6716,
+      "cite_precision": 0.5495,
+      "llm_calls": 8.1176,
+      "tool_calls": 6.1176,
+      "tokens": 24305.4706,
+      "ci": {
+        "acc": [
+          0.5294,
+          0.8235
+        ],
+        "partial": [
+          0.0588,
+          0.2941
+        ],
+        "acc_lenient": [
+          0.7059,
+          0.9412
+        ],
+        "abstain": [
+          0.0,
+          0.0
+        ],
+        "process_cov": [
+          0.6127,
+          0.8333
+        ],
+        "note_recall": [
+          0.5588,
+          0.7843
+        ],
+        "cite_recall": [
+          0.5245,
+          0.7353
+        ],
+        "ctx_recall": [
+          0.5588,
+          0.7843
+        ],
+        "cite_precision": [
+          0.4323,
+          0.6667
+        ],
+        "llm_calls": [
+          7.4404,
+          8.8824
+        ],
+        "tool_calls": [
+          5.1765,
+          7.1471
+        ],
+        "tokens": [
+          21492.5551,
+          27423.2096
+        ]
+      },
+      "termination": {
+        "finish": 27,
+        "limit_tokens": 4,
+        "limit_tool_calls": 3
+      },
+      "labels": {
+        "correct": 23,
+        "wrong": 6,
+        "partial": 5
+      },
+      "scored_by": {
+        "judge": 30,
+        "rule": 4
+      },
+      "invalid_citations": 0
+    }
+  },
+  "latency_ms": {
+    "p50": 26424.9,
+    "p95": 46082.7
+  },
+  "errors": 0,
+  "ci_level": 0.95
+}

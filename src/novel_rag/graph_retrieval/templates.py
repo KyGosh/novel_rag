@@ -342,6 +342,11 @@ class GraphQueries:
         )  # fmt: skip
         return QueryResult("paths", {"a": a, "b": b, "max_hops": hops, "types": types}, rows)
 
+    def entity_type(self, entity_id: str, max_reading_order: int | None) -> str | None:
+        """实体类型（在阅读进度内不可见时返回 None）。图谱范围限定用。"""
+        rows = self._run("entity_type", Q_ENTITY, max_reading_order, eid=entity_id)
+        return rows[0]["type"] if rows else None
+
     def kg_version(self) -> str | None:
         """当前写在 Neo4j 里的图谱版本（KGMeta），评测时记入运行配置。"""
         rows = self._read(Q_KG_VERSION, sid=self.series_id)

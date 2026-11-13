@@ -119,6 +119,21 @@ class SearchTextArgs(_Args):
     entity_id: str | None = Field(None, description="只在提到该实体的段落里检索（实体 ID 来自 find_entity）")
 
 
+class SearchTextArgsNoEntity(_Args):
+    # 去掉全部图谱的消融：原文检索不再支持按实体限定。这里不能写类 docstring——它会进参数 schema，被模型看到
+    query: str = Field(min_length=1, max_length=200, description="检索语句：写成陈述句或关键词组合，带上人名、地名")
+    top_k: int = Field(5, ge=1, le=8, description="返回段落数，默认 5")
+    volume: str | None = Field(None, description="只在这一卷里检索（卷 ID）")
+    chapter_from: str | None = Field(None, description="章节范围起点（章节编号 卷ID:章号，含）")
+    chapter_to: str | None = Field(None, description="章节范围终点（含）")
+
+
+SEARCH_TEXT_DESC_NO_ENTITY = (
+    "原文检索（BM25 + 向量 + rerank）：按语义找相关原文段落，返回段落全文及 chunk_id、卷名和章节。"
+    "什么时候用：找某个情节、细节、对话的原文证据；已知章节时可以用 volume / 章节范围缩小范围。"
+    "多跳问题先查出桥接实体，再针对桥接实体单独检索。"
+)
+
 SEARCH_TEXT_DESC = (
     "原文检索（BM25 + 向量 + rerank）：按语义找相关原文段落，返回段落全文及 chunk_id、卷名和章节。"
     "什么时候用：找某个情节、细节、对话的原文证据；已知人物或章节时可以用 entity_id / volume / 章节范围缩小范围。"
@@ -126,13 +141,13 @@ SEARCH_TEXT_DESC = (
 )
 
 
-def search_text(args: SearchTextArgs, ctx: ToolContext, b: ToolBackends) -> ToolResult:
+def search_text(args: SearchTextArgs | SearchTextArgsNoEntity, ctx: ToolContext, b: ToolBackends) -> ToolResult:
     from novel_rag.config import get_settings
 
     cfg = get_settings().tools
     flt, note = make_filter(
         b, ctx, volume=args.volume, chapter_from=args.chapter_from, chapter_to=args.chapter_to,
-        entity_id=args.entity_id,
+        entity_id=getattr(args, "entity_id", None),
     )  # fmt: skip
     hits, lat = run_search(b, args.query, min(args.top_k, cfg.search_max_top_k), flt)
     if not hits:

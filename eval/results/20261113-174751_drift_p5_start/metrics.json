@@ -1,0 +1,156 @@
+{
+  "name": "p5_start",
+  "created": "2026-11-13T17:47:51",
+  "n": 24,
+  "ids": [
+    "fact-353b9116",
+    "fact-570a3d28",
+    "fact-6d0127ba",
+    "fact-e53ff9cb",
+    "fact-f66b71d4",
+    "fact-ff7ecc70",
+    "multihop-422a390b",
+    "multihop-5f183c0f",
+    "multihop-7600fbf9",
+    "multihop-8c3ef2c8",
+    "multihop-dc2dd31f",
+    "multihop-f4af5f56",
+    "plot-1a8107e5",
+    "plot-6447dcc4",
+    "plot-666aad95",
+    "plot-788effab",
+    "plot-97469d62",
+    "plot-c6fd4517",
+    "relation-1cde3c0c",
+    "relation-5263ba62",
+    "relation-709622b8",
+    "relation-75f8846a",
+    "relation-7f0252c7",
+    "relation-e7bd5a7a"
+  ],
+  "runs": {
+    "p4_s0": {
+      "dir": "20261112-005605_p4_agent_dev_s0",
+      "created": "2026-11-12T01:04:42",
+      "sample": 0,
+      "llm_cache": true,
+      "model": {
+        "agent": "workbuddy/deepseek-v4.1-flash",
+        "reflect": "workbuddy/deepseek-v4.1-flash",
+        "answer": "workbuddy/deepseek-v4.1-flash"
+      }
+    },
+    "p4_s1": {
+      "dir": "20261112-010511_p4_agent_dev_s1",
+      "created": "2026-11-12T01:15:06",
+      "sample": 1,
+      "llm_cache": true,
+      "model": {
+        "agent": "workbuddy/deepseek-v4.1-flash",
+        "reflect": "workbuddy/deepseek-v4.1-flash",
+        "answer": "workbuddy/deepseek-v4.1-flash"
+      }
+    },
+    "start": {
+      "dir": "20261113-174536_p5_drift_start",
+      "created": "2026-11-13T17:47:48",
+      "sample": 0,
+      "llm_cache": false,
+      "model": {
+        "agent": "workbuddy/deepseek-v4.1-flash",
+        "reflect": "workbuddy/deepseek-v4.1-flash",
+        "answer": "workbuddy/deepseek-v4.1-flash"
+      }
+    }
+  },
+  "profiles": {
+    "p4_s0": {
+      "acc": 0.875,
+      "acc_lenient": 0.9583333333333334,
+      "tokens": 21551.541666666668,
+      "llm_calls": 7.583333333333333,
+      "tool_calls": 5.041666666666667,
+      "rounds": 2.375,
+      "tools_per_question": {
+        "search_text": 2.58,
+        "read_text": 0.5,
+        "search_summaries": 0.38,
+        "read_summary": 0.12,
+        "find_entity": 1.25,
+        "graph_query": 0.21
+      },
+      "termination": {
+        "finish": 20,
+        "limit_tokens": 4
+      }
+    },
+    "p4_s1": {
+      "acc": 0.9166666666666666,
+      "acc_lenient": 1.0,
+      "tokens": 22818.958333333332,
+      "llm_calls": 8.083333333333334,
+      "tool_calls": 5.5,
+      "rounds": 2.6666666666666665,
+      "tools_per_question": {
+        "search_text": 2.54,
+        "read_text": 0.79,
+        "search_summaries": 0.42,
+        "read_summary": 0.08,
+        "find_entity": 1.42,
+        "graph_query": 0.25
+      },
+      "termination": {
+        "finish": 18,
+        "limit_tokens": 4,
+        "limit_tool_calls": 1,
+        "limit_rounds": 1
+      }
+    },
+    "start": {
+      "acc": 0.75,
+      "acc_lenient": 0.9166666666666666,
+      "tokens": 23436.5,
+      "llm_calls": 8.25,
+      "tool_calls": 5.625,
+      "rounds": 2.75,
+      "tools_per_question": {
+        "search_text": 2.58,
+        "read_text": 1.04,
+        "search_summaries": 0.38,
+        "read_summary": 0.04,
+        "find_entity": 1.33,
+        "graph_query": 0.25
+      },
+      "termination": {
+        "finish": 18,
+        "limit_tokens": 6
+      }
+    }
+  },
+  "pairs": {
+    "p4_s0 vs p4_s1": {
+      "label_agreement": 0.9166666666666666,
+      "correct_agreement": 0.9583333333333334,
+      "first_round_same_tools": 0.4583333333333333,
+      "acc_diff": 0.04166666666666663,
+      "tokens_ratio": 1.0588086312464111,
+      "tool_calls_ratio": 1.0909090909090908
+    },
+    "p4_s0 vs start": {
+      "label_agreement": 0.8333333333333334,
+      "correct_agreement": 0.875,
+      "first_round_same_tools": 0.5416666666666666,
+      "acc_diff": -0.125,
+      "tokens_ratio": 1.0874628071851007,
+      "tool_calls_ratio": 1.1157024793388428
+    },
+    "p4_s1 vs start": {
+      "label_agreement": 0.8333333333333334,
+      "correct_agreement": 0.8333333333333334,
+      "first_round_same_tools": 0.4166666666666667,
+      "acc_diff": -0.16666666666666663,
+      "tokens_ratio": 1.0270626580602753,
+      "tool_calls_ratio": 1.0227272727272727
+    }
+  }
+}

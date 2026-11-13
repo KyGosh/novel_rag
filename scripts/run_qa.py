@@ -10,7 +10,15 @@
     uv run python scripts/run_qa.py --system agent    --name lat --latency-sample 30 --concurrency 1 --no-cache
     uv run python scripts/run_qa.py --system agent    --name no_graph --drop-tools find_entity,graph_query
 
-固定只跑 dev（test 留到 P5）；每题按 max_reading_order 过滤（防剧透）；检索范围为评测集涉及的全部卷。
+P5 消融开关（只对 Agent 生效）：
+    --no-graph                去掉全部图谱：去掉 find_entity / graph_query，原文检索也不再支持按实体限定
+    --drop-tools graph_query  只去掉图谱查询；--drop-tools search_summaries,read_summary 去掉摘要
+    --graph-scope person      图谱工具只看人物子图（运行环境注入，模型不可见）
+    --act-memory raw          行动环节另外看到历次工具返回的原文
+    --max-rounds / --max-tool-calls / --max-tokens   预算档位；--thinking 开启思考
+
+默认只跑 dev。test 只在配置冻结后跑一次：必须同时给 --split test 和 --confirm-test，每次 test 运行都会追加记入
+eval/results/test_runs.jsonl。每题按 max_reading_order 过滤（防剧透）；检索范围为评测集涉及的全部卷。
 --no-cache 关闭 LLM 结果缓存（延迟测量用）；--sample 换一个采样编号得到独立的新样本。
 """
 
@@ -50,7 +58,8 @@ def main() -> int:
     parser.add_argument("--system", required=True, choices=["closed", "rag", "graphrag", "agent"])
     parser.add_argument("--name", required=True)
     parser.add_argument("--dataset", default="asoiaf_v1")
-    parser.add_argument("--split", choices=["dev"], default="dev", help="P4 只跑 dev")
+    parser.add_argument("--split", choices=["dev", "test", "all"], default="dev", help="all = dev + test（v0 佐证用）")
+    parser.add_argument("--confirm-test", action="store_true", help="确认要跑 test（配置冻结后只跑一次）")
     parser.add_argument("--sample", type=int, default=0, help="采样编号（参与 LLM 缓存键）")
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--smoke", action="store_true", help="只跑冒烟子集（每类 6 题）")
@@ -63,7 +72,18 @@ def main() -> int:
     parser.add_argument("--thinking", action="store_true", help="Agent 的规划与行动开启思考")
     parser.add_argument("--max-rounds", type=int)
     parser.add_argument("--max-tool-calls", type=int)
+    parser.add_argument("--max-tokens", type=int, help="Agent 每题 token 上限")
+    parser.add_argument("--no-graph", action="store_true", help="Agent 去掉全部图谱（含按实体限定的检索）")
+    parser.add_argument("--graph-scope", choices=["all", "person"], default="all", help="图谱工具的实体范围")
+    parser.add_argument("--act-memory", choices=["notes", "raw"], default="notes", help="行动环节的记忆模式")
     args = parser.parse_args()
+
+    if args.split != "dev" and not args.confirm_test:
+        print("test 只在配置冻结后跑一次；确认要跑请加 --confirm-test", file=sys.stderr)
+        return 2
+    if args.split != "dev" and (args.smoke or args.latency_sample or args.ids or args.limit):
+        print("test 不支持子集运行（避免反复查看 test 结果）", file=sys.stderr)
+        return 2
 
     if args.no_cache:
         os.environ["LLM__CACHE_ENABLED"] = "false"
@@ -77,12 +97,16 @@ def main() -> int:
 
     s = get_settings()
     agent_over = {k: v for k, v in {"max_rounds": args.max_rounds, "max_tool_calls": args.max_tool_calls,
-                                    "thinking": True if args.thinking else None}.items() if v is not None}  # fmt: skip
+                                    "max_tokens": args.max_tokens, "thinking": True if args.thinking else None,
+                                    "act_memory": "raw" if args.act_memory == "raw" else None}.items()
+                  if v is not None}  # fmt: skip
     if agent_over:
         s = s.model_copy(update={"agent": s.agent.model_copy(update=agent_over)})
+    if args.graph_scope == "person":
+        s = s.model_copy(update={"tools": s.tools.model_copy(update={"graph_scope_entity_types": ("Person",)})})
     ds_dir = s.paths.datasets_dir / args.dataset
     manifest = DatasetManifest.model_validate_json((ds_dir / "manifest.json").read_text(encoding="utf-8"))
-    items = load_dataset(ds_dir, s.paths.books_dir, split=args.split)
+    items = load_dataset(ds_dir, s.paths.books_dir, split=None if args.split == "all" else args.split)
     subset = None
     if args.smoke:
         items, subset = smoke_subset(items), "smoke"
@@ -122,6 +146,8 @@ def main() -> int:
 
         b = build_backends(s, scope, env.chunks, env.titles)
         tb = Toolbox(b)
+        if args.no_graph:
+            tb = tb.without_graph()
         if args.drop_tools:
             tb = tb.without(*[x.strip() for x in args.drop_tools.split(",")])
         system = AgentSystem(tb, s, scope=scope, count_tokens=n_tokens)
@@ -141,6 +167,8 @@ def main() -> int:
         "dataset": {"name": manifest.name, "split": args.split, "subset": subset, "n_items": len(items),
                     "fingerprint": dataset_fingerprint(ds_dir), "ids": [i.id for i in items] if subset else None},
         "system": system.describe(),
+        "variant": {"no_graph": args.no_graph, "drop_tools": args.drop_tools, "graph_scope": args.graph_scope,
+                    "act_memory": args.act_memory, "thinking": args.thinking},
         "sample": args.sample,
         "concurrency": args.concurrency,
         "llm_cache": not args.no_cache,
@@ -152,6 +180,14 @@ def main() -> int:
         "config": s.snapshot(),
     }  # fmt: skip
     write_qa_run(out, run, metrics, rows)
+    if args.split != "dev":  # test 运行台账：只追加，不含逐题结果
+        ledger = {
+            "dir": out_name, "created": run["created"], "system": args.system, "sample": args.sample,
+            "dataset": args.dataset, "split": args.split, "commit": run["git"]["commit"],
+            "dirty": run["git"]["dirty"], "n_items": len(items), "acc": metrics["overall"].get("acc"),
+        }  # fmt: skip
+        with (s.paths.results_dir / "test_runs.jsonl").open("a", encoding="utf-8", newline="") as f:
+            f.write(json.dumps(ledger, ensure_ascii=False) + "\n")
     print((out / "summary.md").read_text(encoding="utf-8"))
     print(f"结果目录：{out}")
     print(json.dumps({"errors": metrics["errors"]}, ensure_ascii=False))

@@ -115,7 +115,7 @@ class FakeGraph:
                 continue
             rows.append({
                 "type": t, "role": role, "outgoing": a == eid, "a_to_b": a == eid, "other_id": o,
-                "other": self.ENTITIES[o]["name"], "other_type": "Person", "other_category": "人",
+                "other": self.ENTITIES[o]["name"], "other_type": self.ENTITIES[o]["type"], "other_category": "人",
                 "n_evidence": len(vis), "first_ro": vis[0]["ro"], "last_ro": vis[-1]["ro"], "evidence": vis,
             })  # fmt: skip
         return rows
@@ -130,13 +130,17 @@ class FakeGraph:
         ]  # fmt: skip
         return QueryResult("resolve", {"name": name}, rows)
 
+    def entity_type(self, entity_id: str, max_reading_order: int | None) -> str | None:
+        e = self.ENTITIES.get(entity_id)
+        return None if e is None or e["first_ro"] > self._ro(max_reading_order) else e["type"]
+
     def profile(self, entity_id: str, max_reading_order: int | None, limit: int | None = None) -> QueryResult:
         self.calls.append(("profile", max_reading_order))
         e = self.ENTITIES.get(entity_id)
         if e is None or e["first_ro"] > self._ro(max_reading_order):
             return QueryResult("profile", {}, [])
         rels = self._rel_rows(entity_id, max_reading_order)
-        row = {"entity_id": entity_id, "type": "Person", "name": e["name"], "qualifier": None, "category": "人",
+        row = {"entity_id": entity_id, "type": e["type"], "name": e["name"], "qualifier": None, "category": "人",
                "aliases": [], "first_ro": e["first_ro"], "first_seen": e["first_ro"], "last_seen": e["first_ro"],
                "mentions": 3, "groups": [], "relations": rels}  # fmt: skip
         if max_reading_order is not None and not self.leak:
@@ -153,10 +157,12 @@ class FakeGraph:
         if types and any(t not in ("KIN", "ALLY", "SPOUSE") for t in types):
             raise QueryError(f"未知的关系类型：{types}")
         self.calls.append(("neighbors", max_reading_order))
-        return QueryResult("neighbors", {}, self._rel_rows(entity_id, max_reading_order))
+        rows = self._rel_rows(entity_id, max_reading_order)
+        return QueryResult("neighbors", {}, [r for r in rows if not other_types or r["other_type"] in other_types])
 
     def paths(self, a, b, max_reading_order, **kw) -> QueryResult:
         self.calls.append(("paths", max_reading_order))
+        self.last_paths_kw = kw
         return QueryResult("paths", {}, [])
 
     def timeline(self, entity_id, max_reading_order, limit=None) -> QueryResult:
