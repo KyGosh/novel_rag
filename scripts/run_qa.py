@@ -181,9 +181,11 @@ def main() -> int:
     }  # fmt: skip
     write_qa_run(out, run, metrics, rows)
     if args.split != "dev":  # test 运行台账：只追加，不含逐题结果
-        ledger = {"dir": out_name, "created": run["created"], "system": args.system, "sample": args.sample,
-                  "dataset": args.dataset, "split": args.split, "commit": run["git"]["commit"],
-                  "dirty": run["git"]["dirty"], "n_items": len(items), "acc": metrics["overall"].get("acc")}  # fmt: skip
+        ledger = {
+            "dir": out_name, "created": run["created"], "system": args.system, "sample": args.sample,
+            "dataset": args.dataset, "split": args.split, "commit": run["git"]["commit"],
+            "dirty": run["git"]["dirty"], "n_items": len(items), "acc": metrics["overall"].get("acc"),
+        }  # fmt: skip
         with (s.paths.results_dir / "test_runs.jsonl").open("a", encoding="utf-8", newline="") as f:
             f.write(json.dumps(ledger, ensure_ascii=False) + "\n")
     print((out / "summary.md").read_text(encoding="utf-8"))
