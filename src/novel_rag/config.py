@@ -21,7 +21,7 @@ class _Frozen(BaseModel):
 
 
 class ESConfig(_Frozen):
-    url: str = "http://localhost:9200"
+    url: str = "http://localhost:19200"
     request_timeout: float = 30.0
 
 
@@ -330,6 +330,9 @@ class ToolsConfig(_Frozen):
     entity_filter_max_chunks: int = 5000  # 实体限定检索：提及该实体的 chunk 超过此数时不限定（几乎覆盖全书）
     graph_max_chars: int = 3000
     graph_default_limit: int = 15
+    # 图谱范围（P5 消融）：只让图谱工具看到这些类型的实体（("Person",) = 人物子图）；None = 全量。
+    # 由运行环境写进 ToolContext，模型不可见、不可改
+    graph_scope_entity_types: tuple[str, ...] | None = None
     # 服务超时 / 连接失败的重试（参数错误、找不到实体不重试）
     max_retries: int = 2
     retry_backoff_s: float = 0.5
@@ -347,6 +350,9 @@ class AgentConfig(_Frozen):
     thinking: bool = False  # True：规划与行动用 agent_thinking 任务（开启思考）
     observation_max_chars: int = 12_000  # 一轮全部观察交给反思时的总长上限
     max_notes: int = 30  # 证据笔记条数上限（超出后只保留最早的，后续新增作废并计数）
+    # 行动环节的记忆（P5 消融）：notes = 只看证据笔记与行动记录（默认）；raw = 另外看到历次工具返回的原文
+    act_memory: Literal["notes", "raw"] = "notes"
+    raw_history_max_chars: int = 24_000  # raw 模式下历次观察的总长上限（从最近一轮往前保留）
 
 
 class AnswerConfig(_Frozen):

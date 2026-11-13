@@ -63,6 +63,7 @@ class AgentState(TypedDict, total=False):
     status: str
     actions: list[dict[str, Any]]  # 行动记录：{round, tool, args, overview, ok}
     observations: list[dict[str, Any]]  # 本轮原始观察（只交给反思，用完即丢）
+    history: list[str]  # 历次观察的原文（只在 act_memory=raw 的消融里保留并交给行动环节）
     pending_calls: list[ToolCall]
     finish_requested: bool
     finish_reason: str
@@ -155,6 +156,27 @@ def format_actions(actions: list[dict[str, Any]]) -> str:
     return "\n".join(f"第 {a['round']} 轮 {a['tool']}({a['args']}) → {a['overview']}" for a in actions)
 
 
+def format_history(history: list[str], max_chars: int) -> str:
+    """raw 模式下交给行动环节的历次观察：从最近一轮往前保留，超出总长上限的更早内容截断或省略。"""
+    if not history:
+        return "（暂无）"
+    kept: list[str] = []
+    left = max_chars
+    for k in range(len(history), 0, -1):
+        block = f"【第 {k} 轮观察】\n{history[k - 1]}"
+        if len(block) > left:
+            if left > 200:  # 还放得下一部分：截断这一轮，更早的省略
+                kept.append(block[:left] + "……（截断）")
+                if k > 1:
+                    kept.append(f"（第 {k - 1} 轮及更早的观察因长度上限省略）")
+            else:
+                kept.append(f"（第 {k} 轮及更早的观察因长度上限省略）")
+            break
+        kept.append(block)
+        left -= len(block)
+    return "\n\n".join(reversed(kept))
+
+
 _WS = re.compile(r"\s+")
 
 
@@ -194,13 +216,17 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             reason = "error_streak"
         if reason:
             return {"termination": reason, "pending_calls": []}
-        p = deps.prompt("agent_act")
-        msgs = p.render(
+        raw = cfg.act_memory == "raw"
+        p = deps.prompt("agent_act_raw" if raw else "agent_act")
+        values = dict(
             volumes=deps.volumes, max_calls=str(cfg.max_calls_per_round), question=state["question"],
             plan=state.get("plan", ""), notes=format_notes(state.get("notes", [])),
             status=state.get("status") or "（尚未开始检索）", actions=format_actions(state.get("actions", [])),
             rounds_left=str(cfg.max_rounds - rounds), calls_left=str(cfg.max_tool_calls - calls_used),
         )  # fmt: skip
+        if raw:  # 消融：行动环节另外看到历次工具返回的原文（按总长上限截断）
+            values["observations"] = format_history(state.get("history", []), cfg.raw_history_max_chars)
+        msgs = p.render(**values)
         t0 = time.perf_counter()
         res = deps.agent_chat.chat(msgs, prompt_version=p.version_id, tools=tool_schemas, sample=deps.sample)
         calls = list(res.tool_calls)
@@ -276,13 +302,14 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             blocks.append(f"[观察 {k}] {o['tool']}({o['args']})\n{text}")
         p = deps.prompt("agent_reflect")
         msgs = p.render(question=state["question"], notes=format_notes(notes), observations="\n\n".join(blocks))
+        history = [*state.get("history", []), "\n\n".join(blocks)] if cfg.act_memory == "raw" else []
         t0 = time.perf_counter()
         try:
             res = deps.reflect_chat.chat(msgs, schema=ReflectOut, prompt_version=p.version_id, sample=deps.sample)
         except StructuredOutputError as e:
             step = {"step": "reflect", "round": state["rounds"], "error": str(e)}
             return {"observations": [], "status": "（上一轮反思失败）", "trace": [*state.get("trace", []), step],
-                    "llm_calls": state.get("llm_calls", 0) + 1}  # fmt: skip
+                    "llm_calls": state.get("llm_calls", 0) + 1, "history": history}  # fmt: skip
         out: ReflectOut = res.parsed  # type: ignore[assignment]
         invalid = state.get("invalid_notes", 0)
         added, rejected = [], []
@@ -316,6 +343,7 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         upd: dict[str, Any] = {
             **_usage_update(state, res), "notes": notes + added, "status": out.status.strip()[:300] or "（无）",
             "observations": [], "invalid_notes": invalid, "trace": [*state.get("trace", []), step],
+            "history": history,
         }  # fmt: skip
         upd["last_round_tokens"] = upd["prompt_tokens"] + upd["completion_tokens"] - state.get("round_start_tokens", 0)
         if state.get("finish_requested"):

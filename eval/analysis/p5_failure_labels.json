@@ -1,0 +1,311 @@
+{
+ "_readme": "P5 失败分析的人工归因：Claude 逐题阅读 data/traces/ 中两次 Agent 运行的完整 trace 后填写（2026-11-13）。未经用户审阅。只含题号、类别和简短转述，不含原文。citations 是对“不在金标里的引用”的抽查判定（supports = 该段直接写明答案的某一问或桥接事实；partial = 相关上下文但没有写明；no = 无关）。",
+ "cause_names": {
+  "evidence_missed": "某段金标证据始终没检索到",
+  "wrong_scope": "检索限定到了错误的卷 / 时间段",
+  "competing_answer": "取了另一个看似合理的候选",
+  "question_ambiguous": "题目有歧义或答案不唯一",
+  "summary_as_evidence": "据摘要转述作答",
+  "reflect_miss": "反思漏记",
+  "answer_incomplete": "证据已在笔记，作答漏要点或选错",
+  "judge_boundary": "judge 边界（实质一致或措辞差异）",
+  "budget": "触及上限时仍在检索",
+  "premature": "一轮就结束"
+ },
+ "questions": {
+  "multihop-8f3c5337": {
+   "causes": [
+    "evidence_missed",
+    "summary_as_evidence",
+    "budget"
+   ],
+   "note": "桥接人物找到；说明原因的那一段两次都没出现在检索结果里（同章其他段落被反复召回）。第一次运行据章节摘要里的另一种说法作答，第二次到 token 上限后弃答。摘要的说法本身也讲得通，金标只认其中一种原因。"
+  },
+  "multihop-95e0198c": {
+   "causes": [
+    "question_ambiguous",
+    "competing_answer"
+   ],
+   "note": "同一章里该人物先后被用两个名字称呼，题目没有限定是哪一次；两次运行都取了更显眼的那个，金标是另一个。"
+  },
+  "multihop-aae769bc": {
+   "causes": [
+    "evidence_missed",
+    "budget"
+   ],
+   "note": "桥接（外公不信任的侯爵）找到；第二跳检索了六到八次都没召回那一段，检索语句与原文措辞差距大，到 token 上限。"
+  },
+  "multihop-c0ac8fb7": {
+   "causes": [
+    "wrong_scope",
+    "budget"
+   ],
+   "note": "把“后来被抓住”理解成同一场战斗里的事，始终在第一卷同一章附近检索和重读，没有去后面的卷找，到 token 上限后弃答。"
+  },
+  "plot-3aeed14e": {
+   "causes": [
+    "evidence_missed",
+    "competing_answer",
+    "question_ambiguous"
+   ],
+   "note": "第一问答对；第二问所在章里有多处“吩咐侍从做某事”，两次运行各取了一处，都不是金标那一处；题目的时间限定不够明确。"
+  },
+  "plot-622f9016": {
+   "causes": [
+    "answer_incomplete",
+    "competing_answer"
+   ],
+   "note": "第一次运行两段金标都进了笔记，作答仍选了另一位更亲近的人物，而不是题目问的“首领”；检索语句一开始就预设了那个人物。"
+  },
+  "plot-6591b923": {
+   "causes": [
+    "question_ambiguous",
+    "evidence_missed",
+    "budget"
+   ],
+   "note": "开放式汇总题（“做过哪两件事”），原文里可以算数的事例很多；金标指定的两件之一始终没检索到。"
+  },
+  "plot-91fdf888": {
+   "causes": [
+    "answer_incomplete",
+    "judge_boundary"
+   ],
+   "note": "证据进了笔记；答案漏了兵力的一半信息或人质说法不够精确，判部分对。第二次运行的依据里写全了，简短答案里没写。"
+  },
+  "plot-97469d62": {
+   "causes": [
+    "answer_incomplete",
+    "question_ambiguous"
+   ],
+   "note": "两段金标都在笔记里；第二问“处境如何”问法宽泛，答案用了别的笔记，或只答了第一问。"
+  },
+  "plot-c6fd4517": {
+   "causes": [
+    "evidence_missed",
+    "wrong_scope",
+    "budget"
+   ],
+   "note": "第二问的证据在后面的卷，检索集中在第一卷的相关场景；第一次运行还把人物自己的猜测当成了第一问的答案。"
+  },
+  "fact-069aa202": {
+   "causes": [
+    "competing_answer",
+    "premature"
+   ],
+   "note": "第二次运行一轮就结束，引用的是描述外形的另一段，没有给出金标要的名称。"
+  },
+  "multihop-212423b7": {
+   "causes": [
+    "competing_answer",
+    "question_ambiguous",
+    "evidence_missed"
+   ],
+   "note": "该人物在同一地点先后用过两个化名；第二次运行取了较早的一个，金标那段没检索到。第一次运行答对，但没引用金标段。"
+  },
+  "multihop-d9ea9126": {
+   "causes": [
+    "evidence_missed",
+    "competing_answer"
+   ],
+   "note": "第一次运行第二跳金标段没出现，取了另一处“改变装束”的描写作答。"
+  },
+  "multihop-f4dff06d": {
+   "causes": [
+    "judge_boundary"
+   ],
+   "note": "两段金标都在笔记里；第二次运行的答案用了原文对同一事物的另一种说法，judge 判错。"
+  },
+  "multihop-f558567a": {
+   "causes": [
+    "reflect_miss",
+    "premature"
+   ],
+   "note": "第一次运行第一轮就检索到两段金标，反思没有记下任何笔记，行动环节随后在笔记为空时直接结束，导致弃答。"
+  },
+  "plot-0ec80a4a": {
+   "causes": [
+    "answer_incomplete",
+    "question_ambiguous"
+   ],
+   "note": "开放式“看法变化”题；第二次运行金标两段都在笔记里，答案的概括方向与金标要点不同。"
+  },
+  "plot-37866d96": {
+   "causes": [
+    "evidence_missed",
+    "budget"
+   ],
+   "note": "第二次运行第二问的证据没检索到；有两次调用因章节编号写错而浪费，到调用上限。"
+  },
+  "plot-666aad95": {
+   "causes": [
+    "judge_boundary"
+   ],
+   "note": "两次运行答案实质相同（比金标多列一人），一次判对、一次判部分对。"
+  },
+  "plot-66da9486": {
+   "causes": [
+    "answer_incomplete"
+   ],
+   "note": "第一次运行第二问的答案已在笔记里，简短答案只写了第一问。"
+  },
+  "plot-7b6f15b8": {
+   "causes": [
+    "wrong_scope",
+    "evidence_missed",
+    "budget"
+   ],
+   "note": "第二次运行第二问的证据在下一卷开头，检索限定在上一卷，取了相近的描写作答。"
+  },
+  "plot-7f7fb755": {
+   "causes": [
+    "wrong_scope",
+    "competing_answer"
+   ],
+   "note": "第二次运行把检索限定到了前一卷，找到措辞相近但说的是另一个人的段落。"
+  },
+  "plot-88ab551a": {
+   "causes": [
+    "evidence_missed",
+    "question_ambiguous"
+   ],
+   "note": "第一次运行把“雇来的那批人”理解成了另一批人，第一问的金标段没检索到。"
+  },
+  "plot-8eed57a0": {
+   "causes": [
+    "judge_boundary"
+   ],
+   "note": "两次运行答案实质相同，一次判对、一次判部分对（修饰语不同）。"
+  },
+  "plot-9a510fc7": {
+   "causes": [
+    "summary_as_evidence",
+    "reflect_miss"
+   ],
+   "note": "第一次运行第一问据摘要里的概括作答；金标段读过，但要点没进笔记。"
+  },
+  "plot-a6e3b8df": {
+   "causes": [
+    "judge_boundary"
+   ],
+   "note": "两次运行答案相同，一次因缺少目的说明被判部分对。"
+  },
+  "plot-c6e2ea8d": {
+   "causes": [
+    "premature",
+    "competing_answer",
+    "evidence_missed"
+   ],
+   "note": "第二次运行一轮就结束，第一问取了后一段行程里的另一艘船。"
+  },
+  "relation-2d83c007": {
+   "causes": [
+    "judge_boundary",
+    "answer_incomplete"
+   ],
+   "note": "金标段在笔记里；第一次运行的答案把另一段的背景并进来改写了原因，判部分对。"
+  },
+  "relation-78ea0948": {
+   "causes": [
+    "answer_incomplete",
+    "competing_answer"
+   ],
+   "note": "第二次运行金标段在笔记里，作答选了“老师”而不是题目问的“陪练”。"
+  }
+ },
+ "citations": {
+  "s0|multihop-7600fbf9|asoiaf-5:0030:0016": {
+   "verdict": "supports"
+  },
+  "s0|multihop-adabd5ed|asoiaf-5:0031:0010": {
+   "verdict": "partial"
+  },
+  "s0|multihop-2ec9b3c7|asoiaf-2:0035:0000": {
+   "verdict": "supports"
+  },
+  "s0|multihop-07c4bf34|asoiaf-3:0039:0019": {
+   "verdict": "supports"
+  },
+  "s0|plot-e923c8ef|asoiaf-2:0068:0010": {
+   "verdict": "supports"
+  },
+  "s0|plot-0246e9d9|asoiaf-2:0047:0025": {
+   "verdict": "supports"
+  },
+  "s0|relation-08363d32|asoiaf-4:0030:0022": {
+   "verdict": "partial"
+  },
+  "s0|relation-5840351e|asoiaf-3:0037:0011": {
+   "verdict": "supports"
+  },
+  "s0|multihop-9155017d|asoiaf-2:0038:0003": {
+   "verdict": "supports"
+  },
+  "s0|multihop-1ec89f19|asoiaf-3:0042:0024": {
+   "verdict": "supports"
+  },
+  "s0|relation-8e4c54f2|asoiaf-1:0029:0001": {
+   "verdict": "partial"
+  },
+  "s0|fact-f66b71d4|asoiaf-5:0037:0017": {
+   "verdict": "supports"
+  },
+  "s0|plot-7b6f15b8|asoiaf-3:0000:0003": {
+   "verdict": "supports"
+  },
+  "s0|fact-9be5b4ac|asoiaf-3:0033:0007": {
+   "verdict": "supports"
+  },
+  "s0|multihop-ddb4b417|asoiaf-5:0052:0019": {
+   "verdict": "supports"
+  },
+  "rag|plot-8eed57a0|asoiaf-1:0060:0004": {
+   "verdict": "supports"
+  },
+  "rag|multihop-1eccfa3d|asoiaf-3:0023:0010": {
+   "verdict": "partial"
+  },
+  "rag|relation-1cde3c0c|asoiaf-1:0004:0006": {
+   "verdict": "supports"
+  },
+  "rag|fact-dd6a767b|asoiaf-1:0006:0011": {
+   "verdict": "supports"
+  },
+  "rag|fact-f66b71d4|asoiaf-5:0037:0007": {
+   "verdict": "supports"
+  },
+  "rag|fact-5e4b11b1|asoiaf-3:0051:0001": {
+   "verdict": "partial"
+  },
+  "rag|fact-cb8b38ae|asoiaf-1:0018:0004": {
+   "verdict": "supports"
+  },
+  "rag|relation-1cde3c0c|asoiaf-1:0004:0013": {
+   "verdict": "supports"
+  },
+  "rag|relation-edd35c42|asoiaf-2:0065:0003": {
+   "verdict": "supports"
+  },
+  "rag|relation-35ae3a9c|asoiaf-2:0070:0022": {
+   "verdict": "partial"
+  },
+  "rag|plot-65322664|asoiaf-4:0006:0017": {
+   "verdict": "supports"
+  },
+  "rag|multihop-1eccfa3d|asoiaf-5:0030:0017": {
+   "verdict": "supports"
+  },
+  "rag|plot-5c4dddaf|asoiaf-1:0072:0009": {
+   "verdict": "supports"
+  },
+  "rag|fact-e2d380c8|asoiaf-2:0038:0003": {
+   "verdict": "supports"
+  },
+  "rag|relation-85ffdc06|asoiaf-3:0014:0006": {
+   "verdict": "supports"
+  }
+ },
+ "gain_notes": "小结（收益来源）：\n\n- Agent 的收益主要是**检索收益**（两次运行分别为 66% / 75%）：固定 RAG 一次检索拿不到的那段金标证据（多数是多跳题的第二跳、跨章节题的另一章），Agent 找到了。\n- 找到的方式几乎都是**再做一次原文检索**：换一个针对子问题的检索语句（10 / 13 题），或者把检索限定到某一卷、某段章节（9 / 8 题）。限定范围之前通常先用摘要工具定位章节（收益题中 16 题用过摘要）。\n- **多轮是必要的**：检索收益题里约八成（15/19、17/21）要到第 2 轮及以后才补齐证据，也就是先确认桥接实体或章节位置、再针对性检索；只有 4 题靠第 1 轮的问题拆分就够了。\n- **按实体限定的检索没有带来过一次“第一次找到固定 RAG 缺的金标证据”**（两次运行都是 0）；图谱查询在收益题中只出现 3 / 1 题。实体查找虽然用得多（18 题），起的作用更像是确认人物身份。这与 P4 的工具统计一致，图谱的实际贡献要看第五节的消融。\n- 证据整理收益占一成左右（3 / 2 题，都是人物关系题）：固定 RAG 的上下文里已有金标证据，却被其他段落带偏或弃答。\n- “其他”一类（7 / 5 题）是靠金标以外、写了同一事实的段落答对的，与第 8 节“不在金标里的引用大多支持答案”一致。",
+ "plot_notes": "小结（跨章节题）：\n\n- 34 道跨章节题里 31 道是明确的两问式题目（“甲怎样？后来乙怎样？”），所以“部分对”基本等于只答对一问；没答对的题里部分对占多数（第一次运行 11 题中 8 题，第二次 12 题中 7 题）。\n- **没找全证据是主因**：没答对的题中，证据没到位（partial / none）的占 7/11（第一次运行）和 10/12（第二次）；证据全部到位仍没答对的是 4/11 和 2/12。证据全进笔记时准确率 0.80 / 0.85，只到位一部分时 0.60 / 0.53。\n- “找全证据但答不全”的 6 题次里，原因是简短答案漏写一问、选了另一个候选，或答案与金标只差修饰语而被判部分对（见第 3、4 节逐题）。\n- 跨章节题也是两次运行之间最不稳定的题型（18 道不稳定题中占 11 道），其中 3 道是两次答案实质相同、judge 判定不同。报告跨章节准确率时应同时给出“含部分对”的数字。",
+ "citation_notes": "两个系统抽到的 30 条“不在金标里的引用”中没有一条与答案无关：24 条直接写明了答案的某一问或桥接事实，6 条是相关上下文。所以按金标口径算的引用准确率（约 0.64）明显低估了真实水平，差距来自同一事实在书中多处出现，而金标每题只标了一两处。样本每个系统只有 15 条，折算值只作量级参考。",
+ "conclusions": "**失败原因的构成**（28 道至少一次没答对的题：稳定失败 10 + 不稳定 18；一题可有多个原因，下面按主要原因归并）：\n\n| 主要原因 | 题数 | 说明 |\n|---|---|---|\n| 检索侧：某段金标证据没找到 | 14 | 细分为检索语句与原文措辞差距大、同章其他段落被反复召回（5）；把检索限定到了错误的卷或时间段（4）；找到另一个看似合理的候选后就结束（5）。其中 8 题至少一次是在 token / 调用上限处停下的，另外 6 题是模型认为已经找到答案而主动结束 |\n| 作答侧：证据已在笔记，答案漏要点或选错候选 | 6 | 两问式题目只答一问、简短答案写不全、在两个候选里选错 |\n| judge 边界 | 5 | 其中 3 题两次运行的答案实质相同、判定不同 |\n| 题目本身（歧义或答案不唯一）为主 | 1（另有 6 题涉及） | v1 未经人工复核；这类题集中在“先后用过两个名字”“做过哪两件事”“处境如何”一类问法 |\n| 反思漏记 / 据摘要作答 | 2 | 其中 1 题反思没记任何笔记，行动环节在笔记为空时直接结束 |\n\n**回退题**（固定 RAG 对、Agent 某一次错，两次运行共 9 题次）没有一道是稳定回退：5 道属于 judge 边界或措辞差异，3 道是取了另一个看似合理的候选（其中 2 道一轮就结束），1 道是反思漏记。也就是说 Agent 的多步过程没有系统性地把某类题弄错，回退来自运行间的随机性。\n\n**对“一次定向改进”的判断：不触发，按 P4 的配置定稿。** 理由：\n\n1. 没有一个原因占明显多数。最大的一类（检索侧，14/28）内部是三种不同的情况，修法各不相同；其中“模型认为已经找到答案”的那部分，靠提示词里加“逐问核对”也拦不住，因为它并不知道自己缺证据。\n2. 第二大类（作答侧，6 题）要改的是四个系统共用的作答提示词，一改就得把闭卷、固定 RAG、固定 GraphRAG 全部重跑；预期影响每次运行 2–3 题（约 0.02），小于两次运行之间的噪声（总体差值区间约 [−0.08, +0.05]），改了也验证不出来。\n3. judge 边界和题目歧义不是 Agent 的问题，不应通过改 Agent 来“修”。\n\n**留给 P6 或以后的改进线索**（本阶段不做）：\n\n- 作答提示词：题目有几问就逐问作答；两问式题目放宽 30 字的简短答案上限。\n- 行动环节：笔记为空时不允许结束；问题里有“后来”“之后”时提示到更靠后的卷、章去找。\n- token 上限：检索侧失败里有 8 题是在上限处停下的，是否值得提高上限由第五节的预算消融回答。\n- 评测集：把本报告标为“题目有歧义”的 7 道题交人工复核（v1 dev 141 题中约 5%）。\n\n配置定稿：与 P4 两次 dev 运行相同（提示词 agent_plan.v1 / agent_act.v1 / agent_reflect.v1 / qa_answer.v1，上限 6 轮 / 12 次调用 / 4 万 token，关闭思考，图谱 `56be6611` 全量）。消融以 P4 的两次运行作对照，不重跑。"
+}

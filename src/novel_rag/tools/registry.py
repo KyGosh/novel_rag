@@ -77,6 +77,19 @@ class Toolbox:
         tb.tools = {n: t for n, t in self.tools.items() if n not in names}
         return tb
 
+    def without_graph(self) -> Toolbox:
+        """去掉全部图谱（P5 消融）：去掉实体查找与图谱查询，原文检索也不再支持按实体限定。"""
+        from novel_rag.tools import text
+
+        tb = self.without("find_entity", "graph_query")
+        if "search_text" in tb.tools:
+            tb.tools = {
+                n: Tool(n, text.SEARCH_TEXT_DESC_NO_ENTITY, text.SearchTextArgsNoEntity, text.search_text)
+                if n == "search_text" else t
+                for n, t in tb.tools.items()
+            }  # fmt: skip
+        return tb
+
     def schemas(self) -> list[ToolSchema]:
         return [t.schema() for t in self.tools.values()]
 
