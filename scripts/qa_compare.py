@@ -63,6 +63,9 @@ def main() -> int:
     ap.add_argument("--closed", default="closed")
     ap.add_argument("--agents", default="agent,agent_s1", help="Agent 的两次运行（逗号分隔）")
     ap.add_argument("--dataset", default="asoiaf_v1")
+    ap.add_argument("--title", help="报告标题（默认按 P4 第一轮对比）")
+    ap.add_argument("--note", action="append", default=[], help="写在报告开头的说明（可多次）")
+    ap.add_argument("--dev-ref", help="作参照的 dev 对比表 JSON（本脚本此前的输出）；给出时在准确率一节并列 dev 数字")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -83,9 +86,17 @@ def main() -> int:
         "n": len(ids),
         "commits": {k: m["git"]["commit"][:10] for k, m in meta.items()},
     }
-    md = [f"# P4 第一轮对比（{args.dataset} dev，{len(ids)} 题）", ""]
-    md.append("运行：" + "；".join(f"{k} = `{runs[k].name}`（commit `{out['commits'][k]}`）" for k in names))
+    split = meta[names[0]]["dataset"]["split"]
+    if any(m["dataset"]["split"] != split for m in meta.values()):
+        print("各运行的划分不一致", file=sys.stderr)
+        return 1
+    out["split"] = split
+    md = [f"# {args.title or 'P4 第一轮对比'}（{args.dataset} {split}，{len(ids)} 题）", ""]
+    md.append("运行：" + "；".join(f"{k} = `{runs[k].name}`（commit `{out['commits'][k]}`，"
+                                 f"{meta[k]['created'][:16]}）" for k in names))  # fmt: skip
     md.append("")
+    if args.note:
+        md += [f"- {n}" for n in args.note] + [""]
 
     # ---- 1. 准确率
     md += [
@@ -116,6 +127,25 @@ def main() -> int:
         "",
     ]
     out["accuracy"] = acc
+    if args.dev_ref:
+        ref_acc = json.loads(Path(args.dev_ref).read_text(encoding="utf-8"))["accuracy"]
+        md += [f"参照：同一系统在 dev 上的准确率（`{Path(args.dev_ref).name}`；dev 用于调参与消融，{split} 只跑这一次）", "",  # noqa: E501
+               "| 系统 | " + " | ".join(f"{GNAME[g]} dev → {split}" for g in GROUPS) + " |",
+               "|---" * (len(GROUPS) + 1) + "|"]  # fmt: skip
+        for k in names:
+            if k in ref_acc:
+                md.append(f"| {k} | " + " | ".join(
+                    f"{ref_acc[k][g]['acc']:.3f} → {acc[k][g]['acc']:.3f}" for g in GROUPS) + " |")  # fmt: skip
+        md.append("")
+        out["dev_reference"] = {k: {g: ref_acc[k][g]["acc"] for g in GROUPS} for k in names if k in ref_acc}
+    md += ["含“部分对”的准确率（correct + partial）：", "", "| 系统 | " + " | ".join(GNAME[g] for g in GROUPS) + " |",
+           "|---" * (len(GROUPS) + 1) + "|"]  # fmt: skip
+    out["accuracy_lenient"] = {}
+    for k in names:
+        vals = {g: mean(r["metrics"]["acc_lenient"] for r in sel(R[k], g)) for g in GROUPS}
+        out["accuracy_lenient"][k] = vals
+        md.append(f"| {k} | " + " | ".join(f"{vals[g]:.3f}" for g in GROUPS) + " |")
+    md.append("")
 
     # ---- 2. 配对差值
     ref = args.reference
@@ -229,7 +259,7 @@ def main() -> int:
     # ---- 7. 失败分类与工具使用
     if agents:
         env = load_env(s, tuple(meta[agents[0]]["scope"]))
-        items = {i.id: i for i in load_dataset(s.paths.datasets_dir / args.dataset, s.paths.books_dir, split="dev")}
+        items = {i.id: i for i in load_dataset(s.paths.datasets_dir / args.dataset, s.paths.books_dir, split=split)}
         rel = {"min_ratio": e.relevance_min_ratio, "min_chars": e.relevance_min_chars}
         ft = failure_table(R[agents[0]], items, env.spans, rel)
         out["failures"] = {k: v for k, v in ft.items() if k != "per_question"}

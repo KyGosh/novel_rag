@@ -1,0 +1,22 @@
+{
+  "title": "Agent 消融表（asoiaf_v1 dev 141 题，定稿配置）",
+  "notes": [
+    "定稿配置 = P4 的配置（P5 失败分析后决定不做定向改进）：提示词 agent_plan.v1 / agent_act.v1 / agent_reflect.v1 / qa_answer.v1，上限 6 轮 / 12 次工具调用 / 4 万 token，关闭思考，图谱 56be6611 全量。默认配置直接用 P4 的两次 dev 运行，没有重跑。",
+    "每个变体只改一处。全五卷检索 + 每题按 max_reading_order 过滤；作答环节、judge 与默认配置相同。",
+    "去掉全部图谱 = 去掉 find_entity 和 graph_query，原文检索也不再支持按实体限定；去掉图谱查询 = 只去掉 graph_query；图谱范围只用人物 = 图谱工具只能看到人物（含动物）实体及它们之间的关系，由运行环境注入。",
+    "看原始历史 = 行动环节另外看到历次工具返回的原文（总长上限 24000 字，从最近一轮往前保留），反思和笔记照旧，token 上限不变。",
+    "预算低档 = 3 轮 / 6 次调用 / 2 万 token；高档 = 10 轮 / 20 次调用 / 6 万 token。开启思考 = 规划和行动环节开启思考。",
+    "主要变体（去掉全部图谱、去掉摘要、看原始历史）各跑两次，其余各跑一次（P5 方案第五节）。v1 评测集未经人工复核；跨章节题的“部分对”判定是 judge 最不稳的地方（P4：12 条中与人工一致 9 条），所以第 3 节另列含部分对的口径。"
+  ],
+  "default": {"label": "默认配置", "runs": ["p4_agent_dev_s0", "p4_agent_dev_s1"]},
+  "rows": [
+    {"group": "图谱", "label": "去掉图谱查询", "runs": ["p5_abl_nogq_s0"]},
+    {"group": "图谱", "label": "去掉全部图谱", "runs": ["p5_abl_nograph_s0", "p5_abl_nograph_s1"]},
+    {"group": "图谱", "label": "图谱范围只用人物", "runs": ["p5_abl_person_s0"]},
+    {"group": "摘要", "label": "去掉摘要", "runs": ["p5_abl_nosum_s0", "p5_abl_nosum_s1"]},
+    {"group": "记忆", "label": "行动环节看原始历史", "runs": ["p5_abl_raw_s0", "p5_abl_raw_s1"]},
+    {"group": "预算", "label": "预算低档（3 轮 / 6 次 / 2 万）", "runs": ["p5_abl_low_s0"]},
+    {"group": "预算", "label": "预算高档（10 轮 / 20 次 / 6 万）", "runs": ["p5_abl_high_s0"]},
+    {"group": "模型", "label": "开启思考", "runs": ["p5_abl_think_s0"]}
+  ]
+}

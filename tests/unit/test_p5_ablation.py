@@ -250,3 +250,45 @@ def test_gain_source_kinds():
     assert gain_source(rag_full, agent, item, SPANS, REL)["kind"] == "rag_had_evidence"
     blind = _row("correct", [_tool(1, "search_text", shown=["b:0001:0000"])])
     assert gain_source(rag_missing, blind, item, SPANS, REL)["kind"] == "other_evidence"
+
+
+# ---------------------------------------------------------------- 消融表
+
+
+def _abl_run(name, accs, tokens=1000.0):
+    rows = [
+        {"id": f"q{i}", "type": "multihop" if i % 2 else "plot", "label": "correct" if a else "wrong",
+         "termination": "finish", "metrics": {"acc": float(a), "acc_lenient": float(a), "tokens": tokens,
+                                              "llm_calls": 5.0, "tool_calls": 3.0, "ctx_recall": float(a)}}
+        for i, a in enumerate(accs)
+    ]  # fmt: skip
+    return {
+        "dir": name,
+        "rows": rows,
+        "run": {"git": {"commit": "abcdef123456", "dirty": False}, "created": "2026-11-13T10:00:00"},
+    }
+
+
+def test_ablation_table_averages_samples_then_pairs(tmp_path, monkeypatch):
+    from novel_rag.qa import ablation as ab
+
+    runs = {
+        "d0": _abl_run("d0", [1, 1, 1, 0]), "d1": _abl_run("d1", [1, 0, 1, 0]),
+        "v0": _abl_run("v0", [1, 0, 0, 0], tokens=2000.0), "v1": _abl_run("v1", [1, 0, 1, 0], tokens=2000.0),
+    }  # fmt: skip
+    monkeypatch.setattr(ab, "find_run", lambda d, n: n)
+    monkeypatch.setattr(ab, "load_run", lambda n: runs[n])
+    cfg = {"bootstrap_samples": 200, "bootstrap_seed": 1, "ci_level": 0.95}
+    assert ab.per_question([runs["d0"], runs["d1"]], "acc") == {"q0": 1.0, "q1": 0.5, "q2": 1.0, "q3": 0.0}
+    spec = {"title": "t", "default": {"label": "默认", "runs": ["d0", "d1"]},
+            "rows": [{"group": "g", "label": "变体", "runs": ["v0", "v1"]}]}  # fmt: skip
+    t = ab.build_table(spec, tmp_path, cfg)
+    assert t["default"]["groups"]["overall"]["acc"] == 0.625 and t["default"]["sample_acc"] == [0.75, 0.5]
+    row = t["rows"][0]
+    assert row["groups"]["overall"]["acc"] == 0.375
+    assert row["diff"]["overall"]["diff"] == -0.25  # (1,0,0.5,0) − (1,0.5,1,0) 的均值
+    assert row["diff"]["plot"]["diff"] == -0.25 and row["diff"]["multihop"]["diff"] == -0.25
+    assert row["cost_ratio"]["tokens"] == 2.0
+    assert t["noise"][0]["diff"]["overall"]["diff"] == -0.25 and t["noise"][0]["label_agreement"] == 0.75
+    md = ab.render_markdown(t)
+    assert "噪声参照" in md and "变体" in md and "2.00×" in md
