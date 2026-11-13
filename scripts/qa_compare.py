@@ -259,7 +259,7 @@ def main() -> int:
     # ---- 7. 失败分类与工具使用
     if agents:
         env = load_env(s, tuple(meta[agents[0]]["scope"]))
-        items = {i.id: i for i in load_dataset(s.paths.datasets_dir / args.dataset, s.paths.books_dir, split=split)}
+        items = {i.id: i for i in load_dataset(s.paths.datasets_dir / args.dataset, s.paths.books_dir, split=None if split == "all" else split)}  # noqa: E501
         rel = {"min_ratio": e.relevance_min_ratio, "min_chars": e.relevance_min_chars}
         ft = failure_table(R[agents[0]], items, env.spans, rel)
         out["failures"] = {k: v for k, v in ft.items() if k != "per_question"}

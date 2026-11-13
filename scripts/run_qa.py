@@ -58,7 +58,7 @@ def main() -> int:
     parser.add_argument("--system", required=True, choices=["closed", "rag", "graphrag", "agent"])
     parser.add_argument("--name", required=True)
     parser.add_argument("--dataset", default="asoiaf_v1")
-    parser.add_argument("--split", choices=["dev", "test"], default="dev")
+    parser.add_argument("--split", choices=["dev", "test", "all"], default="dev", help="all = dev + test（v0 佐证用）")
     parser.add_argument("--confirm-test", action="store_true", help="确认要跑 test（配置冻结后只跑一次）")
     parser.add_argument("--sample", type=int, default=0, help="采样编号（参与 LLM 缓存键）")
     parser.add_argument("--concurrency", type=int, default=4)
@@ -78,10 +78,10 @@ def main() -> int:
     parser.add_argument("--act-memory", choices=["notes", "raw"], default="notes", help="行动环节的记忆模式")
     args = parser.parse_args()
 
-    if args.split == "test" and not args.confirm_test:
+    if args.split != "dev" and not args.confirm_test:
         print("test 只在配置冻结后跑一次；确认要跑请加 --confirm-test", file=sys.stderr)
         return 2
-    if args.split == "test" and (args.smoke or args.latency_sample or args.ids or args.limit):
+    if args.split != "dev" and (args.smoke or args.latency_sample or args.ids or args.limit):
         print("test 不支持子集运行（避免反复查看 test 结果）", file=sys.stderr)
         return 2
 
@@ -106,7 +106,7 @@ def main() -> int:
         s = s.model_copy(update={"tools": s.tools.model_copy(update={"graph_scope_entity_types": ("Person",)})})
     ds_dir = s.paths.datasets_dir / args.dataset
     manifest = DatasetManifest.model_validate_json((ds_dir / "manifest.json").read_text(encoding="utf-8"))
-    items = load_dataset(ds_dir, s.paths.books_dir, split=args.split)
+    items = load_dataset(ds_dir, s.paths.books_dir, split=None if args.split == "all" else args.split)
     subset = None
     if args.smoke:
         items, subset = smoke_subset(items), "smoke"
@@ -180,10 +180,10 @@ def main() -> int:
         "config": s.snapshot(),
     }  # fmt: skip
     write_qa_run(out, run, metrics, rows)
-    if args.split == "test":  # test 运行台账：只追加，不含逐题结果
+    if args.split != "dev":  # test 运行台账：只追加，不含逐题结果
         ledger = {"dir": out_name, "created": run["created"], "system": args.system, "sample": args.sample,
-                  "dataset": args.dataset, "commit": run["git"]["commit"], "dirty": run["git"]["dirty"],
-                  "n_items": len(items), "acc": metrics["overall"].get("acc")}  # fmt: skip
+                  "dataset": args.dataset, "split": args.split, "commit": run["git"]["commit"],
+                  "dirty": run["git"]["dirty"], "n_items": len(items), "acc": metrics["overall"].get("acc")}  # fmt: skip
         with (s.paths.results_dir / "test_runs.jsonl").open("a", encoding="utf-8", newline="") as f:
             f.write(json.dumps(ledger, ensure_ascii=False) + "\n")
     print((out / "summary.md").read_text(encoding="utf-8"))
