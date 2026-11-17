@@ -350,6 +350,7 @@
     - 版权自查（`scripts/copyright_scan.py`，与原文连续重合 ≥ 30 字）：10 个已入库的 Agent 结果文件中有 22 处 Agent 自己写的检索语句照抄原文短句（30–52 字），其他文件和历史中没有别的命中。**用户决定（2026-11-17）：只处理当前文件、不改写历史**——替换为“[…]”（每处只改一行），`run_qa` 写结果前自动做同样处理（`eval/redact.py`）。
     - 密钥：`.env` 从未入库；真实的 Neo4j 密码不在任何提交里；历史中唯一与 `.env` 相同的“LLM key”是 `.env.example` 里的公开占位值（本地代理不校验 key）；87 份配置快照的密钥字段都已打码。
     - MIT 许可证（KyGosh，2026，只针对代码）；CI（GitHub Actions：ruff + 单测，不装 gpu 依赖组）。依赖：torch、FlagEmbedding 移入默认安装的 `gpu` 依赖组，matplotlib 为开发依赖。
+  - **复现演练（2026-11-17）**：在临时目录全新克隆本分支，按 README 安装：只装 dev 组（与 CI 相同，不含 torch / FlagEmbedding）时 ruff 通过、单测 347 个通过；全量安装后连接现有容器跑 `check_env.py` 7/7 通过；把数据目录指向本机已有的 `data/`、关闭 LLM 代理地址，从缓存回放 Agent 冒烟子集，与 P4 第一次 dev 运行 24 题逐题完全一致。演练中发现 CI 的问题：`uv run` 会按默认依赖组重新同步、把 gpu 组装回来，CI 已加 `UV_NO_SYNC=1`。没有从零重建图谱（需要数小时的模型调用）。
   - **A 对外材料**：README 重写（`scripts/make_readme.py` 生成表格、数字和两张图，`--check` 校验一致）；`docs/interview.md`（本地，不入库）；design-notes、CLAUDE.md 与本文件按最终状态整理。
 
 ## 历史记录

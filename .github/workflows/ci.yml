@@ -8,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      # uv run 默认会按默认依赖组（含 gpu 组）重新同步；CI 只装 dev 组，所以禁止自动同步
+      UV_NO_SYNC: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
