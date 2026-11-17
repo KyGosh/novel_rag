@@ -9,6 +9,12 @@
     uv run python scripts/run_qa.py --system agent    --name smoke --smoke                 # 冒烟子集（每类 6 题）
     uv run python scripts/run_qa.py --system agent    --name lat --latency-sample 30 --concurrency 1 --no-cache
     uv run python scripts/run_qa.py --system agent    --name no_graph --drop-tools find_entity,graph_query
+    uv run python scripts/run_qa.py --system cascade  --route-signal verify --route-dry --name p6_route_verify
+    uv run python scripts/run_qa.py --system cascade  --route-signal selfcheck --sample 1 --name p6_cascade_s1
+
+P6 按需升级（--system cascade）：先走固定 RAG，--route-signal 判断证据是否充分（rules / selfcheck / verify，
+见 qa/route.py），不充分才升级到 Agent（从头开始，行为与单独运行 Agent 相同）。--route-dry 只做第一阶段和路由、
+从不升级（可行性验证）。--sequential-tools：Agent 同一轮的工具调用逐个执行（P4 / P5 的执行方式，延迟对比用）。
 
 P5 消融开关（只对 Agent 生效）：
     --no-graph                去掉全部图谱：去掉 find_entity / graph_query，原文检索也不再支持按实体限定
@@ -55,7 +61,7 @@ def latency_subset(items: list[EvalItem], n: int, seed: str = "p4-latency") -> l
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--system", required=True, choices=["closed", "rag", "graphrag", "agent"])
+    parser.add_argument("--system", required=True, choices=["closed", "rag", "graphrag", "agent", "cascade"])
     parser.add_argument("--name", required=True)
     parser.add_argument("--dataset", default="asoiaf_v1")
     parser.add_argument("--split", choices=["dev", "test", "all"], default="dev", help="all = dev + test（v0 佐证用）")
@@ -76,6 +82,9 @@ def main() -> int:
     parser.add_argument("--no-graph", action="store_true", help="Agent 去掉全部图谱（含按实体限定的检索）")
     parser.add_argument("--graph-scope", choices=["all", "person"], default="all", help="图谱工具的实体范围")
     parser.add_argument("--act-memory", choices=["notes", "raw"], default="notes", help="行动环节的记忆模式")
+    parser.add_argument("--route-signal", choices=["rules", "selfcheck", "verify"], help="按需升级的路由信号")
+    parser.add_argument("--route-dry", action="store_true", help="按需升级只做第一阶段和路由，从不升级")
+    parser.add_argument("--sequential-tools", action="store_true", help="Agent 同一轮的工具调用逐个执行")
     args = parser.parse_args()
 
     if args.split != "dev" and not args.confirm_test:
@@ -85,11 +94,15 @@ def main() -> int:
         print("test 不支持子集运行（避免反复查看 test 结果）", file=sys.stderr)
         return 2
 
+    if args.system == "cascade" and not args.route_signal:
+        print("--system cascade 需要 --route-signal", file=sys.stderr)
+        return 2
     if args.no_cache:
         os.environ["LLM__CACHE_ENABLED"] = "false"
     from novel_rag.config import get_settings
     from novel_rag.eval.runner import dataset_fingerprint, git_info
     from novel_rag.llm import get_chat_model, get_token_counter
+    from novel_rag.qa.answer import AnswerOutput
     from novel_rag.qa.env import load_env
     from novel_rag.qa.runner import results_dir_name, run_qa_eval, summarize, write_qa_run
     from novel_rag.qa.systems import ClosedBookSystem, FixedRAGSystem
@@ -98,7 +111,8 @@ def main() -> int:
     s = get_settings()
     agent_over = {k: v for k, v in {"max_rounds": args.max_rounds, "max_tool_calls": args.max_tool_calls,
                                     "max_tokens": args.max_tokens, "thinking": True if args.thinking else None,
-                                    "act_memory": "raw" if args.act_memory == "raw" else None}.items()
+                                    "act_memory": "raw" if args.act_memory == "raw" else None,
+                                    "parallel_tools": False if args.sequential_tools else None}.items()
                   if v is not None}  # fmt: skip
     if agent_over:
         s = s.model_copy(update={"agent": s.agent.model_copy(update=agent_over)})
@@ -144,13 +158,29 @@ def main() -> int:
         from novel_rag.agent.system import AgentSystem
         from novel_rag.tools import Toolbox
 
-        b = build_backends(s, scope, env.chunks, env.titles)
+        light = args.system == "cascade" and args.route_dry  # 只做第一阶段，不需要图谱和摘要
+        b = build_backends(s, scope, env.chunks, env.titles, with_graph=not light, with_summaries=not light)
         tb = Toolbox(b)
         if args.no_graph:
             tb = tb.without_graph()
         if args.drop_tools:
             tb = tb.without(*[x.strip() for x in args.drop_tools.split(",")])
-        system = AgentSystem(tb, s, scope=scope, count_tokens=n_tokens)
+        system = None if light else AgentSystem(tb, s, scope=scope, count_tokens=n_tokens)
+        if args.system == "cascade":
+            from novel_rag.prompts import load_prompt
+            from novel_rag.qa.route import CascadeSystem, SelfCheckAnswer
+
+            selfcheck = args.route_signal == "selfcheck"
+            rag = FixedRAGSystem(  # 与 --system rag 同一实现、同一后端（共用 GPU 锁）
+                "rag", b, answer_chat, n_tokens, scope=scope, top_k=s.answer.fixed_top_k, pool=s.eval.context_pool,
+                budget=s.answer.context_token_budget, abstain=abstain,
+                answer_prompt=load_prompt("qa_answer_selfcheck") if selfcheck else None,
+                answer_schema=SelfCheckAnswer if selfcheck else AnswerOutput,
+            )  # fmt: skip
+            system = CascadeSystem(
+                rag, system, signal=args.route_signal, dry=args.route_dry,
+                check_chat=get_chat_model("route_check") if args.route_signal == "verify" else None,
+            )  # fmt: skip
 
     out_name = results_dir_name(args.name)
     out = s.paths.results_dir / out_name
@@ -160,6 +190,11 @@ def main() -> int:
         count_tokens=n_tokens, chunk_text=lambda c: env.chunks.by_id(c)["text"],
     )  # fmt: skip
     metrics = summarize(rows, s)
+    # 结果入库前的版权处理：字符串里与原文连续重合 ≥ 30 字的片段替换成"[…]"（P6；Agent 的检索语句偶尔照抄原文）
+    from novel_rag.eval.redact import RedactIndex
+
+    ri = RedactIndex((s.paths.books_dir / b / "text.txt").read_text(encoding="utf-8") for b in scope)
+    rows = [ri.redact_obj(r) for r in rows]
     run = {
         "name": args.name,
         "created": datetime.now().isoformat(timespec="seconds"),
@@ -168,7 +203,8 @@ def main() -> int:
                     "fingerprint": dataset_fingerprint(ds_dir), "ids": [i.id for i in items] if subset else None},
         "system": system.describe(),
         "variant": {"no_graph": args.no_graph, "drop_tools": args.drop_tools, "graph_scope": args.graph_scope,
-                    "act_memory": args.act_memory, "thinking": args.thinking},
+                    "act_memory": args.act_memory, "thinking": args.thinking, "route_signal": args.route_signal,
+                    "route_dry": args.route_dry, "parallel_tools": s.agent.parallel_tools},
         "sample": args.sample,
         "concurrency": args.concurrency,
         "llm_cache": not args.no_cache,
@@ -176,6 +212,7 @@ def main() -> int:
         "scope": list(scope),
         "chunk_version": env.chunk_version,
         "spoiler_filter": True,
+        "redacted_spans": ri.count,
         "trace_dir": str(Path("data") / "traces" / out_name),
         "config": s.snapshot(),
     }  # fmt: skip

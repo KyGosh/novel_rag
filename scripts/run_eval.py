@@ -8,7 +8,6 @@ bootstrap 置信区间与分阶段延迟，结果落盘到 eval/results/。
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name hybrid_k20 --no-rerank --rrf-k 20
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name final --split test             # 跑 test 要显式指定
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name stress --scope all             # 设置 B：全部已索引的卷
-    uv run python scripts/run_eval.py --dataset asoiaf_v0 --name gen --generate                 # 顺带生成答案供抽查
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name sum_route --routes bm25,vector,summary_locate
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name sum_restrict --summary-restrict 5
     uv run python scripts/run_eval.py --dataset asoiaf_v0 --name graph3 --routes bm25,vector,graph
@@ -22,7 +21,6 @@ bootstrap 置信区间与分阶段延迟，结果落盘到 eval/results/。
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from datetime import datetime
 from functools import lru_cache
@@ -33,9 +31,8 @@ from novel_rag.corpus import BookText
 from novel_rag.eval.dataset import DatasetManifest, load_dataset
 from novel_rag.eval.metrics import Span
 from novel_rag.eval.runner import dataset_fingerprint, git_info, run_retrieval_eval, write_run
-from novel_rag.generation.simple import answer
 from novel_rag.ingestion.chunking import chunk_version, chunks_dir, load_chunks
-from novel_rag.llm import get_chat_model, get_token_counter
+from novel_rag.llm import get_token_counter
 from novel_rag.retrieval.expand import ChunkIndex, expand_hits
 from novel_rag.retrieval.factory import build_retriever
 from novel_rag.retrieval.filters import SearchFilter
@@ -83,7 +80,6 @@ def main() -> int:
     )  # fmt: skip
     parser.add_argument("--scope", help="检索范围：逗号分隔的 book_id，或 all；默认为评测集涉及的卷")
     parser.add_argument("--spoiler-filter", action="store_true", help="用每题的 max_reading_order 过滤检索范围")
-    parser.add_argument("--generate", action="store_true", help="对每题调用生成模型作答（消耗 LLM 调用，有缓存）")
     parser.add_argument("--limit", type=int, help="只跑前 N 题（调试用）")
     args = parser.parse_args()
 
@@ -161,12 +157,6 @@ def main() -> int:
     def expander(hits, flt: SearchFilter):
         return expand_hits(hits, index, rc.expand_window, flt)
 
-    generator = None
-    if args.generate:
-        chat = get_chat_model("generation")
-        k = s.eval.generate_top_k
-        generator = lambda item, hits: answer(item.question, hits[:k], chat, book_titles=titles)  # noqa: E731
-
     rows, metrics = run_retrieval_eval(
         items,
         retriever,
@@ -174,7 +164,6 @@ def main() -> int:
         s,
         base_filter=SearchFilter(book_ids=scope),
         spoiler_filter=args.spoiler_filter,
-        generator=generator,
         expander=expander,
         count_tokens=lambda c: n_tokens(c.text),
     )
@@ -199,7 +188,6 @@ def main() -> int:
         "spoiler_filter": args.spoiler_filter,
         "relevance": {"min_ratio": s.eval.relevance_min_ratio, "min_chars": s.eval.relevance_min_chars},
         "ks": list(s.eval.ks),
-        "generate": args.generate,
         "overrides": {
             **overrides,
             **summary_overrides,
@@ -213,8 +201,6 @@ def main() -> int:
     out = write_run(s.paths.results_dir, args.name, run, metrics, rows, s.eval.ks)
     print((out / "summary.md").read_text(encoding="utf-8"))
     print(f"结果目录：{out}")
-    if args.generate:
-        print(json.dumps({"generated": len(rows)}, ensure_ascii=False))
     return 0
 
 

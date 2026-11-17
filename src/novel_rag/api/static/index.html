@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小说问答演示</title>
+<style>
+:root {
+  --bg: #f6f5f2; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e4e2dc;
+  --accent: #2f5d8a; --accent-soft: #e6eef6; --ok: #2e7d4f; --bad: #b3412e; --warn: #9a6a12;
+  --quote: #f3f1ea; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a; --panel: #212225; --ink: #ececee; --muted: #9a9aa2; --line: #34353a;
+    --accent: #8cb4dc; --accent-soft: #263445; --ok: #6cc08f; --bad: #e98a76; --warn: #d9b062;
+    --quote: #2a2b2f; --shadow: none;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+header { padding: 28px 16px 8px; max-width: 1180px; margin: 0 auto; }
+header h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 48px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+form.card { padding: 16px; display: grid; gap: 12px; }
+textarea { width: 100%; min-height: 64px; resize: vertical; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; }
+.row { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
+.label { color: var(--muted); font-size: 13px; margin-right: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg label { padding: 6px 12px; cursor: pointer; font-size: 14px; border-right: 1px solid var(--line); user-select: none; }
+.seg label:last-child { border-right: 0; }
+.seg input { display: none; }
+.seg input:checked + span { color: var(--accent); font-weight: 600; }
+.seg label:has(input:checked) { background: var(--accent-soft); }
+select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 14px; max-width: 240px; }
+button { padding: 8px 22px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font: inherit;
+  font-weight: 600; cursor: pointer; }
+@media (prefers-color-scheme: dark) { button { color: #10161d; } }
+button:disabled { opacity: .5; cursor: default; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+section.card { padding: 14px 16px; min-height: 120px; }
+section h2 { font-size: 14px; margin: 0 0 10px; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; }
+#timer { font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: 14px; }
+ol.tl { list-style: none; margin: 0; padding: 0; }
+ol.tl > li { position: relative; padding: 0 0 12px 22px; border-left: 2px solid var(--line); margin-left: 6px; }
+ol.tl > li:last-child { border-left-color: transparent; }
+ol.tl > li::before { content: ""; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--panel); border: 2px solid var(--accent); }
+ol.tl > li.k-tool::before, ol.tl > li.k-note::before { width: 8px; height: 8px; left: -5px; top: 7px; border-width: 2px; }
+ol.tl > li.bad::before { border-color: var(--bad); }
+.t-head { font-weight: 600; font-size: 14px; }
+.t-head small { font-weight: 400; color: var(--muted); margin-left: 6px; }
+.t-body { font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
+.t-body .muted { color: var(--muted); }
+code { font: 12.5px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; background: var(--quote); padding: 1px 5px;
+  border-radius: 4px; overflow-wrap: anywhere; }
+.note { margin: 4px 0 0; padding: 6px 10px; background: var(--quote); border-radius: 6px; font-size: 13.5px; }
+.note .where { color: var(--muted); font-size: 12px; }
+.ok { color: var(--ok); } .bad-t { color: var(--bad); } .warn { color: var(--warn); }
+#answer .ans { font-size: 20px; font-weight: 700; margin: 2px 0 6px; }
+#answer .abst { color: var(--warn); }
+#answer .why { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+.cites { margin: 0; padding-left: 18px; font-size: 13.5px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; margin-top: 14px; }
+.stat { background: var(--quote); border-radius: 8px; padding: 6px 10px; }
+.stat b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.progress { font-size: 13px; color: var(--muted); margin-top: 6px; }
+footer { color: var(--muted); font-size: 12px; text-align: center; padding: 0 16px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>长篇小说跨章节问答 · 本地演示</h1>
+  <p>混合检索 + 知识图谱工具 + 多轮检索规划。原文只在本机处理，页面只显示短引文和“卷名 · 章节”引用。</p>
+</header>
+<main>
+  <form class="card" id="f">
+    <textarea id="q" maxlength="200" placeholder="输入关于这部小说的问题，可以是需要多步推理或跨章节的问题" required></textarea>
+    <div class="row">
+      <div><span class="label">模式</span><span class="seg" id="modes"><label><span class="label">加载中……</span></label></span></div>
+      <div><span class="label">阅读进度</span>
+        <select id="vol" aria-label="卷"><option value="">全部（不限）</option></select>
+        <select id="chap" aria-label="章" disabled><option value="">读完本卷</option></select>
+      </div>
+      <button id="go" type="submit">提问</button>
+    </div>
+  </form>
+  <div class="grid">
+    <section class="card"><h2><span>检索过程</span><span id="timer"></span></h2>
+      <div id="tl"><p class="empty">提问后，这里实时显示规划、工具调用和新增的证据笔记。</p></div></section>
+    <section class="card" id="answer"><h2><span>答案</span></h2><p class="empty">—</p></section>
+  </div>
+</main>
+<footer>本地单用户演示 · 不对外提供服务</footer>
+<script>
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+let VOLS = [], es = null, t0 = 0, tick = null, tlList = null;
+
+fetch("/api/meta").then(r => r.json()).then(m => {
+  const modes = $("#modes"); modes.replaceChildren();
+  m.modes.forEach(md => {
+    const l = el("label"); const i = el("input"); i.type = "radio"; i.name = "mode"; i.value = md.id;
+    if (md.id === m.default_mode) i.checked = true;
+    l.append(i, el("span", null, md.name)); modes.append(l);
+  });
+  VOLS = m.volumes;
+  VOLS.forEach((v, k) => { const o = el("option", null, `第 ${k + 1} 卷《${v.title}》`); o.value = v.book_id; $("#vol").append(o); });
+}).catch(() => { $("#tl").replaceChildren(el("p", "empty bad-t", "无法读取 /api/meta：服务没有启动？")); });
+
+$("#vol").addEventListener("change", () => {
+  const c = $("#chap"); c.replaceChildren(el("option", null, "读完本卷")); c.firstChild.value = "";
+  const v = VOLS.find(x => x.book_id === $("#vol").value);
+  c.disabled = !v;
+  if (v) v.chapters.forEach(ch => { const o = el("option", null, `读到 ${ch.idx}：${ch.title || "第" + ch.idx + "章"}`); o.value = ch.idx; c.append(o); });
+});
+
+function args(a) {
+  if (!a || typeof a !== "object") return "（参数无效）";
+  return Object.entries(a).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ");
+}
+function addItem(kind, head, small, bad) {
+  const li = el("li", "k-" + kind + (bad ? " bad" : ""));
+  const h = el("div", "t-head", head); if (small) h.append(el("small", null, small));
+  li.append(h); const body = el("div", "t-body"); li.append(body); tlList.append(li);
+  return body;
+}
+const secs = (ms) => ms == null ? "" : `${(ms / 1000).toFixed(1)} s`;
+
+function onStep(e) {
+  switch (e.type) {
+    case "start": addItem("start", "开始", e.progress); break;
+    case "plan": addItem("plan", "规划", secs(e.latency_ms)).append(el("div", null, e.plan)); break;
+    case "retrieve": { const b = addItem("retrieve", "固定检索", `${e.chunks.length} 段 · ${secs(e.latency_ms)}`);
+      b.append(el("div", "muted", e.chunks.map(c => c.where).join("；"))); break; }
+    case "answer": addItem("answer", "作答", e.citations.length ? `引用 ${e.citations.length} 段` : "")
+      .append(el("div", e.abstained ? "warn" : null, e.answer)); break;
+    case "route": { const b = addItem("route", "证据核对", secs(e.latency_ms), e.escalate);
+      b.append(el("div", e.escalate ? "warn" : "ok", e.escalate ? `证据不足，升级到 Agent（${e.reason}）` : "证据充分，直接返回"));
+      (e.parts || []).forEach(p => b.append(el("div", p.supported ? "ok" : "bad-t", `${p.supported ? "✓" : "✗"} ${p.part}`)));
+      break; }
+    case "act": {
+      if (e.calls.length) { const b = addItem("act", `第 ${e.round} 轮 · 行动`, secs(e.latency_ms));
+        e.calls.forEach(c => { const d = el("div"); d.append("→ ", el("code", null, `${c.tool}(${args(c.args)})`)); b.append(d); }); }
+      if (e.finish) addItem("act", `第 ${e.round} 轮 · 结束检索`, secs(e.latency_ms));
+      break; }
+    case "tool": { const b = addItem("tool", `${e.ok ? "✓" : "✗"} ${e.tool}`, secs(e.latency_ms), !e.ok);
+      b.append(el("div", "muted", e.overview)); break; }
+    case "reflect": {
+      if (e.error) { addItem("note", "反思：跳过", e.error, true); break; }
+      const b = addItem("note", `反思 · 新增 ${e.added.length} 条笔记`, (e.sufficient ? "证据已充分 · " : "") + secs(e.latency_ms));
+      e.added.forEach(n => { const d = el("div", "note"); d.append(el("div", null, n.claim));
+        if (n.quote) d.append(el("div", "muted", `“${n.quote}”`)); d.append(el("div", "where", n.where)); b.append(d); });
+      if (e.status) b.append(el("div", "muted", "现状：" + e.status));
+      break; }
+    case "stop": addItem("stop", "触及上限", e.termination, true); break;
+  }
+}
+
+function showResult(r) {
+  const box = $("#answer"); box.replaceChildren(el("h2", null, "答案"));
+  box.append(el("div", "ans" + (r.abstained ? " abst" : ""), r.answer || "（空）"));
+  if (r.rationale) box.append(el("div", "why", r.rationale));
+  if (r.citations.length) { const ul = el("ol", "cites");
+    r.citations.forEach(c => { const li = el("li", null, c.where + " "); li.append(el("code", null, c.chunk_id)); ul.append(li); });
+    box.append(el("div", "label", "引用"), ul); }
+  const c = r.cost || {}, lat = r.latency_ms || {};
+  const tokens = (c.prompt_tokens || 0) + (c.completion_tokens || 0);
+  const stats = el("div", "stats");
+  const add = (v, k) => { const s = el("div", "stat"); s.append(el("b", null, v), el("span", null, k)); stats.append(s); };
+  add(secs(lat.total), "耗时"); add(String(c.llm_calls ?? "—"), "LLM 调用"); add(String(c.tool_calls ?? "—"), "工具调用");
+  add(tokens.toLocaleString(), "token");
+  if (r.route) add(r.route.escalate ? "已升级" : "未升级", "按需升级");
+  box.append(stats, el("div", "progress", `${r.mode_name} · ${r.progress}`));
+}
+
+$("#f").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  const q = $("#q").value.trim(); if (!q) return;
+  if (es) es.close();
+  const p = new URLSearchParams({ q, mode: $("#modes input:checked").value });
+  if ($("#vol").value) { p.set("volume", $("#vol").value); if ($("#chap").value !== "") p.set("chapter", $("#chap").value); }
+  tlList = el("ol", "tl"); $("#tl").replaceChildren(tlList);
+  $("#answer").replaceChildren(el("h2", null, "答案"), el("p", "empty", "正在检索……"));
+  $("#go").disabled = true; t0 = performance.now(); clearInterval(tick);
+  tick = setInterval(() => { $("#timer").textContent = ((performance.now() - t0) / 1000).toFixed(1) + " s"; }, 100);
+  const done = () => { es.close(); clearInterval(tick); $("#go").disabled = false; };
+  es = new EventSource("/api/ask?" + p.toString());
+  es.addEventListener("step", (m) => onStep(JSON.parse(m.data)));
+  es.addEventListener("result", (m) => { done(); showResult(JSON.parse(m.data)); });
+  es.addEventListener("error", (m) => {
+    done();
+    const msg = m.data ? JSON.parse(m.data).message : "连接中断";
+    $("#answer").replaceChildren(el("h2", null, "答案"), el("p", "bad-t", "出错：" + msg));
+  });
+});
+</script>
+</body>
+</html>

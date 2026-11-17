@@ -4,7 +4,7 @@
 import pytest
 
 from novel_rag.config import get_settings
-from novel_rag.tools import ToolContext, Toolbox, build_backends
+from novel_rag.tools import Toolbox, ToolContext, build_backends
 
 pytestmark = pytest.mark.integration
 

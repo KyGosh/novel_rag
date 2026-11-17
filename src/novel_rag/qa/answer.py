@@ -102,13 +102,16 @@ def answer_question(
     allowed_citations: set[str] | None,
     abstain: str,
     prompt: Prompt | None = None,
+    schema: type[AnswerOutput] = AnswerOutput,
     sample: int = 0,
 ) -> dict[str, Any]:
-    """返回不含原文的结构化结果（answer / rationale / citations / 计数 / 用量）。"""
+    """返回不含原文的结构化结果（answer / rationale / citations / 计数 / 用量）。
+
+    schema 可以是 AnswerOutput 的子类（P6 按需升级的作答自评），多出的字段放进结果的 extra。"""
     prompt = prompt or load_prompt("qa_answer")
     msgs = build_messages(prompt, question, context, abstain)
     try:
-        res = chat.chat(msgs, schema=AnswerOutput, prompt_version=prompt.version_id, sample=sample)
+        res = chat.chat(msgs, schema=schema, prompt_version=prompt.version_id, sample=sample)
         out: AnswerOutput = res.parsed  # type: ignore[assignment]
         usage, cached, error = res.usage, res.cached, None
     except StructuredOutputError as e:
@@ -118,7 +121,11 @@ def answer_question(
     allowed = allowed_citations if allowed_citations is not None else set()
     valid = [c for c in cited if c in allowed]
     abstained = is_abstain(out.answer, abstain)
+    extra = {k: v for k, v in out.model_dump().items() if k not in AnswerOutput.model_fields}
+    if schema is not AnswerOutput:  # 默认 schema 的结果与 P4 / P5 完全相同（不加 extra 键）
+        extra = {k: None for k in schema.model_fields if k not in AnswerOutput.model_fields} | extra
     return {
+        **({"extra": extra} if schema is not AnswerOutput else {}),
         "answer": out.answer.strip(),
         "rationale": out.rationale.strip(),
         "abstained": abstained,

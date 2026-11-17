@@ -65,7 +65,7 @@ def test_happy_path_plan_act_execute_reflect_answer():
     assert rec["cost"]["llm_calls"] == 5 and rec["cost"]["tool_calls"] == 1  # 规划 + 2 次行动 + 反思 + 作答
     assert rec["agent"]["note_sources"] == {"demo-1:0002:0000": ["search_text"]}
     steps = [st["step"] for st in out.trace["trace"]]
-    assert steps == ["plan", "act", "tool", "reflect", "act"]
+    assert steps == ["plan", "act", "tool", "execute", "reflect", "act"]
     # trace 摘要不含原文；完整 trace 含观察原文
     assert "observation" not in json.dumps(rec["agent"]["trace"], ensure_ascii=False)
     assert "柳月给白狐取名雪团" in out.trace["trace"][2]["observation"]
@@ -194,3 +194,86 @@ def test_token_limit_is_predictive_from_last_round_cost():
     rec = sysm.run(item()).record
     assert rec["termination"] == "limit_tokens" and rec["agent"]["rounds"] == 2
     assert rec["cost"]["loop_tokens"] <= 6000
+
+
+# ---------------------------------------------------------------- P6：并行执行工具、事件回调
+
+
+def _multi_call_script():
+    calls = Call((
+        ("search_text", {"query": "白狐 取名"}),
+        ("no_such_tool", {}),
+        ("read_text", {"chunk_id": "demo-1:0002:0000", "after": 1}),
+        ("search_text", {"query": "石峰"}),
+        ("search_text", {"query": "多出来的一次"}),
+    ))  # fmt: skip
+    return {
+        PLAN: [Say("p")], ACT: [calls, Call.one("finish", {"reason": "x"})],
+        REFLECT: [reflect([{"claim": "白狐叫雪团", "chunk_id": "demo-1:0002:0000", "quote": "取名"}])],
+        ANSWER: [answer("雪团", ["demo-1:0002:0000"])],
+    }  # fmt: skip
+
+
+def _strip_latency(obj):
+    if isinstance(obj, dict):
+        drop = ("latency_ms", "wall_ms", "latency", "parallel")
+        return {k: _strip_latency(v) for k, v in obj.items() if k not in drop}
+    if isinstance(obj, list):
+        return [_strip_latency(v) for v in obj]
+    return obj
+
+
+def test_parallel_tools_give_identical_record_and_prompts_as_sequential():
+    outs = {}
+    for par in (False, True):
+        sysm, m = system(_multi_call_script(), parallel_tools=par, max_calls_per_round=4)
+        out = sysm.run(item())
+        outs[par] = (_strip_latency(out.record), [h["messages"] for h in m.history])
+    assert outs[False] == outs[True]
+    rec = outs[True][0]
+    assert rec["agent"]["dropped_calls"] == 1 and rec["cost"]["tool_calls"] == 4
+    tools = [st["tool"] for st in rec["agent"]["trace"] if st["step"] == "tool"]
+    assert tools == ["search_text", "no_such_tool", "read_text", "search_text"]  # 原顺序
+
+
+def test_parallel_tools_really_run_concurrently(monkeypatch):
+    import threading
+
+    barrier = threading.Barrier(2, timeout=5)
+    orig = Toolbox.call
+
+    def call(self, name, args, ctx, **kw):
+        barrier.wait()  # 两个调用必须同时在途，否则超时报错
+        return orig(self, name, args, ctx, **kw)
+
+    monkeypatch.setattr(Toolbox, "call", call)
+    two = Call((("search_text", {"query": "白狐"}), ("read_text", {"chunk_id": "demo-1:0002:0000"})))
+    sysm, _ = system({PLAN: [Say("p")], ACT: [two, Call.one("finish", {"reason": "x"})], REFLECT: [reflect([])],
+                      ANSWER: [answer("原文未提及", [])]}, parallel_tools=True)  # fmt: skip
+    rec = sysm.run(item()).record
+    assert rec["cost"]["tool_calls"] == 2 and not rec["agent"]["tool_errors"]
+    ex = next(st for st in rec["agent"]["trace"] if st["step"] == "execute")
+    assert ex["parallel"] and ex["n"] == 2 and "tools_wall" in rec["latency_ms"]
+
+
+def test_events_follow_the_loop_and_callback_errors_are_ignored():
+    events = []
+    sysm, _ = system(_multi_call_script())
+    sysm.run(item(), on_event=events.append)
+    types = [e["type"] for e in events]
+    assert types == ["plan", "act", "tool", "tool", "tool", "tool", "reflect", "act", "answer"]
+    act = events[1]
+    assert act["round"] == 1 and len(act["calls"]) == 5 and not act["finish"]
+    assert [e["tool"] for e in events if e["type"] == "tool"] == ["search_text", "no_such_tool", "read_text",
+                                                                    "search_text"]  # fmt: skip
+    note = events[6]["added"][0]
+    assert note["chunk_id"] == "demo-1:0002:0000" and note["where"] == "北岭记 · 柳月" and note["claim"] == "白狐叫雪团"
+    ans = events[-1]
+    assert ans["answer"] == "雪团" and ans["citations"] == [{"chunk_id": "demo-1:0002:0000", "where": "北岭记 · 柳月"}]
+    assert events[7]["finish"] and ans["cost"]["llm_calls"] == 5  # 规划 + 2 次行动 + 反思 + 作答
+
+    def boom(e):
+        raise RuntimeError("回调坏了")
+
+    sysm2, _ = system(_multi_call_script())
+    assert sysm2.run(item(), on_event=boom).record["answer"]["answer"] == "雪团"
