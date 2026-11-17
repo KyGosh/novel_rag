@@ -1,0 +1,20 @@
+{
+  "git": {
+    "commit": "2526357ad9ba4b9184176826da6feb36f0123ba0",
+    "branch": "p6-perf-demo",
+    "dirty": true
+  },
+  "reranker": {
+    "model_name": "BAAI/bge-reranker-v2-m3",
+    "max_length": 1024,
+    "batch_size": 16,
+    "device": "cuda",
+    "fp16": true
+  },
+  "candidates": 40,
+  "gaps_s": [
+    0.0,
+    0.5,
+    2.0
+  ]
+}

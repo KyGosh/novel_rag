@@ -127,10 +127,20 @@ def block_latency(lat: dict[str, Any] | None) -> str:
                 lines.append(
                     f"| {names[k]} | {st[k]['per_q']:.2f} | {st[k]['ms'] / 1000:.2f} s | {st[k]['per_q'] * st[k]['ms'] / 1000:.1f} s |"
                 )
+    agents = [v for v in lat["systems"].values() if "stages" in v]
+    if len(agents) == 2:
+        a, b = agents
+        lines += ["", f"两次 Agent 测量（工具逐个 / 并行执行）端到端的差别来自关闭缓存后两次的轨迹不同（每题 LLM 调用 {a['llm_calls']:.1f} / "
+                  f"{b['llm_calls']:.1f} 次），不是执行方式的效果；执行方式本身的影响用下面的缓存回放配对比较。"]  # fmt: skip
     if "replay" in lat:
         r = lat["replay"]
         lines += ["", f"同一轮内的工具调用改为并行执行：缓存回放下（轨迹完全相同）每题工具墙钟时间 {r['seq_tools_wall_ms'] / 1000:.2f} s → "
                   f"{r['par_tools_wall_ms'] / 1000:.2f} s，没有可测的收益——检索时间主要是 GPU 上的编码和 rerank，单卡上只能串行。"]  # fmt: skip
+    if "rerank_gap" in lat:
+        g = lat["rerank_gap"]["results"]
+        k0, k2 = min(g, key=float), max(g, key=float)
+        lines += ["", f"流水线里的 rerank 比连续计时慢：两次 rerank 之间空闲 {float(k2):g} s 后 P50 {g[k2]['p50']:.0f} ms，连续执行时 {g[k0]['p50']:.0f} ms"
+                  f"（+{g[k2]['p50'] / g[k0]['p50'] - 1:.0%}），印证了等待 LLM 时 GPU 降频的猜测；按每题约两次检索算，保温最多省零点几秒，没有做。"]  # fmt: skip
     return "\n".join(lines) + "\n\n（测量口径与明细：[`eval/results/p6_latency.md`](eval/results/p6_latency.md)）"
 
 
