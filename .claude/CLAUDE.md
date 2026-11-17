@@ -4,10 +4,11 @@
 
 - 进度与决策：`docs/progress.md`；各阶段方案：`docs/phases/Px.md`；各模块的详细设计要点：`docs/design-notes.md`（做对应阶段方案时查阅）。
 - 最高原则：每一项优化都要有可复现的评测数字。简历上的数字只能来自 `eval/results/`。
+- 项目状态：P0–P6 已完成（P7 并入 P6），`v0.7` 收尾。默认配置 = P5 在 v1 test 上确认过的 Agent；README 的表格和图由 `scripts/make_readme.py` 从 `eval/results/` 生成。之后的改动按"新阶段"对待：先在 dev 上评测，test 已用过一次，不再为调参使用。
 
 ## 协作约定
 
-- 按阶段 P0→P7 推进，每个阶段开一个新会话，结束时更新 `docs/progress.md`。
+- 按阶段推进（P0→P6 已完成），每个阶段开一个新会话，结束时更新 `docs/progress.md`。
 - 计划和方案阶段只讲思路（目标、步骤、取舍、验收标准），不写详细代码。
 - subagent 只用于查资料、广泛搜索和代码审查。
 
@@ -47,3 +48,5 @@ Python 3.11 + uv；ES 8.19.23 + IK 8.19.23（两者必须完全一致）；Milvu
 - 核心逻辑必须有单测，测试用自己构造的样例，不用版权原文。外部服务用 mock 替代，或者放到 `tests/integration`。
 - prompt 以文件形式存放并带版本号；LLM 调用结果按内容 hash 缓存。
 - 不提交 `data/`、`.env`、模型权重和 `.idea/`。
+- 结果入库前做版权处理（`run_qa` 自动做；其他来源的结果用 `scripts/copyright_scan.py --fix`），发布前跑 `scripts/copyright_scan.py`。
+- CI（GitHub Actions）跑 ruff 和单测，不装 gpu 依赖组；改 README 里的数字只能改结果文件再重新生成。

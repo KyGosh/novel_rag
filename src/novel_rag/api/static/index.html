@@ -85,7 +85,7 @@ footer { color: var(--muted); font-size: 12px; text-align: center; padding: 0 16
   <form class="card" id="f">
     <textarea id="q" maxlength="200" placeholder="输入关于这部小说的问题，可以是需要多步推理或跨章节的问题" required></textarea>
     <div class="row">
-      <div><span class="label">模式</span><span class="seg" id="modes"></span></div>
+      <div><span class="label">模式</span><span class="seg" id="modes"><label><span class="label">加载中……</span></label></span></div>
       <div><span class="label">阅读进度</span>
         <select id="vol" aria-label="卷"><option value="">全部（不限）</option></select>
         <select id="chap" aria-label="章" disabled><option value="">读完本卷</option></select>
@@ -106,7 +106,7 @@ const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls)
 let VOLS = [], es = null, t0 = 0, tick = null, tlList = null;
 
 fetch("/api/meta").then(r => r.json()).then(m => {
-  const modes = $("#modes");
+  const modes = $("#modes"); modes.replaceChildren();
   m.modes.forEach(md => {
     const l = el("label"); const i = el("input"); i.type = "radio"; i.name = "mode"; i.value = md.id;
     if (md.id === m.default_mode) i.checked = true;

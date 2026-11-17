@@ -44,3 +44,6 @@ docker/elasticsearch/ik-dict/*.dic
 docs/*
 !docs/progress.md
 !docs/design-notes.md
+
+# 本地预览配置
+.claude/launch.json

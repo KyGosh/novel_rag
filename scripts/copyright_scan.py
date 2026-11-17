@@ -131,7 +131,8 @@ def main() -> int:
         report["history"] = {"commits": commits, "blobs": len(blobs), "hits": hist_hits}
         print(f"历史提交 {commits} 个、blob {len(blobs)} 个，命中 {len(hist_hits)} 个", flush=True)
         for sha, v in hist_hits.items():
-            print(f"  {sha[:10]} {v['paths']}：" + "、".join(f"偏移 {x['offset']} 长 {x['length']}" for x in v["hits"][:5]))
+            spans = "、".join(f"偏移 {x['offset']} 长 {x['length']}" for x in v["hits"][:5])
+            print(f"  {sha[:10]} {v['paths']}：{spans}")
     out = s.paths.reports_dir / f"copyright_scan_{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
