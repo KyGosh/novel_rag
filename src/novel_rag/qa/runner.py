@@ -157,7 +157,7 @@ def run_qa_eval(
             "citations": ans.get("citations", []), "invalid_citations": ans.get("invalid_citations", []),
             "metrics": metrics, "cost": cost, "latency_ms": rec.get("latency_ms", {}),
             "termination": rec.get("termination"), "error": rec.get("error"),
-            **{k: rec[k] for k in ("hits", "evidence_sets", "agent", "context_tokens") if k in rec},
+            **{k: rec[k] for k in ("hits", "evidence_sets", "agent", "context_tokens", "route", "stage1") if k in rec},
         }  # fmt: skip
         done += 1
         if progress and (done % 10 == 0 or done == len(items)):

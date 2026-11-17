@@ -93,7 +93,6 @@ def run_retrieval_eval(
     *,
     base_filter: SearchFilter | None = None,
     spoiler_filter: bool = False,
-    generator: Callable[[EvalItem, list[Hit]], dict[str, Any]] | None = None,
     expander: Callable[[list[Hit], SearchFilter], list[Context]] | None = None,
     count_tokens: Callable[[Context], int] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -132,8 +131,6 @@ def run_retrieval_eval(
                 row["contexts"].append(
                     {"budget": budget, "n": len(packed), "tokens": sum(count_tokens(c) for c in packed)}
                 )
-        if generator is not None:
-            row["generation"] = generator(item, hits)
         rows.append(row)
     summary = aggregate(rows, ks)
     add_confidence_intervals(summary, rows, settings)

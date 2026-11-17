@@ -65,6 +65,8 @@ def _default_tasks() -> dict[str, LLMTaskConfig]:
         "reflect": LLMTaskConfig(model=model, extra_body=no_thinking),
         "answer": LLMTaskConfig(model=model, extra_body=no_thinking),
         "answer_judge": LLMTaskConfig(model=model, temperature=0.0, extra_body=no_thinking),
+        # P6 按需升级：独立核对固定 RAG 的答案是否有所引原文支持（路由信号 verify）
+        "route_check": LLMTaskConfig(model=model, extra_body=no_thinking),
     }
 
 
@@ -171,7 +173,6 @@ class EvalConfig(_Frozen):
     relevance_min_ratio: float = 0.5
     relevance_min_chars: int = 50
     ks: tuple[int, ...] = (5, 10, 20)
-    generate_top_k: int = 6  # 最简生成取前几个 chunk
     # 固定 token 预算下的证据覆盖率：上下文（扩展、装箱后）在这些预算内覆盖了多少金标证据
     token_budgets: tuple[int, ...] = (2000, 4000, 8000)
     context_pool: int = 40  # 装箱时可用的检索结果数（排名指标只看前 max(ks) 个）
@@ -358,6 +359,12 @@ class AgentConfig(_Frozen):
     raw_history_max_chars: int = 24_000  # raw 模式下历次观察的总长上限（从最近一轮往前保留）
 
 
+class CascadeConfig(_Frozen):
+    """P6 按需升级（可选模式，不是默认配置）：先走固定 RAG，路由信号判定证据不足时才升级到 Agent（qa/route.py）。"""
+
+    signal: Literal["rules", "selfcheck", "verify"] = "verify"
+
+
 class AnswerConfig(_Frozen):
     """统一作答环节（闭卷 / 固定 RAG / 固定 GraphRAG / Agent 共用）。"""
 
@@ -442,6 +449,7 @@ class Settings(BaseSettings):
     kg: KGConfig = KGConfig()
     tools: ToolsConfig = ToolsConfig()
     agent: AgentConfig = AgentConfig()
+    cascade: CascadeConfig = CascadeConfig()
     answer: AnswerConfig = AnswerConfig()
     paths: PathsConfig = PathsConfig()
 

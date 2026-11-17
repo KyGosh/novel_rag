@@ -8,9 +8,6 @@ from novel_rag.config import PathsConfig, Settings
 from novel_rag.eval.dataset import EvalItem, Evidence
 from novel_rag.eval.metrics import Span, aggregate, is_relevant, score_ranking
 from novel_rag.eval.runner import run_retrieval_eval, write_run
-from novel_rag.generation.simple import answer, build_messages
-from novel_rag.llm.fake import FakeChatModel
-from novel_rag.prompts import load_prompt
 from novel_rag.retrieval.base import Hit, Retriever
 
 KS = (5, 10, 20)
@@ -114,16 +111,6 @@ def test_runner_spoiler_switch_and_record(tmp_path):
     assert "原文甲" not in dump and "原文乙" not in dump
     assert "跨章节情节" in (out / "summary.md").read_text(encoding="utf-8")
     assert json.loads((out / "metrics.json").read_text(encoding="utf-8"))["overall"]["n"] == 2
-
-
-def test_generation_messages_and_answer():
-    hits = [Hit(1, "b:0001:0000", 0.9, {"book_id": "b", "chapter_title": "第一章", "text": "片段内容"})]
-    prompt = load_prompt("answer")
-    msgs = build_messages("谁来了？", hits, prompt, {"b": "某书"})
-    assert msgs[0]["role"] == "system" and "片段" in msgs[0]["content"]
-    assert "谁来了？" in msgs[1]["content"] and "[1] 《某书 第一章》 b:0001:0000\n片段内容" in msgs[1]["content"]
-    res = answer("谁来了？", hits, FakeChatModel(lambda m: "某人 [1]"), book_titles={"b": "某书"})
-    assert res["answer"] == "某人 [1]" and res["prompt_version"] == "answer.v1" and res["chunk_ids"] == ["b:0001:0000"]
 
 
 # ---------------------------------------------------------------- P2：预算覆盖率、置信区间、分阶段延迟

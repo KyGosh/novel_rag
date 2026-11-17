@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+      # 单测不依赖 GPU 库：不装 gpu 组（torch、FlagEmbedding），也不需要 docker 服务、模型权重和语料
+      - name: Install
+        run: uv sync --frozen --no-default-groups --group dev
+      - name: Lint
+        run: |
+          uv run ruff check src scripts tests
+          uv run ruff format --check src scripts tests
+      - name: Unit tests
+        run: uv run pytest -q
