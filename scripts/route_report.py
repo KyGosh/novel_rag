@@ -79,6 +79,12 @@ def combined_acc(stage1: dict[str, dict[str, Any]], escalate: dict[str, bool], a
     return mean(correct(agent[i]) if escalate[i] else correct(stage1[i]) for i in ids)
 
 
+def _route_tokens(r: dict[str, Any]) -> int:
+    """dry 运行记录里核对环节的 token（rules 信号不做核对，估算时扣掉）。"""
+    u = ((r.get("route") or {}).get("verify") or {}).get("usage") or {}
+    return int(u.get("prompt_tokens", 0) + u.get("completion_tokens", 0))
+
+
 def f3(x: float | None) -> str:
     return "—" if x is None else f"{x:.3f}"
 
@@ -100,13 +106,18 @@ def feasibility(args: argparse.Namespace, rd, cfg) -> dict[str, Any]:  # noqa: A
         passed = o["recall"] is not None and o["recall"] >= RECALL_MIN and o["escalation"] <= ESC_MAX
         reasons: dict[str, int] = {}
         for r in rows.values():
-            k = r["route"]["reason"] or "none"
+            k = (r["route"]["rule"] if name == "rules" else r["route"]["reason"]) or "none"
             reasons[k] = reasons.get(k, 0) + 1
         est = [combined_acc(rows, esc, a) for a in agents]
         est_hard = [combined_acc(rows, esc, a, "hard") for a in agents]
+        # 成本估算：第一阶段（含核对）的实际 token + 升级的题按 Agent 各次运行的实际 token
+        stage_tok = mean(r["metrics"]["tokens"] - (0 if name != "rules" else _route_tokens(r)) for r in rows.values())
+        est_tok = [mean(rows[i]["metrics"]["tokens"] - (_route_tokens(rows[i]) if name == "rules" else 0)
+                        + (a[i]["metrics"]["tokens"] if esc[i] else 0) for i in rows) for a in agents]  # fmt: skip
         res["signals"][name] = {"by_group": st, "passed": passed, "reasons": reasons, "est_acc": est,
-                                "est_acc_hard": est_hard}  # fmt: skip
+                                "est_acc_hard": est_hard, "stage_tokens": stage_tok, "est_tokens": est_tok}  # fmt: skip
     if agents:
+        res["agent_tokens"] = [mean(r["metrics"]["tokens"] for r in a.values()) for a in agents]
         res["agent_acc"] = [mean(correct(r) for r in a.values()) for a in agents]
         res["agent_acc_hard"] = [mean(correct(r) for r in a.values() if in_group(r["type"], "hard")) for a in agents]
     # 决策（事先定好的规则）
@@ -166,11 +177,11 @@ def feasibility(args: argparse.Namespace, rd, cfg) -> dict[str, Any]:  # noqa: A
         )
     if agents:
         md += ["", "离线估算（升级的题取 Agent 各次 dev 运行的判分，只作参考）：", "",
-               "| 路由 | 总体准确率（各次） | 平均 | 多跳 + 跨章节（平均） |", "|---|---|---|---|",
-               f"| 全部走 Agent | {' / '.join(f3(x) for x in res['agent_acc'])} | {f3(mean(res['agent_acc']))} | {f3(mean(res['agent_acc_hard']))} |"]  # fmt: skip
+               "| 路由 | 总体准确率（各次） | 平均 | 多跳 + 跨章节（平均） | 每题 token（平均） |", "|---|---|---|---|---|",
+               f"| 全部走 Agent | {' / '.join(f3(x) for x in res['agent_acc'])} | {f3(mean(res['agent_acc']))} | {f3(mean(res['agent_acc_hard']))} | {mean(res['agent_tokens']):.0f} |"]  # fmt: skip
         for name, s in res["signals"].items():
             md.append(
-                f"| {name} | {' / '.join(f3(x) for x in s['est_acc'])} | {f3(mean(s['est_acc']))} | {f3(mean(s['est_acc_hard']))} |"
+                f"| {name} | {' / '.join(f3(x) for x in s['est_acc'])} | {f3(mean(s['est_acc']))} | {f3(mean(s['est_acc_hard']))} | {mean(s['est_tokens']):.0f} |"
             )
     md += ["", f"**结论（按事先定好的规则）**：{'选用 ' + choice if choice else '两个信号都不达标，放弃按需升级'}"]
     res["markdown"] = "\n".join(md) + "\n"

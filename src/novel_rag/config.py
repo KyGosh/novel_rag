@@ -359,12 +359,6 @@ class AgentConfig(_Frozen):
     raw_history_max_chars: int = 24_000  # raw 模式下历次观察的总长上限（从最近一轮往前保留）
 
 
-class CascadeConfig(_Frozen):
-    """P6 按需升级（可选模式，不是默认配置）：先走固定 RAG，路由信号判定证据不足时才升级到 Agent（qa/route.py）。"""
-
-    signal: Literal["rules", "selfcheck", "verify"] = "verify"
-
-
 class AnswerConfig(_Frozen):
     """统一作答环节（闭卷 / 固定 RAG / 固定 GraphRAG / Agent 共用）。"""
 
@@ -449,7 +443,6 @@ class Settings(BaseSettings):
     kg: KGConfig = KGConfig()
     tools: ToolsConfig = ToolsConfig()
     agent: AgentConfig = AgentConfig()
-    cascade: CascadeConfig = CascadeConfig()
     answer: AnswerConfig = AnswerConfig()
     paths: PathsConfig = PathsConfig()
 

@@ -1,7 +1,8 @@
 """交互式问答服务（P6 演示）：命令行入口 scripts/ask.py 与本地 Web 演示（api/）共用。
 
-- 模式：rag = 固定 RAG；agent = Agent（默认配置，即 test 上确认过的那套）；cascade = 按需升级（先固定 RAG，
-  证据不足才升级到 Agent，路由信号见 config.cascade）。三种模式共用同一套工具后端（同一个 GPU 锁）。
+- 模式：rag = 固定 RAG；agent = Agent（默认配置，即 test 上确认过的那套）。两种模式共用同一套工具后端（同一个
+  GPU 锁）。按需升级（qa/route.py）的路由信号没有通过可行性门槛（P6，eval/results/p6_route_feasibility.md），
+  不作为演示模式。
 - 阅读进度：max_reading_order（全局阅读顺序）；reading_order_of(卷, 章) 把"读到第几卷第几章"换算过来。
   None 表示不限（读完全部）。
 - on_event：各环节的事件（演示用的过程时间线），见 agent/loop.py 与 qa/route.py。
@@ -20,8 +21,8 @@ from novel_rag.config import Settings
 from novel_rag.eval.dataset import EvalItem
 from novel_rag.qa.systems import QASystem
 
-MODES = ("rag", "agent", "cascade")
-MODE_NAMES = {"rag": "固定 RAG", "agent": "Agent", "cascade": "按需升级"}
+MODES = ("rag", "agent")
+MODE_NAMES = {"rag": "固定 RAG", "agent": "Agent"}
 EventFn = Callable[[dict[str, Any]], None]
 
 
@@ -70,17 +71,12 @@ class QAService:
                 state["b"] = build_backends(s, env.scope, env.chunks, env.titles)
             return state["b"]
 
-        def rag(selfcheck: bool = False) -> QASystem:
-            from novel_rag.prompts import load_prompt
-            from novel_rag.qa.answer import AnswerOutput
-            from novel_rag.qa.route import SelfCheckAnswer
+        def rag() -> QASystem:
             from novel_rag.qa.systems import FixedRAGSystem
 
             return FixedRAGSystem(
                 "rag", backends(), get_chat_model("answer"), n_tokens, scope=env.scope, top_k=s.answer.fixed_top_k,
                 pool=s.eval.context_pool, budget=s.answer.context_token_budget, abstain=s.answer.abstain_text,
-                answer_prompt=load_prompt("qa_answer_selfcheck") if selfcheck else None,
-                answer_schema=SelfCheckAnswer if selfcheck else AnswerOutput,
             )  # fmt: skip
 
         def agent() -> QASystem:
@@ -88,15 +84,6 @@ class QAService:
             from novel_rag.tools import Toolbox
 
             return AgentSystem(Toolbox(backends()), s, scope=env.scope, count_tokens=n_tokens)
-
-        def cascade() -> QASystem:
-            from novel_rag.qa.route import CascadeSystem
-
-            sig = s.cascade.signal
-            return CascadeSystem(
-                rag(selfcheck=sig == "selfcheck"), svc.system("agent"), signal=sig,  # type: ignore[arg-type]
-                check_chat=get_chat_model("route_check") if sig == "verify" else None,
-            )  # fmt: skip
 
         chapters = sorted(
             {
@@ -111,8 +98,7 @@ class QAService:
         def where_chunk(cid: str) -> str:
             return backends().where_chunk(cid)
 
-        svc = cls(s, env.scope, env.titles, chapters, where_chunk, {"rag": rag, "agent": agent, "cascade": cascade})
-        return svc
+        return cls(s, env.scope, env.titles, chapters, where_chunk, {"rag": rag, "agent": agent})
 
     def system(self, mode: str) -> QASystem:
         if mode not in MODES:

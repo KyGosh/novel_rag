@@ -1,0 +1,20 @@
+{
+  "name": "b1_par_vs_seq",
+  "created": "2026-11-17T18:39:43",
+  "base": "20261117-183616_p6_replay_seq_s0",
+  "new": "20261117-182934_p6_replay_par_s0",
+  "n": 141,
+  "identical": true,
+  "mismatch_counts": {
+    "answer": 0,
+    "label": 0,
+    "citations": 0,
+    "termination": 0,
+    "tokens": 0,
+    "llm_calls": 0,
+    "trajectory": 0,
+    "error": 0
+  },
+  "mismatch_ids": {},
+  "new_errors": 1
+}

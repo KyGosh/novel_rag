@@ -22,7 +22,7 @@ def test_index_and_meta():
     r = c.get("/")
     assert r.status_code == 200 and "<title>" in r.text
     m = c.get("/api/meta").json()
-    assert [x["id"] for x in m["modes"]] == ["rag", "agent", "cascade"]
+    assert [x["id"] for x in m["modes"]] == ["rag", "agent"]
     assert m["volumes"][0]["book_id"] == "demo-1" and m["volumes"][0]["chapters"]
 
 

@@ -190,6 +190,11 @@ def main() -> int:
         count_tokens=n_tokens, chunk_text=lambda c: env.chunks.by_id(c)["text"],
     )  # fmt: skip
     metrics = summarize(rows, s)
+    # 结果入库前的版权处理：字符串里与原文连续重合 ≥ 30 字的片段替换成"[…]"（P6；Agent 的检索语句偶尔照抄原文）
+    from novel_rag.eval.redact import RedactIndex
+
+    ri = RedactIndex((s.paths.books_dir / b / "text.txt").read_text(encoding="utf-8") for b in scope)
+    rows = [ri.redact_obj(r) for r in rows]
     run = {
         "name": args.name,
         "created": datetime.now().isoformat(timespec="seconds"),
@@ -207,6 +212,7 @@ def main() -> int:
         "scope": list(scope),
         "chunk_version": env.chunk_version,
         "spoiler_filter": True,
+        "redacted_spans": ri.count,
         "trace_dir": str(Path("data") / "traces" / out_name),
         "config": s.snapshot(),
     }  # fmt: skip

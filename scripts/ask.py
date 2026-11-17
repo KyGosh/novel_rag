@@ -1,11 +1,10 @@
-"""命令行问答（P6 统一入口）：固定 RAG / Agent / 按需升级，可指定阅读进度，终端里逐步打印过程。
+"""命令行问答（P6 统一入口）：固定 RAG / Agent，可指定阅读进度，终端里逐步打印过程。
 
 原文只在本地处理；终端里只显示证据笔记的短引文和"卷名 · 章节标题"形式的引用，不打印整段原文。
 
 用法：
     uv run python scripts/ask.py "问题"                                   # 默认 Agent，不限阅读进度
     uv run python scripts/ask.py --mode rag "问题"                        # 固定 RAG
-    uv run python scripts/ask.py --mode cascade "问题"                    # 按需升级（证据不足才启动 Agent）
     uv run python scripts/ask.py --volume 1 --chapter 30 "问题"           # 读到第 1 卷第 30 章（防剧透）
     uv run python scripts/ask.py --volume asoiaf-2 "问题"                 # 读完 asoiaf-2 这一卷
     uv run python scripts/ask.py --list-chapters 1                        # 列出第 1 卷的章号与标题
@@ -69,7 +68,7 @@ def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("question", nargs="?")
-    ap.add_argument("--mode", choices=MODES, default="agent", help="rag / agent / cascade，默认 agent")
+    ap.add_argument("--mode", choices=MODES, default="agent", help="rag / agent，默认 agent")
     ap.add_argument("--volume", help="阅读进度：卷 ID 或从 1 开始的卷序号")
     ap.add_argument("--chapter", type=int, help="阅读进度：读到这一章（章号）；不给则读完 --volume 这一卷")
     ap.add_argument("--max-reading-order", type=int, help="直接给全局阅读顺序（与 --volume 二选一）")

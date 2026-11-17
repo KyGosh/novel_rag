@@ -1,0 +1,39 @@
+{
+  "name": "b1_par_s0",
+  "created": "2026-11-17T18:35:38",
+  "base": "20261112-005605_p4_agent_dev_s0",
+  "new": "20261117-182934_p6_replay_par_s0",
+  "n": 141,
+  "identical": false,
+  "mismatch_counts": {
+    "answer": 1,
+    "label": 0,
+    "citations": 0,
+    "termination": 1,
+    "tokens": 1,
+    "llm_calls": 1,
+    "trajectory": 1,
+    "error": 1
+  },
+  "mismatch_ids": {
+    "answer": [
+      "multihop-aae769bc"
+    ],
+    "termination": [
+      "multihop-aae769bc"
+    ],
+    "tokens": [
+      "multihop-aae769bc"
+    ],
+    "llm_calls": [
+      "multihop-aae769bc"
+    ],
+    "trajectory": [
+      "multihop-aae769bc"
+    ],
+    "error": [
+      "multihop-aae769bc"
+    ]
+  },
+  "new_errors": 1
+}

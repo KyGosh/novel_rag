@@ -144,10 +144,11 @@ def main() -> int:
           "## 端到端", "", "| 系统 | 运行 | 题数 | 平均 | P50 | P95 | 每题 LLM 调用 | LLM 耗时 | 工具墙钟 | rerank | 每题 token | 准确率 |",
           "|---|---|---|---|---|---|---|---|---|---|---|---|"]  # fmt: skip
     for label, v in res["systems"].items():
+        acc = "—" if v["acc"] is None else f"{v['acc']:.3f}"
         md.append(
             f"| {label} | `{v['dir']}` | {v['n']} | {s1(v['total']['mean'])} | {s1(v['total']['p50'])} | {s1(v['total']['p95'])} | "
             f"{v['llm_calls']:.2f} | {s1(v.get('llm', v.get('agent.llm', 0)))} | {s1(v.get('tools_wall', v.get('retrieval', 0)))} | "
-            f"{s1(v.get('rerank', 0))} | {v['tokens']:.0f} | {'—' if v['acc'] is None else f'{v['acc']:.3f}'} |"
+            f"{s1(v.get('rerank', 0))} | {v['tokens']:.0f} | {acc} |"
         )
     for label, v in res["systems"].items():
         if "stages" not in v:
