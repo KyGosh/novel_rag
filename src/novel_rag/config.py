@@ -346,6 +346,9 @@ class AgentConfig(_Frozen):
     # 每题 token 上限（规划 + 行动 + 反思；作答另计）。按上一轮的花费预估：再进行一轮就会超出时不再开始新的一轮
     max_tokens: int = 40_000
     max_calls_per_round: int = 4  # 单轮内并行调用的工具数上限，多出的不执行并告知模型
+    # P6：同一轮内的多个工具调用并行执行（观察仍按原顺序交给反思；GPU 上的检索仍由 gpu_lock 串行）。
+    # 不改变行为（缓存回放验证逐题答案与工具轨迹一致），只影响延迟；False = 逐个执行（P4 / P5 的执行方式）
+    parallel_tools: bool = True
     max_error_rounds: int = 3  # 连续这么多轮都只产生错误 → 强制作答（终止原因"异常"）
     thinking: bool = False  # True：规划与行动用 agent_thinking 任务（开启思考）
     observation_max_chars: int = 12_000  # 一轮全部观察交给反思时的总长上限

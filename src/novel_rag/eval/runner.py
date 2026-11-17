@@ -30,6 +30,8 @@ from novel_rag.retrieval.filters import SearchFilter
 
 TYPE_ORDER = ("fact", "relation", "multihop", "plot")
 TYPE_NAMES = {"fact": "事实", "relation": "人物关系", "multihop": "多跳", "plot": "跨章节情节"}
+# 判断"有未提交改动"时排除的路径（git pathspec）：test 台账只追加，不代表代码或配置变了
+DIRTY_EXCLUDE = (":(exclude)eval/results/test_runs.jsonl",)
 
 
 def git_info(root: Path = PROJECT_ROOT) -> dict[str, Any]:
@@ -42,7 +44,8 @@ def git_info(root: Path = PROJECT_ROOT) -> dict[str, Any]:
     return {
         "commit": run("rev-parse", "HEAD"),
         "branch": run("rev-parse", "--abbrev-ref", "HEAD"),
-        "dirty": bool(run("status", "--porcelain", "--untracked-files=no")),
+        # test 台账（只追加）每次 test 运行后都会变，不算作代码 / 配置的未提交改动
+        "dirty": bool(run("status", "--porcelain", "--untracked-files=no", "--", ".", *DIRTY_EXCLUDE)),
     }
 
 

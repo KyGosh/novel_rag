@@ -16,10 +16,12 @@ LangGraph 只在 agent/ 中 import；节点是闭包，外部依赖（模型、�
 
 from __future__ import annotations
 
+import contextlib
 import json
 import re
 import time
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
@@ -93,11 +95,19 @@ class AgentDeps:
     volumes: str  # "卷ID《卷名》、……"
     sample: int = 0
     prompts: dict[str, Prompt] = field(default_factory=dict)
+    # 可选的事件回调（演示用）：每个环节结束时收到一个事件 dict；回调出错不影响循环
+    on_event: Callable[[dict[str, Any]], None] | None = None
 
     def prompt(self, name: str) -> Prompt:
         if name not in self.prompts:
             self.prompts[name] = load_prompt(name)
         return self.prompts[name]
+
+    def emit(self, event: dict[str, Any]) -> None:
+        if self.on_event is None:
+            return
+        with contextlib.suppress(Exception):  # 演示用的回调不能让问答失败
+            self.on_event(event)
 
 
 def _tok(state: AgentState) -> int:
@@ -199,6 +209,7 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         plan = (res.text or "").strip()[:600] or "（无）"
         step = {"step": "plan", "prompt": p.version_id, "tokens": res.usage.total_tokens, "cached": res.cached,
                 "latency_ms": round((time.perf_counter() - t0) * 1000, 1), "output": plan}  # fmt: skip
+        deps.emit({"type": "plan", "plan": plan, "latency_ms": step["latency_ms"], "tokens": step["tokens"]})
         return {"plan": plan, **_usage_update(state, res), "trace": [*state.get("trace", []), step]}
 
     def act_node(state: AgentState) -> dict[str, Any]:
@@ -215,6 +226,7 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         elif state.get("error_rounds", 0) >= cfg.max_error_rounds:
             reason = "error_streak"
         if reason:
+            deps.emit({"type": "stop", "termination": reason})
             return {"termination": reason, "pending_calls": []}
         raw = cfg.act_memory == "raw"
         p = deps.prompt("agent_act_raw" if raw else "agent_act")
@@ -238,6 +250,9 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         upd: dict[str, Any] = {**_usage_update(state, res), "trace": [*state.get("trace", []), step]}
         finish = [c for c in calls if c.name == FINISH]
         others = [c for c in calls if c.name != FINISH]
+        deps.emit({"type": "act", "round": rounds + 1, "latency_ms": step["latency_ms"], "tokens": step["tokens"],
+                   "calls": [{"tool": c.name, "args": c.args} for c in others],
+                   "finish": bool(finish) or not calls})  # fmt: skip
         if not calls:  # 既不调用工具也不调用 finish：按 finish 处理
             return {**upd, "termination": "finish_implicit", "pending_calls": [], "finish_reason": res.text[:200]}
         if finish and not others:
@@ -257,13 +272,21 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         shown, refs = list(state.get("shown", [])), list(state.get("seen_refs", []))
         dropped = state.get("dropped_calls", 0)
         n_ok = n_exec = 0
-        for i, call in enumerate(state.get("pending_calls", [])):
-            if i >= budget:
-                dropped += 1
-                actions.append({"round": rnd, "tool": call.name, "args": _args_text(call.args), "ok": False,
-                                "overview": "未执行：超出本轮或本题的工具调用上限"})  # fmt: skip
-                continue
-            r = tb.call(call.name, call.args, deps.ctx, args_error=call.args_error)  # SpoilerLeak 向外抛
+        pending = state.get("pending_calls", [])
+        to_run, over = pending[:budget], pending[budget:]
+
+        def run_call(call: ToolCall) -> ToolResult:
+            return tb.call(call.name, call.args, deps.ctx, args_error=call.args_error)  # SpoilerLeak 向外抛
+
+        t0 = time.perf_counter()
+        parallel = cfg.parallel_tools and len(to_run) > 1
+        if parallel:  # 结果按原顺序收集：观察、行动记录、trace 的顺序与逐个执行时完全相同
+            with ThreadPoolExecutor(max_workers=len(to_run)) as pool:
+                results = list(pool.map(run_call, to_run))
+        else:
+            results = [run_call(c) for c in to_run]
+        wall = round((time.perf_counter() - t0) * 1000, 1)
+        for call, r in zip(to_run, results, strict=True):
             n_exec += 1
             n_ok += int(r.ok)
             shown += [c for c in r.shown_chunk_ids if c not in shown]
@@ -273,6 +296,14 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             observations.append({"tool": call.name, "args": _args_text(call.args), "result": r})
             trace.append({"step": "tool", "round": rnd, "tool": call.name, "args": call.args,
                           "args_error": call.args_error, **r.summary(), "observation": r.text})  # fmt: skip
+            deps.emit({"type": "tool", "round": rnd, "tool": call.name, "args": call.args, "ok": r.ok, "overview": ov,
+                       "latency_ms": round(r.latency_ms, 1), "shown": list(r.shown_chunk_ids)})  # fmt: skip
+        for call in over:
+            dropped += 1
+            actions.append({"round": rnd, "tool": call.name, "args": _args_text(call.args), "ok": False,
+                            "overview": "未执行：超出本轮或本题的工具调用上限"})  # fmt: skip
+        if to_run:
+            trace.append({"step": "execute", "round": rnd, "n": len(to_run), "parallel": parallel, "wall_ms": wall})
         error_rounds = 0 if n_ok else state.get("error_rounds", 0) + 1
         return {
             "observations": observations, "actions": actions, "trace": trace, "tool_calls": used + n_exec,
@@ -286,6 +317,7 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
         if not obs:  # 本轮只有错误：不调用反思，直接把错误告诉下一轮
             errs = "；".join(f"{o['tool']}：{o['result'].error}" for o in state.get("observations", []))
             spent = _tok(state) - state.get("round_start_tokens", 0)
+            deps.emit({"type": "reflect", "round": state["rounds"], "added": [], "error": "tools_failed"})
             return {"status": f"上一轮工具调用都出错了：{errs[:200]}", "observations": [], "last_round_tokens": spent}
         allowed: dict[str, bool] = {}  # chunk_id → 是否展示了原文
         for o in obs:
@@ -308,6 +340,7 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             res = deps.reflect_chat.chat(msgs, schema=ReflectOut, prompt_version=p.version_id, sample=deps.sample)
         except StructuredOutputError as e:
             step = {"step": "reflect", "round": state["rounds"], "error": str(e)}
+            deps.emit({"type": "reflect", "round": state["rounds"], "added": [], "error": "reflect_failed"})
             return {"observations": [], "status": "（上一轮反思失败）", "trace": [*state.get("trace", []), step],
                     "llm_calls": state.get("llm_calls", 0) + 1, "history": history}  # fmt: skip
         out: ReflectOut = res.parsed  # type: ignore[assignment]
@@ -346,6 +379,12 @@ def build_graph(deps: AgentDeps):  # noqa: ANN201 —— 返回编译后的 Lang
             "history": history,
         }  # fmt: skip
         upd["last_round_tokens"] = upd["prompt_tokens"] + upd["completion_tokens"] - state.get("round_start_tokens", 0)
+        deps.emit({
+            "type": "reflect", "round": state["rounds"], "latency_ms": step["latency_ms"], "tokens": step["tokens"],
+            "added": [{k: n[k] for k in ("claim", "chunk_id", "quote", "quote_ok")} | {"where": where(n["chunk_id"])}
+                      for n in added],
+            "rejected": len(rejected), "status": upd["status"], "sufficient": out.sufficient,
+        })  # fmt: skip
         if state.get("finish_requested"):
             upd["termination"] = "finish"
         return upd

@@ -25,6 +25,14 @@ TOOL_GROUPS = {
 _TEXT_KEYS = ("observation", "output", "text")
 
 
+def answer_event(ans: dict[str, Any], where: Callable[[str], str]) -> dict[str, Any]:
+    """作答事件（演示用）：答案、依据、带"卷名 · 章节标题"的引用。"""
+    return {
+        "answer": ans.get("answer", ""), "rationale": ans.get("rationale", ""), "abstained": ans.get("abstained"),
+        "citations": [{"chunk_id": c, "where": where(c)} for c in ans.get("citations", [])],
+    }  # fmt: skip
+
+
 def trace_summary(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """去掉原文和模型长输出的 trace 摘要（写进 eval/results）。"""
     out = []
@@ -58,7 +66,10 @@ class AgentSystem:
         titles = toolbox.backends.book_titles
         self.volumes = "、".join(f"{b}《{titles.get(b, b)}》" for b in scope)
 
-    def run(self, item: EvalItem, sample: int = 0) -> SystemOutput:
+    def run(
+        self, item: EvalItem, sample: int = 0, on_event: Callable[[dict[str, Any]], None] | None = None
+    ) -> SystemOutput:
+        """on_event：可选的事件回调（演示用），收到规划 / 行动 / 工具 / 反思 / 作答各环节的事件。"""
         t0 = time.perf_counter()
         deps = AgentDeps(
             toolbox=self.tb, agent_chat=self.agent_chat, reflect_chat=self.reflect_chat, cfg=self.s.agent,
@@ -66,6 +77,7 @@ class AgentSystem:
                             graph_entity_types=self.s.tools.graph_scope_entity_types),
             volumes=self.volumes,
             sample=sample,
+            on_event=on_event,
         )  # fmt: skip
         state = run_agent(item.question, deps)
         t1 = time.perf_counter()
@@ -90,6 +102,8 @@ class AgentSystem:
         llm_ms = sum(st.get("latency_ms", 0.0) for st in trace if st["step"] in ("plan", "act", "reflect"))
         lat["llm"] = round(llm_ms + (t2 - t1) * 1000, 1)
         for st in trace:
+            if st["step"] == "execute":  # 每轮工具执行的墙钟时间（并行执行时小于各工具耗时之和）
+                lat["tools_wall"] = round(lat.get("tools_wall", 0.0) + st.get("wall_ms", 0.0), 1)
             if st["step"] == "tool":
                 g = TOOL_GROUPS.get(st["tool"], "other")
                 lat[g] = round(lat.get(g, 0.0) + st.get("latency_ms", 0.0), 1)
@@ -138,6 +152,8 @@ class AgentSystem:
         }
         full = {"plan": state.get("plan"), "notes": notes, "status": state.get("status"), "trace": trace,
                 "context": ctx.text, "answer": ans, "finish_reason": state.get("finish_reason")}  # fmt: skip
+        deps.emit({"type": "answer", **answer_event(ans, self.tb.backends.where_chunk), "cost": rec["cost"],
+                   "latency_ms": lat, "termination": state.get("termination")})  # fmt: skip
         return SystemOutput(rec, full)
 
     @staticmethod
